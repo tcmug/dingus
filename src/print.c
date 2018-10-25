@@ -4,6 +4,12 @@
 #define TEXTURE_WIDTH (256)
 #define TEXTURE_HEIGHT (256)
 
+typedef struct s_font_atlas_glyph_set {
+  Uint32 start;
+  SDL_Texture *texture;
+  SDL_Rect glyphs[256];
+} font_atlas_glyph_set;
+
 font_atlas_glyph_set *font_atlas_glyph_set_create(SDL_Renderer *renderer,
                                                   font_atlas *atlas, int set) {
 
@@ -14,8 +20,6 @@ font_atlas_glyph_set *font_atlas_glyph_set_create(SDL_Renderer *renderer,
 
   Uint32 rmask, gmask, bmask, amask;
 
-  /* SDL interprets each pixel as a 32-bit number, so our masks must depend
-     on the endianness (byte order) of the machine */
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
   rmask = 0xff000000;
   gmask = 0x00ff0000;
@@ -33,10 +37,13 @@ font_atlas_glyph_set *font_atlas_glyph_set_create(SDL_Renderer *renderer,
 
   SDL_Rect destRect = {0, 0, 0, 0};
 
-  for (int c = 0; c < 256; c++) {
+  int start = 0;
+  if (set == 0) {
+    start = 1;
+  }
+
+  for (int c = start; c < 256; c++) {
     Uint16 glyph = (set << 8) | c;
-    if (set == 0 && c == 0 || set > 255)
-      continue;
 
     SDL_Surface *surface = TTF_RenderGlyph_Blended(atlas->font, glyph, white);
     if (!surface) {

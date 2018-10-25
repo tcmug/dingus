@@ -15,6 +15,13 @@ component *_NODE(component init) {
   return this;
 }
 
+void node_render_children(component *this) {
+  if (this->children)
+    for (int i = 0; this->children[i]; i++)
+      if (this->children[i]->render)
+        this->children[i]->render(this->children[i]);
+}
+
 component **_LIST(int count, ...) {
   int i = 0;
   va_list args;

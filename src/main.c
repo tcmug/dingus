@@ -58,51 +58,68 @@ typedef struct s_window_props {
 } window_props;
 
 void screen_render(component *this) {
+  /*
+window_props *props = (window_props *)this->props;
 
-  window_props *props = (window_props *)this->props;
+int scale = 1;
+int offsetx =
+((this->rect.w / scale) / 2) - 16 + sin(props->passed / 5000.0) * 600;
+int offsety =
+((this->rect.h / scale) / 2) - 16 + sin(props->passed / 5000.0) * 300;
 
-  int scale = 1;
-  int offsetx =
-      ((this->rect.w / scale) / 2) - 16 + sin(props->passed / 5000.0) * 600;
-  int offsety =
-      ((this->rect.h / scale) / 2) - 16 + sin(props->passed / 5000.0) * 300;
+int blockw = 32;
+int blockh = 32;
+int bw = blockw;
+// easeOut(props->passed, 0, blockw, frametime / 2);
+int bh = blockh;
+// easeOut(props->passed, 0, blockh, frametime / 2);
+int cell_offset_x = blockw / 2;
+int cell_offset_y = blockh / 4;
 
-  int blockw = 32;
-  int blockh = 32;
-  int bw = blockw;
-  // easeOut(props->passed, 0, blockw, frametime / 2);
-  int bh = blockh;
-  // easeOut(props->passed, 0, blockh, frametime / 2);
-  int cell_offset_x = blockw / 2;
-  int cell_offset_y = blockh / 4;
-
-  for (int frame = 0; frame < 8; frame++) {
-    for (int y = 0; y < 5; y++) {
-      for (int x = 0; x < 5; x++) {
-        int cell = map[frame][x + (y * 5)];
-        if (cell > 0) {
-          int px = offsetx + (cell_offset_x * x - y * cell_offset_x) +
-                   (frame * 7 * cell_offset_x);
-          int py = (offsety + ((x + y) * cell_offset_y) - blockh) +
-                   (frame * 7 * cell_offset_y);
-          SDL_Rect dstrect = {px * scale, py * scale, bw * scale, bh * scale};
-          SDL_Rect source = {(cell - 1) * blockw, 0, blockw, blockh};
-          SDL_RenderCopy(props->renderer, props->texture, &source, &dstrect);
-        }
-      }
-    }
+for (int frame = 0; frame < 8; frame++) {
+for (int y = 0; y < 5; y++) {
+for (int x = 0; x < 5; x++) {
+  int cell = map[frame][x + (y * 5)];
+  if (cell > 0) {
+    int px = offsetx + (cell_offset_x * x - y * cell_offset_x) +
+             (frame * 7 * cell_offset_x);
+    int py = (offsety + ((x + y) * cell_offset_y) - blockh) +
+             (frame * 7 * cell_offset_y);
+    SDL_Rect dstrect = {px * scale, py * scale, bw * scale, bh * scale};
+    SDL_Rect source = {(cell - 1) * blockw, 0, blockw, blockh};
+    SDL_RenderCopy(props->renderer, props->texture, &source, &dstrect);
   }
-
-  if (this->children)
-    for (int i = 0; this->children[i]; i++)
-      if (this->children[i]->render)
-        this->children[i]->render(this->children[i]);
+}
+}
+}
+*/
+  node_render_children(this);
 }
 
-void box_render(component *this) {
-  // window_props *props = (window_props *)this->props;
-  // SDL_SetRenderDrawColor(props->renderer, 255, 255, 255, 255);
-  // SDL_RenderFillRect(props->renderer, &this->rect);
+int immediate(component *this) { return 1; }
+
+font_atlas *fa;
+
+int text_update(component *this) {
+  window_props *props = (window_props *)this->props;
+  const wchar_t *text = (const wchar_t *)this->state;
+  if (!this->texture) {
+    this->texture =
+        SDL_CreateTexture(props->renderer, SDL_PIXELFORMAT_RGBA8888,
+                          SDL_TEXTUREACCESS_TARGET, this->rect.w, this->rect.h);
+  }
+  SDL_SetRenderTarget(props->renderer, this->texture);
+  SDL_RenderClear(props->renderer);
+  print_rect(props->renderer, fa, this->rect, text);
+  SDL_SetRenderTarget(props->renderer, 0);
+  printf("rendered\n");
+}
+
+void texture_render(component *this) {
+  window_props *props = (window_props *)this->props;
+  if (this->texture) {
+    SDL_RenderCopy(props->renderer, this->texture, 0, &this->rect);
+  }
 }
 
 SDL_Texture *drawText(SDL_Renderer *renderer, TTF_Font *font,
@@ -150,17 +167,18 @@ int main(int argc, char *args[]) {
   int running = 1;
   int fps = 60, real_fps = 0, fps_counter = 1000;
   int previous = SDL_GetTicks();
-
+  wchar_t fps_display_string[0xFF];
+  component *fps_display =
+      NODE(.update = &text_update, .render = &texture_render, .props = &props,
+           .state = &fps_display_string, .rect = {0, 0, 200, 100});
   component *root =
-      NODE(.render = &screen_render, .props = &props,
-           .rect = {0, 0, height, width},
-           .children = LIST(NODE(.render = &box_render, .props = &props,
-                                 .rect = {10, 10, 20, 20})));
+      NODE(.update = &immediate, .render = &screen_render, .props = &props,
+           .rect = {0, 0, height, width}, .children = LIST(fps_display));
 
   int fullscreen = 0;
 
   TTF_Init();
-  font_atlas *fa = font_atlas_create(props.renderer, "DroidSans.ttf", 24);
+  fa = font_atlas_create(props.renderer, "DroidSans.ttf", 24);
 
   while (running) {
     SDL_Event ev;
@@ -196,245 +214,13 @@ int main(int argc, char *args[]) {
       real_fps = fps;
       fps = 1;
       fps_counter -= 1000;
-    } else
+      swprintf(fps_display_string, 0xFF, L"FPS: %u", real_fps);
+      fps_display->update(fps_display);
+    } else {
       fps++;
+    }
 
-    // root->render(root);
-
-    wchar_t sfps[25600];
-    swprintf(sfps, 25600,
-             L"FPS: %u (frame: %u)русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский "
-             L"язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 FPS: "
-             L"русский язык 日本 FPS: русский язык 日本 FPS: русский язык 日本 "
-             L"FPS: русский язык 日本 FPS: русский язык 日本 FPS: русский язык "
-             L"日本 FPS:  русский язык 日本 ",
-             real_fps, fps);
-    print_rect(props.renderer, fa, root->rect, sfps);
-
-    SDL_Rect r = {300, 300, 100, 100};
-
-    SDL_SetRenderDrawColor(props.renderer, 255, 0, 0, 0);
-    print_rect(props.renderer, fa, r, L"Hello World");
-    SDL_SetRenderDrawColor(props.renderer, 255, 255, 255, 255);
+    root->render(root);
 
     SDL_RenderPresent(props.renderer);
   }

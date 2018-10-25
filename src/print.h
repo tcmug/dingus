@@ -4,15 +4,9 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
-typedef struct s_font_atlas_glyph_set {
-  Uint32 start;
-  SDL_Texture *texture;
-  SDL_Rect glyphs[256];
-} font_atlas_glyph_set;
-
 typedef struct s_font_atlas {
   TTF_Font *font;
-  font_atlas_glyph_set *glyphset[256];
+  struct s_font_atlas_glyph_set *glyphset[256];
 } font_atlas;
 
 font_atlas *font_atlas_create(SDL_Renderer *renderer, const char *fontName,

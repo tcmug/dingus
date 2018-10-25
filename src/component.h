@@ -7,6 +7,7 @@ struct s_component;
 
 typedef void (*render_callback)(struct s_component *this);
 typedef void (*click_callback)(struct s_component *this);
+typedef int (*update_callback)(struct s_component *this);
 
 typedef struct s_component {
   const char *name;
@@ -14,6 +15,8 @@ typedef struct s_component {
   void *state;
   void *props;
   SDL_Rect rect;
+  SDL_Texture *texture;
+  update_callback update;
   render_callback render;
   click_callback click;
   // click
@@ -26,8 +29,10 @@ typedef struct s_component {
 component *_NODE(component props);
 component **_LIST(int count, ...);
 void DESTROY(component *this);
+void node_render_children(component *this);
 
-#define COMP_DEFAULTS .name = "NO-NAME", .children = 0
+#define COMP_DEFAULTS                                                          \
+  .name = "NO-NAME", .children = 0, .update = 0, .texture = 0
 #define NUMARGS(type, ...) (sizeof((type[]){__VA_ARGS__}) / sizeof(type))
 
 #define NODE(...) _NODE((component){COMP_DEFAULTS, __VA_ARGS__})
