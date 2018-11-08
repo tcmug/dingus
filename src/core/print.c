@@ -1,5 +1,6 @@
 
 #include "print.h"
+#include "log.h"
 
 #define TEXTURE_WIDTH (256)
 #define TEXTURE_HEIGHT (256)
@@ -12,6 +13,8 @@ typedef struct s_font_atlas_glyph_set {
 
 font_atlas_glyph_set *font_atlas_glyph_set_create(SDL_Renderer *renderer,
                                                   font_atlas *atlas, int set) {
+
+  log_debug("Creating glyph set %u", set);
 
   font_atlas_glyph_set *fs =
       (font_atlas_glyph_set *)malloc(sizeof(font_atlas_glyph_set));
@@ -98,7 +101,7 @@ void print_rect(SDL_Renderer *renderer, font_atlas *font, SDL_Rect rect,
         break;
     }
 
-    SDL_SetTextureColorMod(s->texture, 255, 0, 0);
+    // SDL_SetTextureColorMod(s->texture, 255, 0, 0);
     SDL_RenderCopy(renderer, s->texture, glyph, &target);
 
     target.x += glyph->w;
@@ -110,12 +113,14 @@ void print_rect(SDL_Renderer *renderer, font_atlas *font, SDL_Rect rect,
 font_atlas *font_atlas_create(SDL_Renderer *renderer, const char *fontName,
                               int size) {
 
+  log("Creating font atlas %s", fontName);
+
   font_atlas *fa = (font_atlas *)malloc(sizeof(font_atlas));
   memset(fa, 0, sizeof(font_atlas));
 
   fa->font = TTF_OpenFont(fontName, size);
   if (!fa->font) {
-    printf("Unable to load %s\n", fontName);
+    log("Unable to load %s", fontName);
   }
 
   return fa;
