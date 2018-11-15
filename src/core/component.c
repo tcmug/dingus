@@ -10,16 +10,27 @@
 #include "component.h"
 
 component *_NODE(component init) {
-  component *this = (component *)malloc(sizeof(component));
-  memcpy(this, &init, sizeof(component));
-  return this;
+  component *self = (component *)malloc(sizeof(component));
+  memcpy(self, &init, sizeof(component));
+  return self;
 }
 
-void node_render_children(component *this) {
-  if (this->children)
-    for (int i = 0; this->children[i]; i++)
-      if (this->children[i]->render)
-        this->children[i]->render(this->children[i]);
+void node_render_children(component *self) {
+  if (self->children)
+    for (int i = 0; self->children[i]; i++)
+      if (self->children[i]->render)
+        self->children[i]->render(self->children[i]);
+}
+
+void node_move(component *self, int x, int y) {
+  self->rect.x = x;
+  self->rect.y = y; 
+}
+
+void node_resize(component *self, int w, int h) {
+  self->resized = 1;
+  self->rect.w = w;
+  self->rect.h = h; 
 }
 
 component **_LIST(int count, ...) {
@@ -36,13 +47,13 @@ component **_LIST(int count, ...) {
   return children;
 }
 
-void DESTROY(component *this) {
-  if (this->children) {
+void DESTROY(component *self) {
+  if (self->children) {
     int i = 0;
-    while (this->children[i]) {
-      DESTROY(this->children[i++]);
+    while (self->children[i]) {
+      DESTROY(self->children[i++]);
     }
   }
-  free(this->children);
-  free(this);
+  free(self->children);
+  free(self);
 }

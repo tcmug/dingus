@@ -3,21 +3,29 @@
 
 #include <stdio.h>
 
-#define log(...)                                                               \
+#define app_log(...)                                                               \
   {                                                                            \
     printf(__VA_ARGS__);                                                       \
     printf("\n");                                                              \
   }
 
+#define app_warning(...)                                                           \
+  {                                                                            \
+    printf("WARNING: ");                                                       \
+    printf(__VA_ARGS__);                                                       \
+    printf("\n");                                                              \
+  }
+
+
 #ifdef DEBUG
-#define log_debug(s, ...)                                                      \
+#define app_debug(...)                                                      \
   {                                                                            \
     printf("DEBUG: ");                                                         \
-    printf((s), __VA_ARGS__);                                                  \
+    printf(__VA_ARGS__);                                                  \
     printf("\n");                                                              \
   }
 #else
-#define log_debug(s, ...)
+#define app_debug(s, ...)
 #endif
 
 #endif

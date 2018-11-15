@@ -14,7 +14,7 @@ typedef struct s_font_atlas_glyph_set {
 font_atlas_glyph_set *font_atlas_glyph_set_create(SDL_Renderer *renderer,
                                                   font_atlas *atlas, int set) {
 
-  log_debug("Creating glyph set %u", set);
+  app_debug("Creating glyph set %u", set);
 
   font_atlas_glyph_set *fs =
       (font_atlas_glyph_set *)malloc(sizeof(font_atlas_glyph_set));
@@ -113,14 +113,14 @@ void print_rect(SDL_Renderer *renderer, font_atlas *font, SDL_Rect rect,
 font_atlas *font_atlas_create(SDL_Renderer *renderer, const char *fontName,
                               int size) {
 
-  log("Creating font atlas %s", fontName);
+  app_log("Creating font atlas %s", fontName);
 
   font_atlas *fa = (font_atlas *)malloc(sizeof(font_atlas));
   memset(fa, 0, sizeof(font_atlas));
 
   fa->font = TTF_OpenFont(fontName, size);
   if (!fa->font) {
-    log("Unable to load %s", fontName);
+    app_log("Unable to load %s", fontName);
   }
 
   return fa;

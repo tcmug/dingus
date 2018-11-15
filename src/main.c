@@ -8,6 +8,7 @@
 #include <string.h>
 #include <wchar.h>
 
+#include "components/text.h"
 #include "core/component.h"
 #include "core/log.h"
 #include "core/print.h"
@@ -50,14 +51,6 @@ int map[12][25] = {
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1},
 };
 
-typedef struct s_window_props {
-  SDL_Window *window;
-  SDL_Renderer *renderer;
-  SDL_Texture *texture;
-  int passed;
-  int frame;
-} window_props;
-
 void screen_render(component *this) {
   /*
 window_props *props = (window_props *)this->props;
@@ -99,148 +92,61 @@ for (int x = 0; x < 5; x++) {
 
 int immediate(component *this) { return 1; }
 
-font_atlas *fa;
-
-int text_update(component *this) {
-  window_props *props = (window_props *)this->props;
-  const wchar_t *text = (const wchar_t *)this->state;
-  if (!this->texture) {
-    this->texture =
-        SDL_CreateTexture(props->renderer, SDL_PIXELFORMAT_RGBA8888,
-                          SDL_TEXTUREACCESS_TARGET, this->rect.w, this->rect.h);
-  }
-  SDL_SetRenderTarget(props->renderer, this->texture);
-  SDL_RenderClear(props->renderer);
-  print_rect(props->renderer, fa, this->rect, text);
-  SDL_SetRenderTarget(props->renderer, 0);
-  return 0;
-}
-
-void texture_render(component *this) {
-  window_props *props = (window_props *)this->props;
-  if (this->texture) {
-    // SDL_SetRenderTarget(props->renderer, this->texture);
-    // SDL_Rect dest = {this->rect.w / 4, this->rect.h / 4, this->rect.w,
-    //                 this->rect.h};
-    // SDL_RenderCopy(props->renderer, this->texture, 0, &dest);
-    // SDL_SetRenderTarget(props->renderer, 0);
-    SDL_RenderCopy(props->renderer, this->texture, 0, &this->rect);
-  }
-}
-
-SDL_Texture *drawText(SDL_Renderer *renderer, TTF_Font *font,
-                      const char *text) {
-
-  SDL_Color White = {255, 255, 255};
-  SDL_Surface *surface = TTF_RenderText_Solid(font, text, White);
-
-  SDL_Texture *Message = SDL_CreateTextureFromSurface(renderer, surface);
-  SDL_FreeSurface(surface);
-
-  return Message;
-}
-
-typedef struct s_organic {
-  float sx, sy, dx, dy;
-  float x, y;
-  int age, maturity;
-  int depth;
-  int num_branches;
-  struct s_organic *branches;
-} organic;
-
-void organic_update(organic *o, int time_delta) {
-  if (o->age < o->maturity) {
-    o->x = o->sx + easeOut(o->age, 0, o->dx - o->sx, o->maturity);
-    o->y = o->sy + easeOut(o->age, 0, o->dy - o->sy, o->maturity);
-  } else {
-    // split
-    if (!o->branches) {
-      if (o->depth < 5) {
-        o->num_branches = (rand() % 2) + 2;
-        o->branches = malloc(sizeof(organic) * o->num_branches);
-        for (int i = 0; i < o->num_branches; i++) {
-          o->branches[i].sx = o->dx;
-          o->branches[i].sy = o->dy;
-          o->branches[i].x = o->branches[i].sx;
-          o->branches[i].y = o->branches[i].sy;
-          o->branches[i].dx = o->dx + ((rand() % 100) - 50);
-          o->branches[i].dy = o->dy + ((rand() % 100) - 100);
-          o->branches[i].depth = o->depth + 1;
-          o->branches[i].age = 0;
-          o->branches[i].branches = 0;
-          o->branches[i].maturity = ((rand() % 3000)) + 1000;
-        }
-      }
-    } else {
-      for (int i = 0; i < o->num_branches; i++) {
-        organic_update(&o->branches[i], time_delta);
-      }
-    }
-    o->x = o->dx;
-    o->y = o->dy;
-  }
-  o->age += time_delta;
-}
-
-void organic_render(SDL_Renderer *renderer, organic *o) {
-  SDL_RenderDrawLine(renderer, o->sx, o->sy, o->x, o->y);
-  if (o->branches) {
-    for (int i = 0; i < o->num_branches; i++) {
-      organic_render(renderer, &o->branches[i]);
-    }
-  }
-}
-
 int main(int argc, char *args[]) {
 
-  window_props props;
-  int height = 640;
-  int width = 480;
+  window props;
+  int width = 640;
+  int height = 480;
 
   SDL_Init(SDL_INIT_VIDEO);
   props.window = SDL_CreateWindow(
-      "Fuuuu", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, height, width,
+      "Fuuuu", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height,
       SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
 
   if (props.window == NULL) {
-    printf("Could not create window...\n");
+    app_log("Could not create window...\n");
     return 1;
   }
 
-  props.renderer = SDL_CreateRenderer(props.window, -1, 0);
+  props.renderer = SDL_CreateRenderer(props.window, 0, 0);
   props.passed = 0;
   props.frame = 0;
 
-  SDL_Surface *image = SDL_LoadBMP("block.bmp");
-  props.texture = SDL_CreateTextureFromSurface(props.renderer, image);
+//  SDL_RenderSetLogicalSize(props.renderer, width, height);
+  int real_width, real_height;
+  SDL_GetRendererOutputSize(props.renderer, &real_width, &real_height);
+
+  if (real_width != width || real_height != height) {
+    app_warning("Real resolution is %u %u, I asked for %u %u. Results might be... interesting.", real_width, real_height, width, height);
+    width = real_width;
+    height = real_height;
+  }
+
+  // SDL_Surface *image = SDL_LoadBMP("block.bmp");
+  // props.texture = SDL_CreateTextureFromSurface(props.renderer, image);
 
   int running = 1;
   int fps = 60, real_fps = 0, fps_counter = 1000;
   int previous = SDL_GetTicks();
-  wchar_t fps_display_string[0xFF];
 
-  component *fps_display =
-      NODE(.update = &text_update, .render = &texture_render, .props = &props,
-           .state = &fps_display_string, .rect = {0, 0, 200, 100});
+  wchar_t fps_display_string[0xFF];
+  component *fps_display1, *fps_display2;
 
   component *root =
-      NODE(.update = &immediate, .render = &screen_render, .props = &props,
-           .rect = {0, 0, height, width}, .children = LIST(fps_display));
+      NODE(.update = &immediate, .render = &screen_render, .window = &props,
+           .rect = {0, 0, height, width},
+           .children =
+               LIST(fps_display1 =
+                        TEXT(.window = &props, .state = &fps_display_string,
+                             .rect = {0, 0, 200, 100}),
+                    fps_display2 =
+                        TEXT(.window = &props, .state = &fps_display_string,
+                             .rect = {width/2, 0, width, 100})));
 
   int fullscreen = 0;
 
   TTF_Init();
-  fa = font_atlas_create(props.renderer, "munro.ttf", 32);
-
-  organic stump = {.depth = 0,
-                   .sx = 320,
-                   .sy = 480,
-                   .dx = 300,
-                   .dy = 430,
-                   .age = 0,
-                   .maturity = rand() % 3000 + 1000,
-                   .branches = 0};
+  default_font = font_atlas_create(props.renderer, "munro.ttf", 32);
 
   srand(SDL_GetTicks());
 
@@ -255,12 +161,14 @@ int main(int argc, char *args[]) {
           running = 0;
           break;
         case SDLK_f:
-          log("Toggle");
           fullscreen = !fullscreen;
-          if (fullscreen)
+          if (fullscreen) {
+            app_log("Enter fullscreen mode.");
             SDL_SetWindowFullscreen(props.window, SDL_WINDOW_FULLSCREEN);
-          else
+          } else {
+            app_log("Exit fullscreen mode.");
             SDL_SetWindowFullscreen(props.window, 0);
+          }
         }
       }
     }
@@ -274,23 +182,27 @@ int main(int argc, char *args[]) {
     props.passed += frame_time;
     previous = now;
     fps_counter += frame_time;
+    if (fps_counter % 100) {
+      node_resize(fps_display2, 400, 400);
+      node_move(fps_display1, fps_display1->rect.x, (fps_display1->rect.y + 1) % 100);
+    }
     if (fps_counter >= 1000) {
       real_fps = fps;
       fps = 1;
       fps_counter -= 1000;
       swprintf(fps_display_string, 0xFF, L"FPS: %u", real_fps);
-      fps_display->update(fps_display);
+      fps_display1->update(fps_display1);
+      fps_display2->update(fps_display2);
     } else {
       fps++;
     }
 
+    SDL_Rect r = {0, 0, 320, 240};
+    SDL_SetRenderDrawColor(props.renderer, 255, 0, 255, 0);
+    SDL_RenderFillRect(props.renderer, &r);
+
+
     root->render(root);
-
-    SDL_SetRenderDrawColor(props.renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
-    organic_update(&stump, frame_time);
-    organic_render(props.renderer, &stump);
-    SDL_SetRenderDrawColor(props.renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-
     SDL_RenderPresent(props.renderer);
   }
 
