@@ -126,7 +126,7 @@ int main(int argc, char *args[]) {
   // props.texture = SDL_CreateTextureFromSurface(props.renderer, image);
 
   int running = 1;
-  int fps = 60, real_fps = 0, fps_counter = 1000;
+  int fps_limit = 60, fps = 60, real_fps = 0, fps_counter = 1000;
   int previous = SDL_GetTicks();
 
   wchar_t fps_display_string[0xFF];
@@ -173,19 +173,21 @@ int main(int argc, char *args[]) {
       }
     }
 
+    const int start = SDL_GetTicks();
+    const int frame_time = (start - previous);
+    props.passed += frame_time;
+    previous = start;
+
     SDL_GetWindowSize(props.window, &root->rect.w, &root->rect.h);
     SDL_SetRenderDrawColor(props.renderer, 0, 0, 0, 0);
     SDL_RenderClear(props.renderer);
 
-    int now = SDL_GetTicks();
-    int frame_time = (now - previous);
-    props.passed += frame_time;
-    previous = now;
     fps_counter += frame_time;
     if (fps_counter % 100) {
       node_resize(fps_display2, 400, 400);
       node_move(fps_display1, fps_display1->rect.x, (fps_display1->rect.y + 1) % 100);
     }
+
     if (fps_counter >= 1000) {
       real_fps = fps;
       fps = 1;
@@ -201,9 +203,18 @@ int main(int argc, char *args[]) {
     SDL_SetRenderDrawColor(props.renderer, 255, 0, 255, 0);
     SDL_RenderFillRect(props.renderer, &r);
 
-
     root->render(root);
     SDL_RenderPresent(props.renderer);
+
+    // FPS limit.
+    const int end = SDL_GetTicks();
+    if (fps_limit) {
+      const int to_delay = ((1000 / fps_limit) - (end - start));
+      if (to_delay > 0) {
+        SDL_Delay(to_delay);
+        app_log("%u %u", frame_time, to_delay);
+      }
+    }
   }
 
   SDL_DestroyWindow(props.window);
