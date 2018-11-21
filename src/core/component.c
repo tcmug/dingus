@@ -9,7 +9,7 @@
 
 #include "component.h"
 
-component *_NODE(component init) {
+component *component_create(component init) {
   component *self = (component *)malloc(sizeof(component));
   memcpy(self, &init, sizeof(component));
   return self;
@@ -33,7 +33,7 @@ void node_resize(component *self, int w, int h) {
   self->rect.h = h; 
 }
 
-component **_LIST(int count, ...) {
+component **component_list_create(int count, ...) {
   int i = 0;
   va_list args;
   va_start(args, count);
@@ -47,11 +47,11 @@ component **_LIST(int count, ...) {
   return children;
 }
 
-void DESTROY(component *self) {
+void component_destroy(component *self) {
   if (self->children) {
     int i = 0;
     while (self->children[i]) {
-      DESTROY(self->children[i++]);
+      component_destroy(self->children[i++]);
     }
   }
   free(self->children);

@@ -34,13 +34,29 @@ typedef struct s_window {
   int frame;
 } window;
 
-component *_NODE(component props);
-component **_LIST(int count, ...);
-void DESTROY(component *self);
+component *component_create(component props);
+component **component_list_create(int count, ...);
+
+void component_destroy(component *self);
 void node_render_children(component *self);
 
 void node_move(component *self, int x, int y);
 void node_resize(component *self, int w, int h);
+
+#define COMPONENT_DEFAULTS                                                     \
+  .name = "NO-NAME", .children = 0, .update = 0, .texture = 0, .resized = 1
+#define _NUMARGS(type, ...) (sizeof((type[]){__VA_ARGS__}) / sizeof(type))
+
+#define COMPONENT(...)                                                         \
+  component_create((component){COMPONENT_DEFAULTS, __VA_ARGS__})
+
+#define COMPONENT_EXTEND(...)                                                  \
+  component_create((component){COMPONENT_DEFAULTS, __VA_ARGS__})
+
+#define LIST(...)                                                              \
+  component_list_create(_NUMARGS(component *, __VA_ARGS__), __VA_ARGS__)
+
+/*
 
 #define COMP_DEFAULTS                                                          \
   .name = "NO-NAME", .children = 0, .update = 0, .texture = 0, .resized = 1
@@ -49,4 +65,5 @@ void node_resize(component *self, int w, int h);
 #define NODE(...) _NODE((component){COMP_DEFAULTS, __VA_ARGS__})
 #define LIST(...) _LIST(NUMARGS(component *, __VA_ARGS__), __VA_ARGS__)
 
+*/
 #endif

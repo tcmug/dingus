@@ -95,8 +95,8 @@ int immediate(component *this) { return 1; }
 int main(int argc, char *args[]) {
 
   window props;
-  int width = 640;
-  int height = 480;
+  int width = 800;
+  int height = 600;
 
   SDL_Init(SDL_INIT_VIDEO);
   props.window = SDL_CreateWindow(
@@ -112,12 +112,14 @@ int main(int argc, char *args[]) {
   props.passed = 0;
   props.frame = 0;
 
-//  SDL_RenderSetLogicalSize(props.renderer, width, height);
+  //  SDL_RenderSetLogicalSize(props.renderer, width, height);
   int real_width, real_height;
   SDL_GetRendererOutputSize(props.renderer, &real_width, &real_height);
 
   if (real_width != width || real_height != height) {
-    app_warning("Real resolution is %u %u, I asked for %u %u. Results might be... interesting.", real_width, real_height, width, height);
+    app_warning("Real resolution is %u %u, I asked for %u %u. Results might "
+                "be... interesting.",
+                real_width, real_height, width, height);
     width = real_width;
     height = real_height;
   }
@@ -133,15 +135,15 @@ int main(int argc, char *args[]) {
   component *fps_display1, *fps_display2;
 
   component *root =
-      NODE(.update = &immediate, .render = &screen_render, .window = &props,
-           .rect = {0, 0, height, width},
-           .children =
-               LIST(fps_display1 =
+      COMPONENT(.update = &immediate, .render = &screen_render,
+                .window = &props, .rect = {0, 0, height, width},
+                .children = LIST(
+                    fps_display1 =
                         TEXT(.window = &props, .state = &fps_display_string,
                              .rect = {0, 0, 200, 100}),
                     fps_display2 =
                         TEXT(.window = &props, .state = &fps_display_string,
-                             .rect = {width/2, 0, width, 100})));
+                             .rect = {width / 2, 0, width, 100})));
 
   int fullscreen = 0;
 
@@ -185,7 +187,8 @@ int main(int argc, char *args[]) {
     fps_counter += frame_time;
     if (fps_counter % 100) {
       node_resize(fps_display2, 400, 400);
-      node_move(fps_display1, fps_display1->rect.x, (fps_display1->rect.y + 1) % 100);
+      node_move(fps_display1, fps_display1->rect.x,
+                (fps_display1->rect.y + 1) % 100);
     }
 
     if (fps_counter >= 1000) {
@@ -212,7 +215,6 @@ int main(int argc, char *args[]) {
       const int to_delay = ((1000 / fps_limit) - (end - start));
       if (to_delay > 0) {
         SDL_Delay(to_delay);
-        app_log("%u %u", frame_time, to_delay);
       }
     }
   }
