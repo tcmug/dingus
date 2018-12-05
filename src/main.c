@@ -13,85 +13,10 @@
 #include "core/log.h"
 #include "core/print.h"
 
-#define PI 3.14159
+void screen_render(component *self) { component_render_children(self); }
+int immediate(component *self) { return 1; }
 
-float linear(float t, float b, float c, float d) { return c * t / d + b; }
-float elastic(float t, float b, float c, float d) {
-  if (t == 0)
-    return b;
-  if ((t /= d) == 1)
-    return b + c;
-  float p = d * .3f;
-  float a = c;
-  float s = p / 4;
-  float postFix =
-      a *
-      pow(2,
-          10 * (t -= 1)); // this is a fix, again, with post-increment operators
-  return -(postFix * sin((t * d - s) * (2 * PI) / p)) + b;
-}
-
-float easeOut(float t, float b, float c, float d) {
-  t /= d;
-  return -c * t * (t - 2) + b;
-};
-
-int map[12][25] = {
-    {1, 1, 2, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-    {1, 0, 0, 0, 2, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1},
-    {1, 1, 2, 1, 2, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0},
-    {1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1},
-    {1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1},
-    {0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0},
-    {1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1},
-    {1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 2, 1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1},
-};
-
-void screen_render(component *this) {
-  /*
-window_props *props = (window_props *)this->props;
-
-int scale = 1;
-int offsetx =
-((this->rect.w / scale) / 2) - 16 + sin(props->passed / 5000.0) * 600;
-int offsety =
-((this->rect.h / scale) / 2) - 16 + sin(props->passed / 5000.0) * 300;
-
-int blockw = 32;
-int blockh = 32;
-int bw = blockw;
-// easeOut(props->passed, 0, blockw, frametime / 2);
-int bh = blockh;
-// easeOut(props->passed, 0, blockh, frametime / 2);
-int cell_offset_x = blockw / 2;
-int cell_offset_y = blockh / 4;
-
-for (int frame = 0; frame < 8; frame++) {
-for (int y = 0; y < 5; y++) {
-for (int x = 0; x < 5; x++) {
-  int cell = map[frame][x + (y * 5)];
-  if (cell > 0) {
-    int px = offsetx + (cell_offset_x * x - y * cell_offset_x) +
-             (frame * 7 * cell_offset_x);
-    int py = (offsety + ((x + y) * cell_offset_y) - blockh) +
-             (frame * 7 * cell_offset_y);
-    SDL_Rect dstrect = {px * scale, py * scale, bw * scale, bh * scale};
-    SDL_Rect source = {(cell - 1) * blockw, 0, blockw, blockh};
-    SDL_RenderCopy(props->renderer, props->texture, &source, &dstrect);
-  }
-}
-}
-}
-*/
-  node_render_children(this);
-}
-
-int immediate(component *this) { return 1; }
-
+// elem_type
 int main(int argc, char *args[]) {
 
   window props;
@@ -99,6 +24,7 @@ int main(int argc, char *args[]) {
   int height = 600;
 
   SDL_Init(SDL_INIT_VIDEO);
+
   props.window = SDL_CreateWindow(
       "Fuuuu", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height,
       SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
@@ -134,16 +60,18 @@ int main(int argc, char *args[]) {
   wchar_t fps_display_string[0xFF];
   component *fps_display1, *fps_display2;
 
-  component *root =
-      COMPONENT(.update = &immediate, .render = &screen_render,
-                .window = &props, .rect = {0, 0, height, width},
-                .children = LIST(
-                    fps_display1 =
-                        TEXT(.window = &props, .state = &fps_display_string,
-                             .rect = {0, 0, 200, 100}),
-                    fps_display2 =
-                        TEXT(.window = &props, .state = &fps_display_string,
-                             .rect = {width / 2, 0, width, 100})));
+  component *root = COMPONENT_ALLOC(
+      component, .update = &immediate, .render = &screen_render,
+      .window = &props, .rect = {0, 0, height, width},
+      .children =
+          LIST(fps_display1 =
+                   (component *)TEXT(.window = &props,
+                                     .state = {.text = fps_display_string},
+                                     .rect = {0, 0, 200, 100}),
+               fps_display2 =
+                   (component *)TEXT(.window = &props,
+                                     .state = {.text = fps_display_string},
+                                     .rect = {width / 2, 0, width, 100})));
 
   int fullscreen = 0;
 
@@ -186,9 +114,9 @@ int main(int argc, char *args[]) {
 
     fps_counter += frame_time;
     if (fps_counter % 100) {
-      node_resize(fps_display2, 400, 400);
-      node_move(fps_display1, fps_display1->rect.x,
-                (fps_display1->rect.y + 1) % 100);
+      component_resize(fps_display2, 400, 400);
+      component_move(fps_display1, fps_display1->rect.x,
+                     (fps_display1->rect.y + 1) % 100);
     }
 
     if (fps_counter >= 1000) {
@@ -196,8 +124,8 @@ int main(int argc, char *args[]) {
       fps = 1;
       fps_counter -= 1000;
       swprintf(fps_display_string, 0xFF, L"FPS: %u", real_fps);
-      fps_display1->update(fps_display1);
-      fps_display2->update(fps_display2);
+      fps_display1->update((component *)fps_display1);
+      fps_display2->update((component *)fps_display2);
     } else {
       fps++;
     }

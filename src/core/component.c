@@ -15,22 +15,22 @@ component *component_create(component init) {
   return self;
 }
 
-void node_render_children(component *self) {
+void component_render_children(component *self) {
   if (self->children)
     for (int i = 0; self->children[i]; i++)
       if (self->children[i]->render)
         self->children[i]->render(self->children[i]);
 }
 
-void node_move(component *self, int x, int y) {
+void component_move(component *self, int x, int y) {
   self->rect.x = x;
-  self->rect.y = y; 
+  self->rect.y = y;
 }
 
-void node_resize(component *self, int w, int h) {
+void component_resize(component *self, int w, int h) {
   self->resized = 1;
   self->rect.w = w;
-  self->rect.h = h; 
+  self->rect.h = h;
 }
 
 component **component_list_create(int count, ...) {

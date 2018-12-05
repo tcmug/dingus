@@ -4,6 +4,7 @@ ROOT_DIR := $(ROOT)
 
 CC = gcc
 
+# -std=c11
 CFLAGS = -Wall -I/usr/include -I./src/include $(EXTRA_CFLAGS)
 LDFLAGS = -I/usr/include $(EXTRA_CFLAGS) -lSDL2 -lm -lSDL2_ttf
 
@@ -17,14 +18,14 @@ debug:
 	@echo "######################"
 	@echo "# MAKING DEBUG BUILD #"
 	@echo "######################"
-	make dingus CFLAGS="-DDEBUG -g"
+	make dingus EXTRA_CFLAGS="-DDEBUG -g"
 
 production:
 	@echo "###########################"
 	@echo "# MAKING PRODUCTION BUILD #"
 	@echo "###########################"
 	make clean
-	make dingus CFLAGS="-O3"
+	make dingus EXTRA_CFLAGS="-O3"
 	strip -s dingus
 
 dingus: $(APP_OBJ)

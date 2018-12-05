@@ -9,22 +9,12 @@ typedef void (*render_callback)(struct s_component *self);
 typedef void (*click_callback)(struct s_component *self);
 typedef int (*update_callback)(struct s_component *self);
 
+typedef struct s_component_state {
+} component_state;
+
 typedef struct s_component {
-  const char *name;
-  struct s_component **children;
-  void *state;
-  struct s_window *window;
-  SDL_Rect rect;
-  int resized;
-  SDL_Texture *texture;
-  update_callback update;
-  render_callback render;
-  click_callback click;
-  // click
-  // doubleclick
-  // focus
-  // blur
-  // ...
+#include "component_props.h"
+  component_state state;
 } component;
 
 typedef struct s_window {
@@ -38,20 +28,26 @@ component *component_create(component props);
 component **component_list_create(int count, ...);
 
 void component_destroy(component *self);
-void node_render_children(component *self);
+void component_render_children(component *self);
 
-void node_move(component *self, int x, int y);
-void node_resize(component *self, int w, int h);
+void component_move(component *self, int x, int y);
+void component_resize(component *self, int w, int h);
 
 #define COMPONENT_DEFAULTS                                                     \
-  .name = "NO-NAME", .children = 0, .update = 0, .texture = 0, .resized = 1
+  .children = 0, .update = 0, .texture = 0, .resized = 1
+
 #define _NUMARGS(type, ...) (sizeof((type[]){__VA_ARGS__}) / sizeof(type))
 
 #define COMPONENT(...)                                                         \
   component_create((component){COMPONENT_DEFAULTS, __VA_ARGS__})
 
-#define COMPONENT_EXTEND(...)                                                  \
-  component_create((component){COMPONENT_DEFAULTS, __VA_ARGS__})
+#define COMPONENT_ALLOC(elem_type, ...)                                        \
+  ({                                                                           \
+    elem_type *e = malloc(sizeof(elem_type));                                  \
+    elem_type initial = {COMPONENT_DEFAULTS, __VA_ARGS__};                     \
+    memcpy(e, &initial, sizeof(initial));                                      \
+    e;                                                                         \
+  })
 
 #define LIST(...)                                                              \
   component_list_create(_NUMARGS(component *, __VA_ARGS__), __VA_ARGS__)
@@ -59,7 +55,7 @@ void node_resize(component *self, int w, int h);
 /*
 
 #define COMP_DEFAULTS                                                          \
-  .name = "NO-NAME", .children = 0, .update = 0, .texture = 0, .resized = 1
+  .children = 0, .update = 0, .texture = 0, .resized = 1
 #define NUMARGS(type, ...) (sizeof((type[]){__VA_ARGS__}) / sizeof(type))
 
 #define NODE(...) _NODE((component){COMP_DEFAULTS, __VA_ARGS__})
