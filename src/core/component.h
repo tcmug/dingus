@@ -13,8 +13,7 @@ typedef struct s_component_state {
 } component_state;
 
 typedef struct s_component {
-#include "component_props.h"
-  component_state state;
+#include "component_props.inc"
 } component;
 
 typedef struct s_window {
@@ -38,10 +37,7 @@ void component_resize(component *self, int w, int h);
 
 #define _NUMARGS(type, ...) (sizeof((type[]){__VA_ARGS__}) / sizeof(type))
 
-#define COMPONENT(...)                                                         \
-  component_create((component){COMPONENT_DEFAULTS, __VA_ARGS__})
-
-#define COMPONENT_ALLOC(elem_type, ...)                                        \
+#define COMPONENT(elem_type, ...)                                              \
   ({                                                                           \
     elem_type *e = malloc(sizeof(elem_type));                                  \
     elem_type initial = {COMPONENT_DEFAULTS, __VA_ARGS__};                     \
@@ -52,14 +48,4 @@ void component_resize(component *self, int w, int h);
 #define LIST(...)                                                              \
   component_list_create(_NUMARGS(component *, __VA_ARGS__), __VA_ARGS__)
 
-/*
-
-#define COMP_DEFAULTS                                                          \
-  .children = 0, .update = 0, .texture = 0, .resized = 1
-#define NUMARGS(type, ...) (sizeof((type[]){__VA_ARGS__}) / sizeof(type))
-
-#define NODE(...) _NODE((component){COMP_DEFAULTS, __VA_ARGS__})
-#define LIST(...) _LIST(NUMARGS(component *, __VA_ARGS__), __VA_ARGS__)
-
-*/
 #endif

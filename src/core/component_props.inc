@@ -1,3 +1,6 @@
+/////
+// Component header properties
+/////
 
 struct s_component **children; // Component children.
 struct s_window *window;       // Window specs.

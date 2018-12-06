@@ -5,9 +5,9 @@
 
 font_atlas *default_font;
 
-int text_update(component *self) {
-  window *props = (window *)self->window;
-  const text_state *state = (const text_state *)&self->state;
+int text_update(component *_self) {
+  text *self = (text *)_self;
+  window *props = (window *)_self->window;
 
   if (self->resized) {
     if (self->texture) {
@@ -22,7 +22,7 @@ int text_update(component *self) {
   SDL_SetRenderTarget(props->renderer, self->texture);
   SDL_RenderClear(props->renderer);
   SDL_Rect rect = {0, 0, self->rect.w, self->rect.h};
-  print_rect(props->renderer, default_font, rect, state->text);
+  print_rect(props->renderer, default_font, rect, self->text);
   SDL_SetRenderTarget(props->renderer, 0);
   return 0;
 }

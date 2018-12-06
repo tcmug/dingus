@@ -9,12 +9,6 @@
 
 #include "component.h"
 
-component *component_create(component init) {
-  component *self = (component *)malloc(sizeof(component));
-  memcpy(self, &init, sizeof(component));
-  return self;
-}
-
 void component_render_children(component *self) {
   if (self->children)
     for (int i = 0; self->children[i]; i++)

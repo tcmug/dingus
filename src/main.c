@@ -60,18 +60,14 @@ int main(int argc, char *args[]) {
   wchar_t fps_display_string[0xFF];
   component *fps_display1, *fps_display2;
 
-  component *root = COMPONENT_ALLOC(
+  component *root = COMPONENT(
       component, .update = &immediate, .render = &screen_render,
       .window = &props, .rect = {0, 0, height, width},
       .children =
-          LIST(fps_display1 =
-                   (component *)TEXT(.window = &props,
-                                     .state = {.text = fps_display_string},
-                                     .rect = {0, 0, 200, 100}),
-               fps_display2 =
-                   (component *)TEXT(.window = &props,
-                                     .state = {.text = fps_display_string},
-                                     .rect = {width / 2, 0, width, 100})));
+          LIST(fps_display1 = TEXT(.window = &props, .text = fps_display_string,
+                                   .rect = {0, 0, 200, 100}),
+               fps_display2 = TEXT(.window = &props, .text = fps_display_string,
+                                   .rect = {width / 2, 0, width, 100})));
 
   int fullscreen = 0;
 
