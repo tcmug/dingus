@@ -16,6 +16,14 @@ void component_render_children(component *self) {
         self->children[i]->render(self->children[i]);
 }
 
+void component_update_pass(component *self) {
+  if (self->update)
+    self->update(self);
+  if (self->children)
+    for (int i = 0; self->children[i]; i++)
+      component_update_pass(self->children[i]);
+}
+
 void component_move(component *self, int x, int y) {
   self->rect.x = x;
   self->rect.y = y;

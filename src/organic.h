@@ -1,4 +1,9 @@
 
+
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
+#include <math.h>
+
 typedef struct s_organic {
   float sx, sy, dx, dy;
   float x, y;
@@ -7,6 +12,11 @@ typedef struct s_organic {
   int num_branches;
   struct s_organic *branches;
 } organic;
+
+float easeOut(float t, float b, float c, float d) {
+  t /= d;
+  return -c * t * (t - 2) + b;
+};
 
 void organic_update(organic *o, int time_delta) {
   if (o->age < o->maturity) {
@@ -43,6 +53,7 @@ void organic_update(organic *o, int time_delta) {
 }
 
 void organic_render(SDL_Renderer *renderer, organic *o) {
+  SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
   SDL_RenderDrawLine(renderer, o->sx, o->sy, o->x, o->y);
   if (o->branches) {
     for (int i = 0; i < o->num_branches; i++) {
@@ -50,22 +61,3 @@ void organic_render(SDL_Renderer *renderer, organic *o) {
     }
   }
 }
-/*
-
-  // organic stump = {.depth = 0,
-  //                  .sx = 320,
-  //                  .sy = 480,
-  //                  .dx = 300,
-  //                  .dy = 430,
-  //                  .age = 0,
-  //                  .maturity = rand() % 3000 + 1000,
-  //                  .branches = 0};
-
-
-    // SDL_SetRenderDrawColor(props.renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
-    // organic_update(&stump, frame_time);
-    // organic_render(props.renderer, &stump);
-    // SDL_SetRenderDrawColor(props.renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-
-
-*/

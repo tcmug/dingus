@@ -20,6 +20,7 @@ typedef struct s_window {
   SDL_Window *window;
   SDL_Renderer *renderer;
   int passed;
+  int frame_time;
   int frame;
 } window;
 
@@ -28,12 +29,14 @@ component **component_list_create(int count, ...);
 
 void component_destroy(component *self);
 void component_render_children(component *self);
+void component_update_pass(component *self);
 
 void component_move(component *self, int x, int y);
 void component_resize(component *self, int w, int h);
 
 #define COMPONENT_DEFAULTS                                                     \
-  .children = 0, .update = 0, .texture = 0, .resized = 1
+  .window = WINDOW_DEFAULT, .children = 0, .update = 0, .texture = 0,          \
+  .resized = 1
 
 #define _NUMARGS(type, ...) (sizeof((type[]){__VA_ARGS__}) / sizeof(type))
 
@@ -47,5 +50,7 @@ void component_resize(component *self, int w, int h);
 
 #define LIST(...)                                                              \
   component_list_create(_NUMARGS(component *, __VA_ARGS__), __VA_ARGS__)
+
+#define CHILDREN(...) .children = LIST(__VA_ARGS__)
 
 #endif

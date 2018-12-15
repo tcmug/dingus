@@ -8,18 +8,39 @@
 #include <string.h>
 #include <wchar.h>
 
+#include "components/center.h"
 #include "components/text.h"
 #include "core/component.h"
 #include "core/log.h"
 #include "core/print.h"
 
-void screen_render(component *self) { component_render_children(self); }
-int immediate(component *self) { return 1; }
+#include "organic.h"
+organic o = {.depth = 0,
+             .sx = 400,
+             .sy = 480,
+             .dx = 300,
+             .dy = 430,
+             .age = 0,
+             .maturity = 1000,
+             .branches = 0};
+
+void screen_render(component *_self) {
+  window *props = (window *)_self->window;
+  organic_render(props->renderer, &o);
+  component_render_children(_self);
+}
+
+int immediate(component *_self) {
+  window *props = (window *)_self->window;
+  organic_update(&o, props->frame_time);
+  return 1;
+}
 
 // elem_type
 int main(int argc, char *args[]) {
 
   window props;
+
   int width = 800;
   int height = 600;
 
@@ -58,16 +79,19 @@ int main(int argc, char *args[]) {
   int previous = SDL_GetTicks();
 
   wchar_t fps_display_string[0xFF];
-  component *fps_display1, *fps_display2;
+  component *fps_display;
+
+#define WINDOW_DEFAULT (&props)
 
   component *root = COMPONENT(
       component, .update = &immediate, .render = &screen_render,
-      .window = &props, .rect = {0, 0, height, width},
-      .children =
-          LIST(fps_display1 = TEXT(.window = &props, .text = fps_display_string,
-                                   .rect = {0, 0, 200, 100}),
-               fps_display2 = TEXT(.window = &props, .text = fps_display_string,
-                                   .rect = {width / 2, 0, width, 100})));
+      .rect = {0, 0, height, width},
+      CHILDREN(
+          fps_display = TEXT(.text = fps_display_string),
+          CENTER(.rect = {0, 0, width, height},
+                 CHILDREN(TEXT(.text = L"Testing this text thing",
+                               .rect = {0, 0, 400, 40}),
+                          TEXT(.text = L"META", .rect = {0, 0, 100, 30})))));
 
   int fullscreen = 0;
 
@@ -101,6 +125,7 @@ int main(int argc, char *args[]) {
 
     const int start = SDL_GetTicks();
     const int frame_time = (start - previous);
+    props.frame_time = frame_time;
     props.passed += frame_time;
     previous = start;
 
@@ -109,26 +134,21 @@ int main(int argc, char *args[]) {
     SDL_RenderClear(props.renderer);
 
     fps_counter += frame_time;
-    if (fps_counter % 100) {
-      component_resize(fps_display2, 400, 400);
-      component_move(fps_display1, fps_display1->rect.x,
-                     (fps_display1->rect.y + 1) % 100);
-    }
-
     if (fps_counter >= 1000) {
       real_fps = fps;
       fps = 1;
       fps_counter -= 1000;
       swprintf(fps_display_string, 0xFF, L"FPS: %u", real_fps);
-      fps_display1->update((component *)fps_display1);
-      fps_display2->update((component *)fps_display2);
+      fps_display->update((component *)fps_display);
     } else {
       fps++;
     }
 
-    SDL_Rect r = {0, 0, 320, 240};
-    SDL_SetRenderDrawColor(props.renderer, 255, 0, 255, 0);
-    SDL_RenderFillRect(props.renderer, &r);
+    // SDL_Rect r = {0, 0, 320, 240};
+    // SDL_SetRenderDrawColor(props.renderer, 255, 0, 255, 0);
+    // SDL_RenderFillRect(props.renderer, &r);
+
+    component_update_pass(root);
 
     root->render(root);
     SDL_RenderPresent(props.renderer);

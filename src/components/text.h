@@ -13,7 +13,6 @@ typedef struct s_text {
 
 int text_update(component *);
 void texture_render(component *);
-SDL_Texture *drawText(SDL_Renderer *renderer, TTF_Font *font, const char *text);
 
 #define TEXT_DEFAULTS .update = &text_update, .render = &texture_render
 

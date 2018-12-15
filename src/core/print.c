@@ -110,6 +110,29 @@ void print_rect(SDL_Renderer *renderer, font_atlas *font, SDL_Rect rect,
   SDL_RenderSetClipRect(renderer, 0);
 }
 
+void print_size(SDL_Renderer *renderer, font_atlas *font, const wchar_t *text,
+                SDL_Rect *target) {
+
+  target->w = 0;
+  target->h = 0;
+
+  for (int i = 0; i < wcslen(text); i++) {
+
+    Uint16 c = text[i];
+    int set = (c & 0xFF00) >> 8;
+
+    if (font->glyphset[set] == 0) {
+      font->glyphset[set] = font_atlas_glyph_set_create(renderer, font, set);
+    }
+
+    const font_atlas_glyph_set *s = font->glyphset[set];
+    const SDL_Rect *glyph = &s->glyphs[c & 0xFF];
+
+    target->w += glyph->w;
+    target->h = glyph->h > target->h ? glyph->h : target->h;
+  }
+}
+
 font_atlas *font_atlas_create(SDL_Renderer *renderer, const char *fontName,
                               int size) {
 
