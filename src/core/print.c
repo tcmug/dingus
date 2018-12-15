@@ -19,7 +19,7 @@ font_atlas_glyph_set *font_atlas_glyph_set_create(SDL_Renderer *renderer,
   font_atlas_glyph_set *fs =
       (font_atlas_glyph_set *)malloc(sizeof(font_atlas_glyph_set));
 
-  SDL_Color white = {255, 255, 255};
+  SDL_Color white = {255, 255, 255, 0};
 
   Uint32 rmask, gmask, bmask, amask;
 
@@ -78,7 +78,6 @@ void print_rect(SDL_Renderer *renderer, font_atlas *font, SDL_Rect rect,
 
   SDL_RenderSetClipRect(renderer, &rect);
   SDL_Rect target = rect;
-
   for (int i = 0; i < wcslen(text); i++) {
 
     Uint16 c = text[i];
@@ -101,9 +100,7 @@ void print_rect(SDL_Renderer *renderer, font_atlas *font, SDL_Rect rect,
         break;
     }
 
-    // SDL_SetTextureColorMod(s->texture, 255, 0, 0);
     SDL_RenderCopy(renderer, s->texture, glyph, &target);
-
     target.x += glyph->w;
   }
 

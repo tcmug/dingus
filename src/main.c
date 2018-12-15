@@ -71,8 +71,8 @@ int main(int argc, char *args[]) {
     height = real_height;
   }
 
-  // SDL_Surface *image = SDL_LoadBMP("block.bmp");
-  // props.texture = SDL_CreateTextureFromSurface(props.renderer, image);
+  // SDL_Surface *simage = SDL_LoadBMP("block.bmp");
+  // SDL_Texture *image = SDL_CreateTextureFromSurface(props.renderer, simage);
 
   int running = 1;
   int fps_limit = 60, fps = 60, real_fps = 0, fps_counter = 1000;
@@ -144,13 +144,16 @@ int main(int argc, char *args[]) {
       fps++;
     }
 
-    // SDL_Rect r = {0, 0, 320, 240};
-    // SDL_SetRenderDrawColor(props.renderer, 255, 0, 255, 0);
-    // SDL_RenderFillRect(props.renderer, &r);
-
     component_update_pass(root);
 
     root->render(root);
+
+    // SDL_Rect r = {0, 0, 320, 240};
+    // SDL_SetRenderDrawBlendMode(props.renderer, SDL_BLENDMODE_BLEND);
+    // SDL_SetRenderDrawColor(props.renderer, 255, 0, 255, 128);
+    // SDL_RenderCopy(props.renderer, image, 0, &r);
+    // SDL_RenderFillRect(props.renderer, &r);
+
     SDL_RenderPresent(props.renderer);
 
     // FPS limit.

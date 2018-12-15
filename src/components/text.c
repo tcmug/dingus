@@ -26,6 +26,7 @@ int text_update(component *_self) {
     self->texture =
         SDL_CreateTexture(props->renderer, SDL_PIXELFORMAT_RGBA8888,
                           SDL_TEXTUREACCESS_TARGET, self->rect.w, self->rect.h);
+    SDL_SetTextureBlendMode(self->texture, SDL_BLENDMODE_BLEND);
     app_debug("Resized texture");
   }
 
