@@ -31,22 +31,25 @@ int text_update(component *_self) {
   }
 
   SDL_SetRenderTarget(props->renderer, self->texture);
+  SDL_SetRenderDrawColor(props->renderer, self->background.r,
+                         self->background.g, self->background.b,
+                         self->background.a);
   SDL_RenderClear(props->renderer);
   SDL_Rect rect = {0, 0, self->rect.w, self->rect.h};
+
+  SDL_SetTextureColorMod(self->texture, self->color.r, self->color.g,
+                         self->color.b);
+  SDL_SetTextureAlphaMod(self->texture, self->color.a);
   print_rect(props->renderer, default_font, rect, self->text);
+
   SDL_SetRenderTarget(props->renderer, 0);
   return 0;
 }
 
-void texture_render(component *self) {
-  window *props = (window *)self->window;
-
+void texture_render(component *_self) {
+  window *props = (window *)_self->window;
+  text *self = (text *)_self;
   if (self->texture) {
-    // SDL_SetRenderTarget(props->renderer, self->texture);
-    // SDL_Rect dest = {self->rect.w / 4, self->rect.h / 4, self->rect.w,
-    //                 self->rect.h};
-    // SDL_RenderCopy(props->renderer, self->texture, 0, &dest);
-    // SDL_SetRenderTarget(props->renderer, 0);
     SDL_RenderCopy(props->renderer, self->texture, 0, &self->rect);
   }
 }

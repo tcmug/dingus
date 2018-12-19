@@ -3,16 +3,10 @@
 
 #include "center.h"
 
-int center_update(component *_self) { return 0; }
-
-void center_render(component *_self) {
+int center_update(component *_self) {
 
   if (!_self->children)
-    return;
-
-  window *props = (window *)_self->window;
-  SDL_Rect old;
-  SDL_RenderGetViewport(props->renderer, &old);
+    return 0;
 
   int children_height = 0;
 
@@ -26,12 +20,9 @@ void center_render(component *_self) {
   for (int i = 0; _self->children[i]; i++)
     if (_self->children[i]->render) {
       component *child = _self->children[i];
-      SDL_Rect centered = {(_self->rect.x + _self->rect.w - child->rect.w) / 2,
-                           y, child->rect.w, child->rect.h};
-      SDL_RenderSetViewport(props->renderer, &centered);
+      child->rect.x = (_self->rect.x + _self->rect.w - child->rect.w) / 2;
+      child->rect.y = y;
       y += child->rect.h;
-      _self->children[i]->render(_self->children[i]);
     }
-
-  SDL_RenderSetViewport(props->renderer, &old);
+  return 0;
 }

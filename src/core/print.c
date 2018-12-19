@@ -2,8 +2,8 @@
 #include "print.h"
 #include "log.h"
 
-#define TEXTURE_WIDTH (256)
-#define TEXTURE_HEIGHT (256)
+#define TEXTURE_WIDTH (512)
+#define TEXTURE_HEIGHT (512)
 
 typedef struct s_font_atlas_glyph_set {
   Uint32 start;
@@ -69,6 +69,8 @@ font_atlas_glyph_set *font_atlas_glyph_set_create(SDL_Renderer *renderer,
   }
 
   fs->texture = SDL_CreateTextureFromSurface(renderer, glyphs);
+
+  SDL_SaveBMP(glyphs, "glyphs.bmp");
   SDL_FreeSurface(glyphs);
   return fs;
 }
@@ -105,6 +107,30 @@ void print_rect(SDL_Renderer *renderer, font_atlas *font, SDL_Rect rect,
   }
 
   SDL_RenderSetClipRect(renderer, 0);
+}
+
+void print_point(SDL_Renderer *renderer, font_atlas *font, SDL_Point point,
+                 const wchar_t *text) {
+
+  SDL_Rect target = {point.x, point.y, 0, 0};
+  for (int i = 0; i < wcslen(text); i++) {
+
+    Uint16 c = text[i];
+    int set = (c & 0xFF00) >> 8;
+
+    if (font->glyphset[set] == 0) {
+      font->glyphset[set] = font_atlas_glyph_set_create(renderer, font, set);
+    }
+
+    const font_atlas_glyph_set *s = font->glyphset[set];
+    const SDL_Rect *glyph = &s->glyphs[c & 0xFF];
+
+    target.w = glyph->w;
+    target.h = glyph->h;
+
+    SDL_RenderCopy(renderer, s->texture, glyph, &target);
+    target.x += glyph->w;
+  }
 }
 
 void print_size(SDL_Renderer *renderer, font_atlas *font, const wchar_t *text,

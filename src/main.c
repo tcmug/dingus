@@ -36,6 +36,12 @@ int immediate(component *_self) {
   return 1;
 }
 
+void boo(component *_self, SDL_Point pt) {
+  text *self = (text *)_self;
+  self->color = (SDL_Color){255, 0, 0, 255};
+  return 1;
+}
+
 // elem_type
 int main(int argc, char *args[]) {
 
@@ -71,9 +77,6 @@ int main(int argc, char *args[]) {
     height = real_height;
   }
 
-  // SDL_Surface *simage = SDL_LoadBMP("block.bmp");
-  // SDL_Texture *image = SDL_CreateTextureFromSurface(props.renderer, simage);
-
   int running = 1;
   int fps_limit = 60, fps = 60, real_fps = 0, fps_counter = 1000;
   int previous = SDL_GetTicks();
@@ -87,7 +90,8 @@ int main(int argc, char *args[]) {
       component, .update = &immediate, .render = &screen_render,
       .rect = {0, 0, height, width},
       CHILDREN(
-          fps_display = TEXT(.text = fps_display_string),
+          fps_display = TEXT(.text = fps_display_string,
+                             .background = {255, 255, 255, 32}, .click = boo),
           CENTER(.rect = {0, 0, width, height},
                  CHILDREN(TEXT(.text = L"Testing this text thing",
                                .rect = {0, 0, 400, 40}),
@@ -96,16 +100,26 @@ int main(int argc, char *args[]) {
   int fullscreen = 0;
 
   TTF_Init();
-  default_font = font_atlas_create(props.renderer, "munro.ttf", 32);
+  default_font = font_atlas_create(props.renderer, "DroidSans.ttf", 32);
 
   srand(SDL_GetTicks());
 
   while (running) {
     SDL_Event ev;
     while (SDL_PollEvent(&ev)) {
-      if (ev.type == SDL_QUIT) {
+      switch (ev.type) {
+      case SDL_QUIT:
         running = 0;
-      } else if (ev.type == SDL_KEYUP) {
+        break;
+      case SDL_MOUSEBUTTONDOWN: {
+        SDL_Point point = {ev.motion.x, ev.motion.y};
+        component *self = component_at_point(root, point);
+        app_log("component at point (%i, %i) is %p", point.x, point.y, self);
+        if (self->click) {
+          self->click(self, point);
+        }
+      } break;
+      case SDL_KEYUP:
         switch (ev.key.keysym.sym) {
         case SDLK_ESCAPE:
           running = 0;
@@ -153,6 +167,9 @@ int main(int argc, char *args[]) {
     // SDL_SetRenderDrawColor(props.renderer, 255, 0, 255, 128);
     // SDL_RenderCopy(props.renderer, image, 0, &r);
     // SDL_RenderFillRect(props.renderer, &r);
+
+    print_point(props.renderer, default_font, (SDL_Point){0, height / 2},
+                L"JESUS");
 
     SDL_RenderPresent(props.renderer);
 

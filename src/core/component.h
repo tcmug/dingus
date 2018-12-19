@@ -6,7 +6,7 @@
 struct s_component;
 
 typedef void (*render_callback)(struct s_component *self);
-typedef void (*click_callback)(struct s_component *self);
+typedef void (*click_callback)(struct s_component *self, SDL_Point point);
 typedef int (*update_callback)(struct s_component *self);
 
 typedef struct s_component_state {
@@ -30,13 +30,14 @@ component **component_list_create(int count, ...);
 void component_destroy(component *self);
 void component_render_children(component *self);
 void component_update_pass(component *self);
+component *component_at_point(component *self, SDL_Point point);
 
 void component_move(component *self, int x, int y);
 void component_resize(component *self, int w, int h);
 
 #define COMPONENT_DEFAULTS                                                     \
   .window = WINDOW_DEFAULT, .children = 0, .update = 0, .texture = 0,          \
-  .resized = 1
+  .resized = 1, .rect = {0, 0, 0, 0}
 
 #define _NUMARGS(type, ...) (sizeof((type[]){__VA_ARGS__}) / sizeof(type))
 

@@ -8,9 +8,9 @@ typedef struct s_center {
 } center;
 
 int center_update(component *);
-void center_render(component *);
 
-#define CENTER_DEFAULTS .update = &center_update, .render = center_render
+#define CENTER_DEFAULTS                                                        \
+  .update = &center_update, .render = component_render_children
 
 #define CENTER(...)                                                            \
   ((component *)COMPONENT(center, CENTER_DEFAULTS, __VA_ARGS__))

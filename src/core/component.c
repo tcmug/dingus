@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "component.h"
+#include "log.h"
 
 void component_render_children(component *self) {
   if (self->children)
@@ -22,6 +23,19 @@ void component_update_pass(component *self) {
   if (self->children)
     for (int i = 0; self->children[i]; i++)
       component_update_pass(self->children[i]);
+}
+
+component *component_at_point(component *self, SDL_Point point) {
+  if (SDL_PointInRect(&point, &self->rect)) {
+    if (self->children)
+      for (int i = 0; self->children[i]; i++) {
+        component *test = component_at_point(self->children[i], point);
+        if (test)
+          return test;
+      }
+    return self;
+  }
+  return 0;
 }
 
 void component_move(component *self, int x, int y) {
