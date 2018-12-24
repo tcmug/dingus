@@ -1,6 +1,38 @@
 # Dingus
 
+React like UI proof of concept "library" in C. Started as a shitcoding project, but it sort of ended up working _too well_ albeit in a perverse way.
+
+This documentation is **very much incomplete and probably constantly changing.** Let's see how deep the rabbit hole goes...
+
+## Where to start?
+
+**Linux tested only**. You'll need **SDL2** and **SDL2 ttf** libraries and headers installed.
+
+Have a look at the [Makefile](Makefile) for build specifics, but you should get an executable just by running:
+
+```
+$ make
+```
+
+To get a production build:
+
+```
+$ make production
+```
+
 ## Component
+
+Look at [src/main.c](src/main.c) to get a grip on how components are used. Use cases of components are provided there.
+
+Few alignment related components as well as text renderers can be found in [src/components](src/components).
+
+In its simplest form a component is a struct which consists of [src/core/component_props.inc](basic properties) and component specific ones. Naturally properties can be any type of C variable.
+
+Below is a short summary of basic props.
+
+### .rect
+
+The area the component occupies as SDL_Rect.
 
 ### .children
 
