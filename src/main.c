@@ -9,6 +9,7 @@
 #include <wchar.h>
 
 #include "components/center.h"
+#include "components/right.h"
 #include "components/text.h"
 #include "core/component.h"
 #include "core/log.h"
@@ -39,7 +40,6 @@ int immediate(component *_self) {
 void boo(component *_self, SDL_Point pt) {
   text *self = (text *)_self;
   self->color = (SDL_Color){255, 0, 0, 255};
-  return 1;
 }
 
 // elem_type
@@ -92,6 +92,10 @@ int main(int argc, char *args[]) {
       CHILDREN(
           fps_display = TEXT(.text = fps_display_string,
                              .background = {255, 255, 255, 32}, .click = boo),
+          RIGHT(.rect = {0, 0, width, height},
+                CHILDREN(TEXT(.text = L"Aligned right",
+                              .background = {255, 255, 255, 32},
+                              .click = boo))),
           CENTER(.rect = {0, 0, width, height},
                  CHILDREN(TEXT(.text = L"Testing this text thing",
                                .rect = {0, 0, 400, 40}),
