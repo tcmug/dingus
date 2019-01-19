@@ -1,0 +1,20 @@
+{
+  "app-id": "org.meemus.dingus",
+  "runtime": "org.freedesktop.Platform",
+  "runtime-version": "18.08",
+  "sdk": "org.freedesktop.Sdk",
+  "command": "/app/bin/dingus",
+  "finish-args": ["--socket=x11"],
+  "modules": [
+    {
+      "name": "dingus",
+      "buildsystem": "cmake",
+      "sources": [
+        {
+          "type": "dir",
+          "path": "."
+        }
+      ]
+    }
+  ]
+}

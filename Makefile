@@ -1,45 +1,28 @@
 
-# GENERICS
-ROOT_DIR := $(ROOT)
 
-CC = gcc
-
-# -std=c11
-CFLAGS = -Wall -I/usr/include -I./src/include $(EXTRA_CFLAGS)
-LDFLAGS = -I/usr/include $(EXTRA_CFLAGS) -lSDL2 -lm -lSDL2_ttf
-
-ALL_SRC := $(wildcard src/*.c) $(wildcard src/*/*.c)
-ALL_OBJ := $(addprefix tmp/,$(patsubst src/%.c,%.o,$(ALL_SRC)))
-APP_OBJ := $(addprefix tmp/,$(patsubst src/%.c,%.o,$(ALL_SRC)))
-
-dir_guard=@mkdir -p $(@D)
-
-debug:
-	@echo "######################"
-	@echo "# MAKING DEBUG BUILD #"
-	@echo "######################"
-	make dingus EXTRA_CFLAGS="-DDEBUG -g"
+all: development
 
 production:
-	@echo "###########################"
-	@echo "# MAKING PRODUCTION BUILD #"
-	@echo "###########################"
-	make clean
-	make dingus EXTRA_CFLAGS="-O3"
-	strip -s dingus
+	@rm -rf dist
+	@mkdir -p dist
+	@cd dist && cmake .. && make
 
-dingus: $(APP_OBJ)
-	$(CC) $(LDFLAGS) -o $@ $^
+development:
+	@mkdir -p dev
+	@cd dev && cmake -DCMAKE_INSTALL_PREFIX=../resources .. && make
 
-.intermediate:
-	@touch $@
-
-tmp/%.o: src/%.c
-	$(dir_guard)
-	$(CC) $(CFLAGS) -c -o $@ $<
-	
 clean:
-	rm -rf dingus tmp/*
+	@rm -rf dist
+	@rm -rf dev
 
-dbg:
-	@echo $(ALL_SRC)
+run:
+	dev/dingus
+
+flatpak:
+	@flatpak-builder flatpak org.meemus.dingus.json --force-clean
+
+flatpak-run:
+	@flatpak-builder --run flatpak org.meemus.dingus.json dingus
+
+flatpak-dist:
+	@flatpak-builder --repo=flatpak-dist --force-clean flatpak org.meemus.dingus.json

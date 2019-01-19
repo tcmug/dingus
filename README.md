@@ -2,110 +2,64 @@
 
 React like UI proof of concept "library" in C. Started as a shitcoding project, but it sort of ended up working _too well_ albeit in a perverse way.
 
+[Flatpak](https://flatpak.org/) and **make install** builds are supported.
+
 This documentation is **very much incomplete and probably constantly changing.** Let's see how deep the rabbit hole goes...
 
 ## Where to start?
 
-**Linux tested only**. You'll need **SDL2** and **SDL2 ttf** libraries and headers installed.
+**Linux tested only**. You'll need **SDL2** and **SDL2 ttf** libraries and headers installed. Flatpak build requires the **org.freedesktop.Platform** runtime.
 
-Have a look at the [Makefile](Makefile) for build specifics, but you should get an executable just by running:
+### Makefile
+
+The [Makefile](./Makefile) contains shorthands for creating development, production and flatpak builds. The C compilation is handled with cmake in [CMakeLists.txt](CMakeLists.txt).
+
+#### Development
+
+The development builds are placed under **./dev**. To create a development build, run:
 
 ```
-$ make
+$ make development
 ```
 
-To get a production build:
+To run it:
+
+```
+$ make run
+```
+
+### Flatpak
+
+The flatpak builds are placed under **./flatpak**. To create such a build, run:
+
+```
+$ make flatpak
+```
+
+To run it:
+
+```
+$ make flatpak-run
+```
+
+To create a distributable (placed in **./flatpak-dist**):
+
+```
+$ make flatpak-dist
+```
+
+#### Production
+
+If you want to install the application without flatpak, you need to build a production build and install it. The production builds are placed under **./dist**. To create such a build, run:
 
 ```
 $ make production
 ```
 
-## Component
-
-Look at [src/main.c](src/main.c) to get a grip on how components are used. Use cases of components are provided there.
-
-Few alignment related components as well as text renderers can be found in [src/components](src/components).
-
-In its simplest form a component is a struct which consists of [src/core/component_props.inc](basic properties) and component specific ones. Naturally properties can be any type of C variable.
-
-Below is a short summary of basic props.
-
-### .rect
-
-The area the component occupies as SDL_Rect.
-
-### .children
-
-A list of components children. Initialized with a **LIST(...)** macro. Default is NULL.
-
-### .update
-
-Used for updating component, prepping textures etc.
-
-### .render
-
-Called every frame. Default is node_render_children.
-Built in functions:
-
-- #### node_render_children
-
-  - Has no content.
-  - Renders children.
-
-- #### texture_render
-  - Render texture.
-  - Renders children.
-  - Useful for caching.
-
-## Examples
-
-```c
-PARENT(
-    <other props>,
-    .children = LIST(
-        TEXT(
-            .window = &props,
-            .state = "Hello",
-            .rect = {0, 0, 200, 200}
-        ),
-        TEXT(
-            .window = &props,
-            .state = "World",
-            .rect = {200, 200, 200, 200}
-        )
-    )
-);
-```
-
-## Custom components
-
-To extend a component:
-
-```c
-
-typedef struct s_my_component {
-
-#include "../core/component_props.inc"
-
-  int my_value;
-
-} my_component;
-
-#define MY_COMPONENT_DEFAULTS .update = &my_update, .render = &my_render
-
-#define MY_COMPONENT(...) ((component *)COMPONENT(my_component, MY_COMPONENT_DEFAULTS, __VA_ARGS__))
+Note: this build cannot be run without installing it:
 
 ```
-
-### Usage
-
-```c
-PARENT(
-    <other props>,
-    .children =
-        LIST(
-            MY_COMPONENT(.my_value = 1),
-            MY_COMPONENT(.my_value = 2)
-        )
-    );
+$ make install
 ```
+
+Read more about the [source code](./docs/code.md).

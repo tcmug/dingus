@@ -70,7 +70,7 @@ font_atlas_glyph_set *font_atlas_glyph_set_create(SDL_Renderer *renderer,
 
   fs->texture = SDL_CreateTextureFromSurface(renderer, glyphs);
 
-  SDL_SaveBMP(glyphs, "glyphs.bmp");
+  // SDL_SaveBMP(glyphs, "glyphs.bmp");
   SDL_FreeSurface(glyphs);
   return fs;
 }

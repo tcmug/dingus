@@ -1,0 +1,5 @@
+dist
+flatpak
+flatpak-dist
+dev
+.flatpak-builder

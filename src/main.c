@@ -8,6 +8,8 @@
 #include <string.h>
 #include <wchar.h>
 
+#include "config.h"
+
 #include "components/center.h"
 #include "components/right.h"
 #include "components/text.h"
@@ -57,6 +59,7 @@ int main(int argc, char *args[]) {
       SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
 
   if (props.window == NULL) {
+    printf("SDL_Init failed: %s\n", SDL_GetError());
     app_log("Could not create window...\n");
     return 1;
   }
@@ -104,7 +107,8 @@ int main(int argc, char *args[]) {
   int fullscreen = 0;
 
   TTF_Init();
-  default_font = font_atlas_create(props.renderer, "DroidSans.ttf", 32);
+  default_font = font_atlas_create(props.renderer,
+                                   RESOURCE("share/dingus/DroidSans.ttf"), 32);
 
   srand(SDL_GetTicks());
 
@@ -173,7 +177,7 @@ int main(int argc, char *args[]) {
     // SDL_RenderFillRect(props.renderer, &r);
 
     print_point(props.renderer, default_font, (SDL_Point){0, height / 2},
-                L"JESUS");
+                L"Lefty");
 
     SDL_RenderPresent(props.renderer);
 
