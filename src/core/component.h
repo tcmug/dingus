@@ -19,6 +19,8 @@ typedef struct s_component {
 typedef struct s_window {
   SDL_Window *window;
   SDL_Renderer *renderer;
+  int height;
+  int width;
   int passed;
   int frame_time;
   int frame;

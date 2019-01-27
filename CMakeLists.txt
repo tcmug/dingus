@@ -27,11 +27,14 @@ target_sources(dingus
 		src/components/text.c
 		src/components/right.c
 		src/components/center.c
+		src/core/engine.c
 		src/core/print.c
 		src/core/component.c
 )
 
 target_link_libraries(dingus
+	m
+	OpenGL
 	SDL2
 	SDL2_ttf
 )
