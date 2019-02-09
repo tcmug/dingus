@@ -1,7 +1,7 @@
-#ifndef NETTLE_H
-#define NETTLE_H
 
 #include "math.h"
+
+#define MAX_DISTANCE (1000000)
 
 // Inputs: plane origin, plane normal, ray origin ray vector.
 // NOTE: both vectors are assumed to be normalized
@@ -77,20 +77,64 @@ vector closest_point_on_triangle(vector a, vector b, vector c, vector p) {
   return Rca;
 }
 
-real sphere_sweep_triangle(sphere s, vector v, triangle t) {
+real sphere_sweep_triangle(sphere s, vector v, triangle t,
+                           vector *touch_point) {
   plane p = triangle_to_plane(t);
   vector vn = vector_normalize(v);
-  vector touch_point = sphere_sweep_plane(s, vn, p);
-  if (!point_in_triangle(touch_point, t)) {
-    touch_point = closest_point_on_triangle(t.a, t.b, t.c, touch_point);
-    // print_vec(" > touch point edge", touch_point);
+  *touch_point = sphere_sweep_plane(s, vn, p);
+  if (!point_in_triangle(*touch_point, t)) {
+    *touch_point = closest_point_on_triangle(t.a, t.b, t.c, *touch_point);
+    // print_vec(" > touch point edge", (*touch_point));
   } else {
-    // print_vec(" > touch point tri", touch_point);
+    // print_vec(" > touch point tri", (*touch_point));
   }
   vector rv = vector_mul_real(vn, -1);
   // print_vec(" > bw ray", rv);
-  return ray_intersect_sphere(touch_point, rv, s.origin, s.radius);
+  return ray_intersect_sphere(*touch_point, rv, s.origin, s.radius);
   // return vector_add_vector(sphere_intersection_point, vector_mul_real(v, d));
 }
 
-#endif
+int test_triangles(collision *collision, int num_triangles,
+                   triangle *triangles) {
+
+  vector point;
+  real d;
+
+  collision->collided = 0;
+  collision->distance = MAX_DISTANCE;
+
+  for (int i = 0; i < num_triangles; i++) {
+    d = sphere_sweep_triangle(collision->object, collision->velocity,
+                              triangles[i], &point);
+    if (d >= 0 && d < collision->distance) {
+      collision->distance = d;
+      collision->point = point;
+    }
+  }
+  collision->collided =
+      vector_length(collision->velocity) >= collision->distance;
+  return collision->collided;
+}
+
+int point_in_triangle(vector point, triangle t) {
+  // u=P2−P1
+  vector u = vector_sub_vector(t.b, t.a);
+  // v=P3−P1
+  vector v = vector_sub_vector(t.c, t.a);
+  // n=u×v
+  vector n = vector_cross(u, v);
+  // w=P−P1
+  vector w = vector_sub_vector(point, t.a);
+  // Barycentric coordinates of the projection P′of P onto T:
+  real n2 = vector_dot(n, n);
+  // γ=[(u×w)⋅n]/n²
+  real gamma = vector_dot(vector_cross(u, w), n) / n2;
+  // β=[(w×v)⋅n]/n²
+  real beta = vector_dot(vector_cross(w, v), n) / n2;
+  real alpha = 1 - gamma - beta;
+  // The point P′ lies inside T if:
+  return ((0 <= alpha) && (alpha <= 1) && (0 <= beta) && (beta <= 1) &&
+          (0 <= gamma) && (gamma <= 1));
+}
+
+real sphere_triangle_sweep(sphere s, vector v, triangle t) {}

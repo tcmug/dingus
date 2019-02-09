@@ -1,0 +1,630 @@
+#ifndef M4_HPP
+#define M4_HPP
+
+#include "math.hpp"
+
+
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
+
+#define M00 (0)
+#define M01 (1)
+#define M02 (2)
+#define M03 (3)
+
+#define M10 (4)
+#define M11 (5)
+#define M12 (6)
+#define M13 (7)
+
+#define M20 (8)
+#define M21 (9)
+#define M22 (10)
+#define M23 (11)
+
+#define M30 (12)
+#define M31 (13)
+#define M32 (14)
+#define M33 (15)
+
+
+extern v3 _up;
+
+
+class m4 {
+
+
+	public:
+
+
+		real values[16];
+
+
+		m4 &identity() {
+
+			this->values[0] = 1;
+			this->values[1] = 0;
+			this->values[2] = 0;
+			this->values[3] = 0;
+
+			this->values[4] = 0;
+			this->values[5] = 1;
+			this->values[6] = 0;
+			this->values[7] = 0;
+
+			this->values[8] = 0;
+			this->values[9] = 0;
+			this->values[10] = 1;
+			this->values[11] = 0;
+
+			this->values[12] = 0;
+			this->values[13] = 0;
+			this->values[14] = 0;
+			this->values[15] = 1;
+
+			return *this;
+
+		}
+
+
+		m4 operator * (const m4 &other) const {
+
+			m4 result;
+
+			result.values[0] = this->values[0] * other.values[0] + this->values[4] * other.values[1] + this->values[8] * other.values[2] + this->values[12] * other.values[3];
+			result.values[1] = this->values[1] * other.values[0] + this->values[5] * other.values[1] + this->values[9] * other.values[2] + this->values[13] * other.values[3];
+			result.values[2] = this->values[2] * other.values[0] + this->values[6] * other.values[1] + this->values[10] * other.values[2] + this->values[14] * other.values[3];
+			result.values[3] = this->values[3] * other.values[0] + this->values[7] * other.values[1] + this->values[11] * other.values[2] + this->values[15] * other.values[3];
+
+			result.values[4] = this->values[0] * other.values[4] + this->values[4] * other.values[5] + this->values[8] * other.values[6] + this->values[12] * other.values[7];
+			result.values[5] = this->values[1] * other.values[4] + this->values[5] * other.values[5] + this->values[9] * other.values[6] + this->values[13] * other.values[7];
+			result.values[6] = this->values[2] * other.values[4] + this->values[6] * other.values[5] + this->values[10] * other.values[6] + this->values[14] * other.values[7];
+			result.values[7] = this->values[3] * other.values[4] + this->values[7] * other.values[5] + this->values[11] * other.values[6] + this->values[15] * other.values[7];
+
+			result.values[8] = this->values[0] * other.values[8] + this->values[4] * other.values[9] + this->values[8] * other.values[10] + this->values[12] * other.values[11];
+			result.values[9] = this->values[1] * other.values[8] + this->values[5] * other.values[9] + this->values[9] * other.values[10] + this->values[13] * other.values[11];
+			result.values[10] = this->values[2] * other.values[8] + this->values[6] * other.values[9] + this->values[10] * other.values[10] + this->values[14] * other.values[11];
+			result.values[11] = this->values[3] * other.values[8] + this->values[7] * other.values[9] + this->values[11] * other.values[10] + this->values[15] * other.values[11];
+
+			result.values[12] = this->values[0] * other.values[12] + this->values[4] * other.values[13] + this->values[8] * other.values[14] + this->values[12] * other.values[15];
+			result.values[13] = this->values[1] * other.values[12] + this->values[5] * other.values[13] + this->values[9] * other.values[14] + this->values[13] * other.values[15];
+			result.values[14] = this->values[2] * other.values[12] + this->values[6] * other.values[13] + this->values[10] * other.values[14] + this->values[14] * other.values[15];
+			result.values[15] = this->values[3] * other.values[12] + this->values[7] * other.values[13] + this->values[11] * other.values[14] + this->values[15] * other.values[15];
+
+			return result;
+		}
+
+
+
+		m4 &operator *= (const m4 &other) {
+
+			m4 result;
+
+			result.values[0] = this->values[0] * other.values[0] + this->values[4] * other.values[1] + this->values[8] * other.values[2] + this->values[12] * other.values[3];
+			result.values[1] = this->values[1] * other.values[0] + this->values[5] * other.values[1] + this->values[9] * other.values[2] + this->values[13] * other.values[3];
+			result.values[2] = this->values[2] * other.values[0] + this->values[6] * other.values[1] + this->values[10] * other.values[2] + this->values[14] * other.values[3];
+			result.values[3] = this->values[3] * other.values[0] + this->values[7] * other.values[1] + this->values[11] * other.values[2] + this->values[15] * other.values[3];
+
+			result.values[4] = this->values[0] * other.values[4] + this->values[4] * other.values[5] + this->values[8] * other.values[6] + this->values[12] * other.values[7];
+			result.values[5] = this->values[1] * other.values[4] + this->values[5] * other.values[5] + this->values[9] * other.values[6] + this->values[13] * other.values[7];
+			result.values[6] = this->values[2] * other.values[4] + this->values[6] * other.values[5] + this->values[10] * other.values[6] + this->values[14] * other.values[7];
+			result.values[7] = this->values[3] * other.values[4] + this->values[7] * other.values[5] + this->values[11] * other.values[6] + this->values[15] * other.values[7];
+
+			result.values[8] = this->values[0] * other.values[8] + this->values[4] * other.values[9] + this->values[8] * other.values[10] + this->values[12] * other.values[11];
+			result.values[9] = this->values[1] * other.values[8] + this->values[5] * other.values[9] + this->values[9] * other.values[10] + this->values[13] * other.values[11];
+			result.values[10] = this->values[2] * other.values[8] + this->values[6] * other.values[9] + this->values[10] * other.values[10] + this->values[14] * other.values[11];
+			result.values[11] = this->values[3] * other.values[8] + this->values[7] * other.values[9] + this->values[11] * other.values[10] + this->values[15] * other.values[11];
+
+			result.values[12] = this->values[0] * other.values[12] + this->values[4] * other.values[13] + this->values[8] * other.values[14] + this->values[12] * other.values[15];
+			result.values[13] = this->values[1] * other.values[12] + this->values[5] * other.values[13] + this->values[9] * other.values[14] + this->values[13] * other.values[15];
+			result.values[14] = this->values[2] * other.values[12] + this->values[6] * other.values[13] + this->values[10] * other.values[14] + this->values[14] * other.values[15];
+			result.values[15] = this->values[3] * other.values[12] + this->values[7] * other.values[13] + this->values[11] * other.values[14] + this->values[15] * other.values[15];
+
+			*this = result;
+
+			return *this;
+		}
+
+
+
+		m4 &set_rotation(real psi, real theta, real phi) {
+
+			real ca = cos(phi), sa = sin(phi);
+			real cb = cos(theta), sb = sin(theta);
+			real cy = cos(psi), sy = sin(psi);
+
+			this->values[0] = ca*cb;
+			this->values[4] = ca*sb*sy - sa*cy;
+			this->values[8] = ca*sb*cy + sa*sy;
+			this->values[12] = 0.0;
+
+			this->values[1] = sa*cb;
+			this->values[5] = sa*sb*sy + ca*cy;
+			this->values[9] = sa*sb*cy - ca*sy;
+			this->values[13] = 0.0;
+
+			this->values[2] = -sb;
+			this->values[6] = cb*sy;
+			this->values[10] = cb*cy;
+			this->values[14] = 0.0;
+
+			this->values[3] = 0.0;
+			this->values[7] = 0.0;
+			this->values[11] = 0.0;
+			this->values[15] = 1.0;
+
+			return *this;
+
+		}
+
+
+
+		m4 &set_translation(const v3 &vec) {
+
+			this->values[12] = vec.x;
+			this->values[13] = vec.y;
+			this->values[14] = vec.z;
+
+			return *this;
+
+		}
+
+
+
+		m4 &clear_translation() {
+
+			this->values[12] = 0;
+			this->values[13] = 0;
+			this->values[14] = 0;
+
+			return *this;
+
+		}
+
+
+		void apply_rotation(real psi, real theta, real phi) {
+			m4 rot;
+			*this *= rot.set_rotation(psi, theta, phi);
+		}
+
+
+
+		v3 transform(const v3 &vec) const {
+			v3 result = {
+
+				(vec.x * this->values[0]) +
+				(vec.y * this->values[4]) +
+				(vec.z * this->values[8]) + this->values[12],
+
+				(vec.x * this->values[1]) +
+				(vec.y * this->values[5]) +
+				(vec.z * this->values[9]) + this->values[13],
+
+				(vec.x * this->values[2]) +
+				(vec.y * this->values[6]) +
+				(vec.z * this->values[10]) + this->values[14]
+
+			};
+			return result;
+		}
+
+
+		v3 transform_no_translate(const v3 &vec) const {
+			v3 result = {
+
+				(vec.x * this->values[0]) +
+				(vec.y * this->values[4]) +
+				(vec.z * this->values[8]),
+
+				(vec.x * this->values[1]) +
+				(vec.y * this->values[5]) +
+				(vec.z * this->values[9]),
+
+				(vec.x * this->values[2]) +
+				(vec.y * this->values[6]) +
+				(vec.z * this->values[10])
+
+			};
+			return result;
+		}
+
+
+
+		v3 reverse_transform(const v3 &vec) const  {
+
+			v3 temp = {
+				vec.x - this->values[12],
+				vec.y - this->values[13],
+				vec.z - this->values[14]
+			};
+
+			v3 result = {
+
+				(temp.x * this->values[0]) +
+				(temp.y * this->values[1]) +
+				(temp.z * this->values[2]),
+
+				(temp.x * this->values[4]) +
+				(temp.y * this->values[5]) +
+				(temp.z * this->values[6]),
+
+				(temp.x * this->values[8]) +
+				(temp.y * this->values[9]) +
+				(temp.z * this->values[10])
+
+			};
+
+			return result;
+		}
+
+
+		v3 reverse_transform_no_translate(const v3 &vec) const {
+
+			v3 result = {
+
+				(vec.x * this->values[0]) +
+				(vec.y * this->values[1]) +
+				(vec.z * this->values[2]),
+
+				(vec.x * this->values[4]) +
+				(vec.y * this->values[5]) +
+				(vec.z * this->values[6]),
+
+				(vec.x * this->values[8]) +
+				(vec.y * this->values[9]) +
+				(vec.z * this->values[10]),
+
+			};
+			return result;
+		}
+
+
+		v3 project(const v3 &vec) const {
+			v3 out;
+			out.x = vec.x * this->values[0] + vec.y * this->values[4] + vec.z * this->values[8] + this->values[12];
+			out.y = vec.x * this->values[1] + vec.y * this->values[5] + vec.z * this->values[9] + this->values[13];
+			out.z = vec.x * this->values[2] + vec.y * this->values[6] + vec.z * this->values[10] + this->values[14];
+			real t = 1.0 / (vec.x * this->values[3] + vec.y * this->values[7] + vec.z * this->values[11] + this->values[15]);
+			out *= t;
+			return out;
+		}
+
+
+
+		m4 &align(const v3 &eye, const v3 &target, const v3 up = _up) {
+
+			v3 z_axis = target - eye;
+			v3 y_axis = up;
+
+			z_axis.normalize();
+
+			v3 x_axis = z_axis.cross(y_axis);
+			x_axis.normalize();
+
+			y_axis = x_axis.cross(z_axis);
+			y_axis.normalize();
+
+			this->values[M00] = x_axis.x;
+			this->values[M10] = x_axis.y;
+			this->values[M20] = x_axis.z;
+			this->values[M30] = -x_axis.dot(eye);
+
+			this->values[M01] = y_axis.x;
+			this->values[M11] = y_axis.y;
+			this->values[M21] = y_axis.z;
+			this->values[M31] = -y_axis.dot(eye);
+
+			this->values[M02] = -z_axis.x;
+			this->values[M12] = -z_axis.y;
+			this->values[M22] = -z_axis.z;
+			this->values[M32] = z_axis.dot(eye);
+
+			this->values[M03] = 0;
+			this->values[M13] = 0;
+			this->values[M23] = 0;
+			this->values[M33] = 1;
+
+			return *this;
+
+		}
+
+
+
+		m4 &oalign(const v3 &eye, const v3 &target) {
+
+			v3 z_axis = target - eye;
+			v3 y_axis = {0,1,0};
+			v3 x_axis;
+			z_axis.normalize();
+
+			x_axis.x = y_axis.y * z_axis.z - y_axis.z * z_axis.y;
+			x_axis.y = -y_axis.x * z_axis.z + y_axis.z * z_axis.x;
+			x_axis.z = y_axis.x * z_axis.y - y_axis.y * z_axis.x;
+
+			/* Recompute Y = Z cross X */
+			y_axis.x = z_axis.y * x_axis.z - z_axis.z * x_axis.y;
+			y_axis.y = -z_axis.x * x_axis.z + z_axis.z * x_axis.x;
+			y_axis.z = z_axis.x * x_axis.y - z_axis.y * x_axis.x;
+
+			x_axis.normalize();
+			y_axis.normalize();
+
+			this->values[M00] = x_axis.x;
+			this->values[M01] = x_axis.y;
+			this->values[M02] = x_axis.z;
+			this->values[M03] = 0;
+
+			this->values[M10] = y_axis.x;
+			this->values[M11] = y_axis.y;
+			this->values[M12] = y_axis.z;
+			this->values[M13] = 0;
+
+			this->values[M20] = z_axis.x;
+			this->values[M21] = z_axis.y;
+			this->values[M22] = z_axis.z;
+			this->values[M23] = 0;
+
+			this->values[M30] = 0;
+			this->values[M31] = 0;
+			this->values[M32] = 0;
+			this->values[M33] = 1;
+
+			return *this;
+
+		}
+
+
+		m4 &projection_perspective(real near, real far, real fov, real ratio) {
+
+			this->identity();
+
+			real r = TO_RAD(fov) / 2;
+			real a = ratio;
+			real f = 1 / tan(r); // xzoom
+			real dp = near - far;
+
+			this->values[0] = f / a;
+			this->values[5] = f;
+			this->values[10] = (far + near) / dp;
+			this->values[14] = (2 * far * near) / dp; // 32
+			this->values[11] = -1; // 23
+			this->values[15] = 0; // TÄRKEÄ
+
+			return *this;
+		}
+
+
+		m4 &projection_orthogonal(real left, real right, real bottom, real top, real near, real far) {
+
+			this->identity();
+
+			this->values[M00] = 2 / (right - left);
+			this->values[M11] = 2 / (top - bottom);
+			this->values[M22] = - 2 / (far - near);
+			this->values[M30] = - (right + left) / (right - left);
+			this->values[M31] = - (top + bottom) / (top - bottom);
+			this->values[M32] = - (far + near) / (far - near);
+
+			return *this;
+		}
+
+
+		m4 &reverse_projection_perspective(real near, real far, real fov, real ratio) {
+
+			this->identity();
+
+			real r = TO_RAD(fov) / 2;
+			real a = ratio;
+			real f = 1 / tan(r); // xzoom
+			real dp = near - far;
+
+			this->values[0] = a / f;
+			this->values[5] = 1 / f;
+			this->values[10] = 0;
+			this->values[14] = -1;
+			this->values[11] = dp / (2 * far * near);
+			this->values[15] = (far + near) / (2 * far * near);
+
+			return *this;
+		}
+
+
+
+		m4 transposed() {
+			m4 result;
+
+			result.identity();
+			result.values[ 0] = this->values[ 0];
+			result.values[ 1] = this->values[ 4];
+			result.values[ 2] = this->values[ 8];
+			result.values[ 4] = this->values[ 1];
+			result.values[ 5] = this->values[ 5];
+			result.values[ 6] = this->values[ 9];
+			result.values[ 8] = this->values[ 2];
+			result.values[ 9] = this->values[ 6];
+			result.values[10] = this->values[10];
+
+			// result.values[12] = this->values[12];
+			// result.values[13] = this->values[13];
+			// result.values[14] = this->values[14];
+
+			// result.values[ 3] = 0.0f;
+			// result.values[ 7] = 0.0f;
+			// result.values[11] = 0.0f;
+			// result.values[15] = 1.0f;
+
+			return result;
+		}
+
+
+		m4 inverted() {
+
+			m4 inverse;
+			float det;
+			int i;
+
+			inverse.values[0] = this->values[5]  * this->values[10] * this->values[15] -
+					 this->values[5]  * this->values[11] * this->values[14] -
+					 this->values[9]  * this->values[6]  * this->values[15] +
+					 this->values[9]  * this->values[7]  * this->values[14] +
+					 this->values[13] * this->values[6]  * this->values[11] -
+					 this->values[13] * this->values[7]  * this->values[10];
+
+			inverse.values[4] = -this->values[4]  * this->values[10] * this->values[15] +
+					  this->values[4]  * this->values[11] * this->values[14] +
+					  this->values[8]  * this->values[6]  * this->values[15] -
+					  this->values[8]  * this->values[7]  * this->values[14] -
+					  this->values[12] * this->values[6]  * this->values[11] +
+					  this->values[12] * this->values[7]  * this->values[10];
+
+			inverse.values[8] = this->values[4]  * this->values[9] * this->values[15] -
+					 this->values[4]  * this->values[11] * this->values[13] -
+					 this->values[8]  * this->values[5] * this->values[15] +
+					 this->values[8]  * this->values[7] * this->values[13] +
+					 this->values[12] * this->values[5] * this->values[11] -
+					 this->values[12] * this->values[7] * this->values[9];
+
+			inverse.values[12] = -this->values[4]  * this->values[9] * this->values[14] +
+					   this->values[4]  * this->values[10] * this->values[13] +
+					   this->values[8]  * this->values[5] * this->values[14] -
+					   this->values[8]  * this->values[6] * this->values[13] -
+					   this->values[12] * this->values[5] * this->values[10] +
+					   this->values[12] * this->values[6] * this->values[9];
+
+			inverse.values[1] = -this->values[1]  * this->values[10] * this->values[15] +
+					  this->values[1]  * this->values[11] * this->values[14] +
+					  this->values[9]  * this->values[2] * this->values[15] -
+					  this->values[9]  * this->values[3] * this->values[14] -
+					  this->values[13] * this->values[2] * this->values[11] +
+					  this->values[13] * this->values[3] * this->values[10];
+
+			inverse.values[5] = this->values[0]  * this->values[10] * this->values[15] -
+					 this->values[0]  * this->values[11] * this->values[14] -
+					 this->values[8]  * this->values[2] * this->values[15] +
+					 this->values[8]  * this->values[3] * this->values[14] +
+					 this->values[12] * this->values[2] * this->values[11] -
+					 this->values[12] * this->values[3] * this->values[10];
+
+			inverse.values[9] = -this->values[0]  * this->values[9] * this->values[15] +
+					  this->values[0]  * this->values[11] * this->values[13] +
+					  this->values[8]  * this->values[1] * this->values[15] -
+					  this->values[8]  * this->values[3] * this->values[13] -
+					  this->values[12] * this->values[1] * this->values[11] +
+					  this->values[12] * this->values[3] * this->values[9];
+
+			inverse.values[13] = this->values[0]  * this->values[9] * this->values[14] -
+					  this->values[0]  * this->values[10] * this->values[13] -
+					  this->values[8]  * this->values[1] * this->values[14] +
+					  this->values[8]  * this->values[2] * this->values[13] +
+					  this->values[12] * this->values[1] * this->values[10] -
+					  this->values[12] * this->values[2] * this->values[9];
+
+			inverse.values[2] = this->values[1]  * this->values[6] * this->values[15] -
+					 this->values[1]  * this->values[7] * this->values[14] -
+					 this->values[5]  * this->values[2] * this->values[15] +
+					 this->values[5]  * this->values[3] * this->values[14] +
+					 this->values[13] * this->values[2] * this->values[7] -
+					 this->values[13] * this->values[3] * this->values[6];
+
+			inverse.values[6] = -this->values[0]  * this->values[6] * this->values[15] +
+					  this->values[0]  * this->values[7] * this->values[14] +
+					  this->values[4]  * this->values[2] * this->values[15] -
+					  this->values[4]  * this->values[3] * this->values[14] -
+					  this->values[12] * this->values[2] * this->values[7] +
+					  this->values[12] * this->values[3] * this->values[6];
+
+			inverse.values[10] = this->values[0]  * this->values[5] * this->values[15] -
+					  this->values[0]  * this->values[7] * this->values[13] -
+					  this->values[4]  * this->values[1] * this->values[15] +
+					  this->values[4]  * this->values[3] * this->values[13] +
+					  this->values[12] * this->values[1] * this->values[7] -
+					  this->values[12] * this->values[3] * this->values[5];
+
+			inverse.values[14] = -this->values[0]  * this->values[5] * this->values[14] +
+					   this->values[0]  * this->values[6] * this->values[13] +
+					   this->values[4]  * this->values[1] * this->values[14] -
+					   this->values[4]  * this->values[2] * this->values[13] -
+					   this->values[12] * this->values[1] * this->values[6] +
+					   this->values[12] * this->values[2] * this->values[5];
+
+			inverse.values[3] = -this->values[1] * this->values[6] * this->values[11] +
+					  this->values[1] * this->values[7] * this->values[10] +
+					  this->values[5] * this->values[2] * this->values[11] -
+					  this->values[5] * this->values[3] * this->values[10] -
+					  this->values[9] * this->values[2] * this->values[7] +
+					  this->values[9] * this->values[3] * this->values[6];
+
+			inverse.values[7] = this->values[0] * this->values[6] * this->values[11] -
+					 this->values[0] * this->values[7] * this->values[10] -
+					 this->values[4] * this->values[2] * this->values[11] +
+					 this->values[4] * this->values[3] * this->values[10] +
+					 this->values[8] * this->values[2] * this->values[7] -
+					 this->values[8] * this->values[3] * this->values[6];
+
+			inverse.values[11] = -this->values[0] * this->values[5] * this->values[11] +
+					   this->values[0] * this->values[7] * this->values[9] +
+					   this->values[4] * this->values[1] * this->values[11] -
+					   this->values[4] * this->values[3] * this->values[9] -
+					   this->values[8] * this->values[1] * this->values[7] +
+					   this->values[8] * this->values[3] * this->values[5];
+
+			inverse.values[15] = this->values[0] * this->values[5] * this->values[10] -
+					  this->values[0] * this->values[6] * this->values[9] -
+					  this->values[4] * this->values[1] * this->values[10] +
+					  this->values[4] * this->values[2] * this->values[9] +
+					  this->values[8] * this->values[1] * this->values[6] -
+					  this->values[8] * this->values[2] * this->values[5];
+
+			det = this->values[0] * inverse.values[0] + this->values[1] * inverse.values[4] + this->values[2] * inverse.values[8] + this->values[3] * inverse.values[12];
+
+			if (det == 0) {
+				inverse.identity();
+				return inverse;
+			}
+
+			det = 1.0 / det;
+
+			for (i = 0; i < 16; i++) {
+				inverse.values[i] = inverse.values[i] * det;
+			}
+
+			return inverse;
+
+
+		}
+
+
+		void gl_uniform(const char *name) {
+			GLint loc = glGetUniformLocation(
+				shader::active->program,
+				name
+			);
+			engine_gl_check();
+			glUniformMatrix4fv(
+				loc,
+				1,
+				false,
+				this->values
+			);
+			engine_gl_check();
+		}
+
+
+
+
+		void print() const {
+			for (int i = 0; i < 4; i++) {
+				printf("|\t");
+				for (int j = 0; j < 4; j++) {
+					printf("%3.3f\t", this->values[i * 4 + j]);
+				}
+				printf("|\n");
+			}
+			printf("\n");
+		}
+
+
+};
+
+
+#endif

@@ -30,6 +30,12 @@ target_sources(dingus
 		src/core/engine.c
 		src/core/print.c
 		src/core/component.c
+		src/math/vector.c
+		src/math/matrix.c
+		src/math/sphere.c
+		src/math/triangle.c
+		src/math/matrix.c
+		src/math/nettle.c
 )
 
 target_link_libraries(dingus

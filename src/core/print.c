@@ -2,17 +2,28 @@
 #include "print.h"
 #include "log.h"
 
+#include <SDL2/SDL_opengl.h>
+
 #define TEXTURE_WIDTH (512)
 #define TEXTURE_HEIGHT (512)
 
 typedef struct s_font_atlas_glyph_set {
   Uint32 start;
+#ifdef USE_GL
+  GLuint texture;
+#else
   SDL_Texture *texture;
+#endif
   SDL_Rect glyphs[256];
 } font_atlas_glyph_set;
 
-font_atlas_glyph_set *font_atlas_glyph_set_create(SDL_Renderer *renderer,
-                                                  font_atlas *atlas, int set) {
+SDL_Renderer *print_active_renderer = 0;
+
+void print_set_sdl_renderer(SDL_Renderer *renderer) {
+  print_active_renderer = renderer;
+}
+
+font_atlas_glyph_set *font_atlas_glyph_set_create(font_atlas *atlas, int set) {
 
   app_debug("Creating glyph set %u", set);
 
@@ -23,6 +34,12 @@ font_atlas_glyph_set *font_atlas_glyph_set_create(SDL_Renderer *renderer,
 
   Uint32 rmask, gmask, bmask, amask;
 
+#ifdef USE_GL
+  rmask = 0xff000000;
+  gmask = 0x00ff0000;
+  bmask = 0x0000ff00;
+  amask = 0x000000ff;
+#else
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
   rmask = 0xff000000;
   gmask = 0x00ff0000;
@@ -33,6 +50,7 @@ font_atlas_glyph_set *font_atlas_glyph_set_create(SDL_Renderer *renderer,
   gmask = 0x0000ff00;
   bmask = 0x00ff0000;
   amask = 0xff000000;
+#endif
 #endif
 
   SDL_Surface *glyphs = SDL_CreateRGBSurface(0, TEXTURE_WIDTH, TEXTURE_HEIGHT,
@@ -68,17 +86,29 @@ font_atlas_glyph_set *font_atlas_glyph_set_create(SDL_Renderer *renderer,
     SDL_FreeSurface(surface);
   }
 
+#ifdef USE_GL
+  glGenTextures(1, &fs->texture);
+  glBindTexture(GL_TEXTURE_2D, fs->texture);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, TEXTURE_WIDTH, TEXTURE_HEIGHT, 0,
+               GL_RGBA, GL_UNSIGNED_BYTE, glyphs->pixels);
+#else
   fs->texture = SDL_CreateTextureFromSurface(renderer, glyphs);
+#endif
 
-  // SDL_SaveBMP(glyphs, "glyphs.bmp");
   SDL_FreeSurface(glyphs);
   return fs;
 }
 
-void print_rect(SDL_Renderer *renderer, font_atlas *font, SDL_Rect rect,
-                const wchar_t *text) {
+void print_rect(font_atlas *font, SDL_Rect rect, const wchar_t *text) {
 
-  SDL_RenderSetClipRect(renderer, &rect);
+#ifdef USE_GL
+  GLint previous_viewport[4];
+  glGetIntegerv(GL_VIEWPORT, previous_viewport);
+  glViewport(rect.x, rect.y, rect.w, rect.h);
+#else
+  SDL_RenderSetClipRect(print_active_renderer, &rect);
+#endif
+
   SDL_Rect target = rect;
   for (int i = 0; i < wcslen(text); i++) {
 
@@ -86,7 +116,7 @@ void print_rect(SDL_Renderer *renderer, font_atlas *font, SDL_Rect rect,
     int set = (c & 0xFF00) >> 8;
 
     if (font->glyphset[set] == 0) {
-      font->glyphset[set] = font_atlas_glyph_set_create(renderer, font, set);
+      font->glyphset[set] = font_atlas_glyph_set_create(font, set);
     }
 
     const font_atlas_glyph_set *s = font->glyphset[set];
@@ -102,15 +132,19 @@ void print_rect(SDL_Renderer *renderer, font_atlas *font, SDL_Rect rect,
         break;
     }
 
-    SDL_RenderCopy(renderer, s->texture, glyph, &target);
+    SDL_RenderCopy(print_active_renderer, s->texture, glyph, &target);
     target.x += glyph->w;
   }
 
-  SDL_RenderSetClipRect(renderer, 0);
+#ifdef USE_GL
+  glViewport(previous_viewport[0], previous_viewport[1], previous_viewport[2],
+             previous_viewport[3]);
+#else
+  SDL_RenderSetClipRect(print_active_renderer, 0);
+#endif
 }
 
-void print_point(SDL_Renderer *renderer, font_atlas *font, SDL_Point point,
-                 const wchar_t *text) {
+void print_point(font_atlas *font, SDL_Point point, const wchar_t *text) {
 
   SDL_Rect target = {point.x, point.y, 0, 0};
   for (int i = 0; i < wcslen(text); i++) {
@@ -119,7 +153,7 @@ void print_point(SDL_Renderer *renderer, font_atlas *font, SDL_Point point,
     int set = (c & 0xFF00) >> 8;
 
     if (font->glyphset[set] == 0) {
-      font->glyphset[set] = font_atlas_glyph_set_create(renderer, font, set);
+      font->glyphset[set] = font_atlas_glyph_set_create(font, set);
     }
 
     const font_atlas_glyph_set *s = font->glyphset[set];
@@ -128,14 +162,12 @@ void print_point(SDL_Renderer *renderer, font_atlas *font, SDL_Point point,
     target.w = glyph->w;
     target.h = glyph->h;
 
-    SDL_RenderCopy(renderer, s->texture, glyph, &target);
+    SDL_RenderCopy(print_active_renderer, s->texture, glyph, &target);
     target.x += glyph->w;
   }
 }
 
-void print_size(SDL_Renderer *renderer, font_atlas *font, const wchar_t *text,
-                SDL_Rect *target) {
-
+void print_size(font_atlas *font, const wchar_t *text, SDL_Rect *target) {
   target->w = 0;
   target->h = 0;
 
@@ -145,7 +177,7 @@ void print_size(SDL_Renderer *renderer, font_atlas *font, const wchar_t *text,
     int set = (c & 0xFF00) >> 8;
 
     if (font->glyphset[set] == 0) {
-      font->glyphset[set] = font_atlas_glyph_set_create(renderer, font, set);
+      font->glyphset[set] = font_atlas_glyph_set_create(font, set);
     }
 
     const font_atlas_glyph_set *s = font->glyphset[set];
@@ -156,8 +188,7 @@ void print_size(SDL_Renderer *renderer, font_atlas *font, const wchar_t *text,
   }
 }
 
-font_atlas *font_atlas_create(SDL_Renderer *renderer, const char *fontName,
-                              int size) {
+font_atlas *font_atlas_create(const char *fontName, int size) {
 
   app_log("Creating font atlas %s", fontName);
 

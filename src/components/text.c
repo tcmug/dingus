@@ -11,7 +11,7 @@ int text_update(component *_self) {
 
   // Mark resized if text change causes size change.
   SDL_Rect new_rect = _self->rect;
-  print_size(props->renderer, default_font, self->text, &new_rect);
+  print_size(default_font, self->text, &new_rect);
 
   if (new_rect.w != _self->rect.w || new_rect.h != _self->rect.h)
     self->resized = 1;
@@ -30,19 +30,19 @@ int text_update(component *_self) {
     app_debug("Resized texture");
   }
 
-  SDL_SetRenderTarget(props->renderer, self->texture);
-  SDL_SetRenderDrawColor(props->renderer, self->background.r,
-                         self->background.g, self->background.b,
-                         self->background.a);
-  SDL_RenderClear(props->renderer);
+  // SDL_SetRenderTarget(props->renderer, self->texture);
+  // SDL_SetRenderDrawColor(props->renderer, self->background.r,
+  //                        self->background.g, self->background.b,
+  //                        self->background.a);
+  // SDL_RenderClear(props->renderer);
   SDL_Rect rect = {0, 0, self->rect.w, self->rect.h};
 
-  SDL_SetTextureColorMod(self->texture, self->color.r, self->color.g,
-                         self->color.b);
-  SDL_SetTextureAlphaMod(self->texture, self->color.a);
-  print_rect(props->renderer, default_font, rect, self->text);
+  // SDL_SetTextureColorMod(self->texture, self->color.r, self->color.g,
+  //                        self->color.b);
+  // SDL_SetTextureAlphaMod(self->texture, self->color.a);
+  print_rect(default_font, rect, self->text);
 
-  SDL_SetRenderTarget(props->renderer, 0);
+  // SDL_SetRenderTarget(props->renderer, 0);
   return 0;
 }
 

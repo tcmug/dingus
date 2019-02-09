@@ -57,6 +57,11 @@ window engine_init() {
   SDL_Init(SDL_INIT_VIDEO);
   TTF_Init();
 
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
+
   props.window = SDL_CreateWindow(
       "Dingus", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, props.width,
       props.height,
@@ -72,25 +77,14 @@ window engine_init() {
   printf("OPENGL %s / GLSL %s\n", glGetString(GL_VERSION),
          glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-  props.renderer = SDL_CreateRenderer(props.window, 0, 0);
   props.passed = 0;
   props.frame = 0;
 
-  //  SDL_RenderSetLogicalSize(props.renderer, width, height);
-  int real_width, real_height;
-  SDL_GetRendererOutputSize(props.renderer, &real_width, &real_height);
+  glDepthFunc(GL_LESS);
 
-  if (real_width != props.width || real_height != props.height) {
-    app_warning("Real resolution is %u %u, I asked for %u %u. Results might "
-                "be... interesting.",
-                real_width, real_height, props.width, props.height);
-    props.width = real_width;
-    props.height = real_height;
-  }
-
-  // glDepthFunc(GL_LESS);
-  // glEnable(GL_CULL_FACE);
-  // glEnable(GL_DEPTH_TEST);
+  glFrontFace(GL_CW);
+  glEnable(GL_CULL_FACE);
+  glEnable(GL_DEPTH_TEST);
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push
@@ -170,10 +164,13 @@ window engine_init() {
   return props;
 }
 
+// #include <GL/glu.h>
+
 void _engine_gl_check(const char *file, const char *function, int line) {
   GLenum err;
   while ((err = glGetError()) != GL_NO_ERROR) {
-    printf("%s: %u => %s\n", file, line, function);
+    printf("%s: %u => %s (%s)\n", file, line, function);
+    //, gluErrorString(err));
     exit(1);
   }
 }
