@@ -20,12 +20,26 @@
 #include "core/log.h"
 #include "core/print.h"
 
-#include "core/shader.h"
-#include "core/vertex_array.h"
 #include "math/math.h"
+
+#include "core/shader.h"
+
+#include "core/texture.h"
+
+#include "core/buffer.h"
 
 // elem_type
 int main(int argc, char *args[]) {
+
+  // vector c, d;
+  // vector a = {0, 0, 0};
+  // vector b = {0, 0, 0};
+
+  // c = vector_cross(a, b);
+  // d = vector_add_vector(c, a);
+
+  // int *dd = 0;
+  // (*dd) = 2;
 
   window props = engine_init();
 
@@ -46,19 +60,25 @@ int main(int argc, char *args[]) {
   shader glyphs = shader_load(RESOURCE("share/dingus/shaders/glyph.vert"), 0,
                               RESOURCE("share/dingus/shaders/glyph.frag"));
 
-  vertex_array va;
+  default_font = font_atlas_create(RESOURCE("share/dingus/DroidSans.ttf"), 20);
+
+  vector_buffer va;
 
   // GL_STATIC_DRAW
-  vertex_array_init(&va, 3, GL_STREAM_DRAW);
+  vector_buffer_init(&va, 3, GL_STREAM_DRAW);
 
   va.data[0] = (vector){-1, -1, 0};
   va.data[1] = (vector){0, 1, 0};
   va.data[2] = (vector){1, -1, 0};
 
-  vertex_array va2;
+  vector_buffer va2;
+  point_buffer pa2;
+
+  GLuint texture = load_texture("lord.png");
 
   // GL_STATIC_DRAW
-  vertex_array_init(&va2, 6, GL_STREAM_DRAW);
+  vector_buffer_init(&va2, 6, GL_STREAM_DRAW);
+  point_buffer_init(&pa2, 6, GL_STREAM_DRAW);
 
   va2.data[0] = (vector){0, 0, 0};
   va2.data[1] = (vector){50, 0, 0};
@@ -66,6 +86,13 @@ int main(int argc, char *args[]) {
   va2.data[3] = (vector){50, 0, 0};
   va2.data[4] = (vector){50, 50, 0};
   va2.data[5] = (vector){0, 50, 0};
+
+  pa2.data[0] = (point){0, 0};
+  pa2.data[1] = (point){1, 0};
+  pa2.data[2] = (point){0, 1};
+  pa2.data[3] = (point){1, 0};
+  pa2.data[4] = (point){1, 1};
+  pa2.data[5] = (point){0, 1};
 
   GLuint vao;
   glGenVertexArrays(1, &vao);
@@ -120,24 +147,38 @@ int main(int argc, char *args[]) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     engine_gl_check();
 
-    vertex_buffer_update(&va, 3);
-    vertex_buffer_update(&va2, 6);
+    vector_buffer_update(&va, 3);
+    vector_buffer_update(&va2, 6);
+    point_buffer_update(&pa2, 6);
 
     matrix ortho =
         matrix_orthogonal_projection(0, props.width, props.height, 0, 0, 1);
 
     shader_use(glyphs);
 
+    GLuint program;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &program);
+    // app_log("loc: %u %u", glGetAttribLocation(program, "vertex"),
+    //         glGetUniformLocation(program, "view"));
+
     matrix_gl_uniform("projection", ortho);
     matrix_gl_uniform("view", matrix_identity());
     matrix_gl_uniform("model", matrix_identity());
 
-    vertex_buffer_bind(&va2, 0);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    vector_buffer_bind(&va2, 0);
+    point_buffer_bind(&pa2, 1);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    GLuint loc = glGetUniformLocation(program, "glyph_texture");
+    glUniform1i(loc, 0);
+
+    // glDrawArrays(GL_TRIANGLES, 0, 6);
+    print_point(default_font, (SDL_Point){0, 0}, L"Hello");
 
     engine_gl_check();
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-
     engine_gl_check();
 
     vector dir = (vector){1, 1, -5};
@@ -156,7 +197,7 @@ int main(int argc, char *args[]) {
     // glGetIntegerv(GL_CURRENT_PROGRAM, &program);
     // app_log("loc: %u %u", glGetAttribLocation(program, "vertex"),
     //         glGetUniformLocation(program, "view"));
-    vertex_buffer_bind(&va, 0);
+    vector_buffer_bind(&va, 0);
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
     engine_gl_check();

@@ -1,10 +1,11 @@
 cmake_minimum_required (VERSION 3.12)
 
-set (Tutorial_VERSION_MAJOR 1)
-set (Tutorial_VERSION_MINOR 0)
- 
+
+
 project (Dingus)
 
+# -ggdb
+# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
 
 configure_file (
@@ -28,6 +29,7 @@ target_sources(dingus
 		src/components/right.c
 		src/components/center.c
 		src/core/engine.c
+		src/core/buffer.c
 		src/core/print.c
 		src/core/component.c
 		src/math/vector.c
@@ -41,6 +43,7 @@ target_sources(dingus
 target_link_libraries(dingus
 	m
 	OpenGL
+	SDL2_image
 	SDL2
 	SDL2_ttf
 )

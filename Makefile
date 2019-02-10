@@ -10,7 +10,7 @@ production:
 development:
 	@mkdir -p dev
 	@cd dev && cmake -DCMAKE_INSTALL_PREFIX=../resources .. && make
-
+	
 clean:
 	@rm -rf dist
 	@rm -rf dev

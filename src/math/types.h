@@ -3,6 +3,15 @@
 
 #define real float
 
+typedef struct s_point {
+  union {
+    struct {
+      real x, y;
+    };
+    real value[2];
+  };
+} point;
+
 typedef struct s_vector {
   union {
     struct {

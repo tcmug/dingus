@@ -2,14 +2,22 @@
 #define PRINT_H
 
 // Comment below line to use default SDL implementation
-#define USE_GL (1)
+#define USE_GL
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
+#ifdef USE_GL
+#include "buffer.h"
+#endif
+
 typedef struct s_font_atlas {
   TTF_Font *font;
   struct s_font_atlas_glyph_set *glyphset[256];
+#ifdef USE_GL
+  vector_buffer points;
+  point_buffer uvs;
+#endif
 } font_atlas;
 
 void print_set_sdl_renderer(SDL_Renderer *renderer);
