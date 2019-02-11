@@ -25,10 +25,11 @@ void print_set_sdl_renderer(SDL_Renderer *renderer) {
 
 font_atlas_glyph_set *font_atlas_glyph_set_create(font_atlas *atlas, int set) {
 
-  app_debug("Creating glyph set %u", set);
+  app_log("Creating glyph set %u", set);
 
   font_atlas_glyph_set *fs =
       (font_atlas_glyph_set *)malloc(sizeof(font_atlas_glyph_set));
+  // memset(fs, 0, sizeof(font_atlas_glyph_set));
 
   SDL_Color white = {255, 255, 255, 0};
 
@@ -82,34 +83,105 @@ font_atlas_glyph_set *font_atlas_glyph_set_create(font_atlas *atlas, int set) {
   SDL_SaveBMP(glyphs, "glyph.bmp");
 
 #ifdef USE_GL
+  SDL_LockSurface(glyphs);
   glGenTextures(1, &fs->texture);
   glBindTexture(GL_TEXTURE_2D, fs->texture);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  SDL_LockSurface(glyphs);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, TEXTURE_WIDTH, TEXTURE_HEIGHT, 0,
                GL_RGBA, GL_UNSIGNED_BYTE, glyphs->pixels);
   glBindTexture(GL_TEXTURE_2D, 0);
   SDL_UnlockSurface(glyphs);
+
 #else
   fs->texture = SDL_CreateTextureFromSurface(renderer, glyphs);
 #endif
 
   SDL_FreeSurface(glyphs);
+
   return fs;
+}
+
+void _print_flush(font_atlas *font) {
+  if (font->to_render == 0) {
+    return;
+  }
+  vector_buffer_update(&font->points, font->to_render);
+  point_buffer_update(&font->uvs, font->to_render);
+
+  vector_buffer_bind(&font->points, 0);
+  point_buffer_bind(&font->uvs, 1);
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, font->active_glyphset->texture);
+
+  glDrawArrays(GL_TRIANGLES, 0, font->to_render);
+  font->to_render = 0;
+}
+
+void _print_push_glyph(font_atlas *font, SDL_Rect glyph, SDL_Rect target) {
+
+#ifdef USE_GL
+
+  float glx = glyph.x / (float)TEXTURE_WIDTH;
+  float gry = glyph.y / (float)TEXTURE_HEIGHT;
+  float grx = glx + glyph.w / (float)TEXTURE_WIDTH;
+  float gly = gry + glyph.h / (float)TEXTURE_HEIGHT;
+
+  font->points.data[font->to_render].x = target.x;
+  font->points.data[font->to_render].y = target.y - target.h;
+  font->points.data[font->to_render].z = 0;
+  font->uvs.data[font->to_render].x = glx;
+  font->uvs.data[font->to_render].y = gly;
+  font->to_render++;
+
+  font->points.data[font->to_render].x = target.x;
+  font->points.data[font->to_render].y = target.y;
+  font->points.data[font->to_render].z = 0;
+  font->uvs.data[font->to_render].x = glx;
+  font->uvs.data[font->to_render].y = gry;
+  font->to_render++;
+
+  font->points.data[font->to_render].x = target.x + target.w;
+  font->points.data[font->to_render].y = target.y - target.h;
+  font->points.data[font->to_render].z = 0;
+  font->uvs.data[font->to_render].x = grx;
+  font->uvs.data[font->to_render].y = gly;
+  font->to_render++;
+
+  font->points.data[font->to_render].x = target.x + target.w;
+  font->points.data[font->to_render].y = target.y - target.h;
+  font->points.data[font->to_render].z = 0;
+  font->uvs.data[font->to_render].x = grx;
+  font->uvs.data[font->to_render].y = gly;
+  font->to_render++;
+
+  font->points.data[font->to_render].x = target.x;
+  font->points.data[font->to_render].y = target.y;
+  font->points.data[font->to_render].z = 0;
+  font->uvs.data[font->to_render].x = glx;
+  font->uvs.data[font->to_render].y = gry;
+  font->to_render++;
+
+  font->points.data[font->to_render].x = target.x + target.w;
+  font->points.data[font->to_render].y = target.y;
+  font->points.data[font->to_render].z = 0;
+  font->uvs.data[font->to_render].x = grx;
+  font->uvs.data[font->to_render].y = gry;
+  font->to_render++;
+
+  if (font->to_render >= font->points.size) {
+    _print_flush(font);
+  }
+
+#else
+  SDL_RenderCopy(print_active_renderer, s->texture, glyph, &target);
+#endif
 }
 
 void print_rect(font_atlas *font, SDL_Rect rect, const wchar_t *text) {
 
-#ifdef USE_GL
-  GLint previous_viewport[4];
-  glGetIntegerv(GL_VIEWPORT, previous_viewport);
-  glViewport(rect.x, rect.y, rect.w, rect.h);
-#else
-  SDL_RenderSetClipRect(print_active_renderer, &rect);
-#endif
-
-  SDL_Rect target = rect;
+  SDL_Rect target = {rect.x, rect.y, 0, 0};
   for (int i = 0; i < wcslen(text); i++) {
 
     Uint16 c = text[i];
@@ -122,28 +194,29 @@ void print_rect(font_atlas *font, SDL_Rect rect, const wchar_t *text) {
     const font_atlas_glyph_set *s = font->glyphset[set];
     const SDL_Rect *glyph = &s->glyphs[c & 0xFF];
 
+    // Track glyph texture changes & render any glyphs that are on the
+    // previous texture.
+    if (font->active_glyphset != s) {
+#ifdef USE_GL
+      _print_flush(font);
+#endif
+      font->active_glyphset = font->glyphset[set];
+    }
+
     target.w = glyph->w;
     target.h = glyph->h;
 
-    if (target.x + target.w > rect.x + rect.w) {
-      target.x = rect.x;
-      target.y = target.y + glyph->h;
-      if (target.y > rect.y + rect.h)
-        break;
-    }
+    _print_push_glyph(font, *glyph, target);
 
-#ifdef USE_GL
-#else
-    SDL_RenderCopy(print_active_renderer, s->texture, glyph, &target);
-#endif
     target.x += glyph->w;
+    if (target.x > rect.x + rect.w) {
+      target.y -= glyph->h;
+      target.x = rect.x;
+    }
   }
 
 #ifdef USE_GL
-  glViewport(previous_viewport[0], previous_viewport[1], previous_viewport[2],
-             previous_viewport[3]);
-#else
-  SDL_RenderSetClipRect(print_active_renderer, 0);
+  _print_flush(font);
 #endif
 }
 
@@ -162,67 +235,26 @@ void print_point(font_atlas *font, SDL_Point point, const wchar_t *text) {
     const font_atlas_glyph_set *s = font->glyphset[set];
     const SDL_Rect *glyph = &s->glyphs[c & 0xFF];
 
+    // Track glyph texture changes & render any glyphs that are on the
+    // previous texture.
+    if (font->active_glyphset != s) {
+#ifdef USE_GL
+      _print_flush(font);
+#endif
+      font->active_glyphset = font->glyphset[set];
+    }
+
     target.w = glyph->w;
     target.h = glyph->h;
 
-#ifdef USE_GL
+    _print_push_glyph(font, *glyph, target);
 
-    float glx = glyph->x / (float)TEXTURE_WIDTH;
-    float gly = glyph->y / (float)TEXTURE_HEIGHT;
-    float grx = glx + glyph->w / (float)TEXTURE_WIDTH;
-    float gry = gly + glyph->h / (float)TEXTURE_HEIGHT;
-
-    font->points.data[0].x = target.x;
-    font->points.data[0].y = target.y;
-    font->points.data[0].z = 0;
-    font->uvs.data[0].x = glx;
-    font->uvs.data[0].y = gly;
-
-    font->points.data[1].x = target.x + target.w;
-    font->points.data[1].y = target.y;
-    font->points.data[1].z = 0;
-    font->uvs.data[1].x = grx;
-    font->uvs.data[1].y = gly;
-
-    font->points.data[2].x = target.x;
-    font->points.data[2].y = target.y + target.h;
-    font->points.data[2].z = 0;
-    font->uvs.data[2].x = glx;
-    font->uvs.data[2].y = gry;
-
-    font->points.data[3].x = target.x + target.w;
-    font->points.data[3].y = target.y;
-    font->points.data[3].z = 0;
-    font->uvs.data[3].x = grx;
-    font->uvs.data[3].y = gly;
-
-    font->points.data[4].x = target.x + target.w;
-    font->points.data[4].y = target.y + target.h;
-    font->points.data[4].z = 0;
-    font->uvs.data[4].x = grx;
-    font->uvs.data[4].y = gry;
-
-    font->points.data[5].x = target.x;
-    font->points.data[5].y = target.y + target.h;
-    font->points.data[5].z = 0;
-    font->uvs.data[5].x = glx;
-    font->uvs.data[5].y = gry;
-
-    vector_buffer_update(&font->points, 6);
-    point_buffer_update(&font->uvs, 6);
-
-    vector_buffer_bind(&font->points, 0);
-    point_buffer_bind(&font->uvs, 1);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, s->texture);
-
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-#else
-    SDL_RenderCopy(print_active_renderer, s->texture, glyph, &target);
-#endif
     target.x += glyph->w;
   }
+
+#ifdef USE_GL
+  _print_flush(font);
+#endif
 }
 
 void print_size(font_atlas *font, const wchar_t *text, SDL_Rect *target) {
@@ -258,8 +290,10 @@ font_atlas *font_atlas_create(const char *fontName, int size) {
     app_log("Unable to load %s", fontName);
   }
 
-  vector_buffer_init(&fa->points, 6, GL_STREAM_DRAW);
-  point_buffer_init(&fa->uvs, 6, GL_STREAM_DRAW);
-
+#ifdef USE_GL
+  fa->to_render = 0;
+  vector_buffer_init(&fa->points, 6 * 10, GL_STREAM_DRAW);
+  point_buffer_init(&fa->uvs, 6 * 10, GL_STREAM_DRAW);
+#endif
   return fa;
 }

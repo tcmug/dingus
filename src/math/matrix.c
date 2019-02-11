@@ -206,6 +206,36 @@ matrix matrix_rotation(real psi, real theta, real phi) {
 matrix matrix_orthogonal_projection(real left, real right, real bottom,
                                     real top, real near, real far) {
 
+  //   GLfloat r_l = right - left;
+  //   GLfloat t_b = top - bottom;
+  //   GLfloat f_n = far - near;
+  //   GLfloat tx = -(right + left) / (right - left);
+  //   GLfloat ty = -(top + bottom) / (top - bottom);
+  //   GLfloat tz = -(far + near) / (far - near);
+  //   return (matrix){2.0f / r_l,
+  //                   0.0f,
+  //                   0.0f,
+  //                   tx
+
+  //                   ,
+  //                   0.0f,
+  //                   2.0f / t_b,
+  //                   0.0f,
+  //                   ty
+
+  //                   ,
+  //                   0.0f,
+  //                   0.0f,
+  //                   2.0f / f_n,
+  //                   tz
+
+  //                   ,
+  //                   0.0f,
+  //                   0.0f,
+  //                   0.0f,
+  //                   1.0f};
+  // }
+
   return (matrix){2 / (right - left),
                   0,
                   0,

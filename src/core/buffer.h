@@ -7,10 +7,12 @@
 typedef struct s_vector_buffer {
 
   GLuint id;
+  GLuint vaid;
   GLenum usage;
 
   int size;
   vector *data;
+
 } vector_buffer;
 
 typedef struct s_point_buffer {

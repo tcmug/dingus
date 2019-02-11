@@ -43,7 +43,7 @@ void point_buffer_init(point_buffer *self, int size, GLenum u) {
   engine_gl_check();
   self->size = size;
   self->usage = u;
-  self->data = (point *)malloc(sizeof(vector) * size);
+  self->data = (point *)malloc(sizeof(point) * size);
 }
 
 void point_buffer_destroy(point_buffer *self) {

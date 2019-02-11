@@ -17,6 +17,7 @@
 #include "components/text.h"
 #include "core/component.h"
 #include "core/engine.h"
+#include "core/frame.h"
 #include "core/log.h"
 #include "core/print.h"
 
@@ -64,6 +65,8 @@ int main(int argc, char *args[]) {
 
   vector_buffer va;
 
+  frame *frm = frame_create(200, 200);
+
   // GL_STATIC_DRAW
   vector_buffer_init(&va, 3, GL_STREAM_DRAW);
 
@@ -81,18 +84,18 @@ int main(int argc, char *args[]) {
   point_buffer_init(&pa2, 6, GL_STREAM_DRAW);
 
   va2.data[0] = (vector){0, 0, 0};
-  va2.data[1] = (vector){50, 0, 0};
-  va2.data[2] = (vector){0, 50, 0};
-  va2.data[3] = (vector){50, 0, 0};
-  va2.data[4] = (vector){50, 50, 0};
-  va2.data[5] = (vector){0, 50, 0};
+  va2.data[1] = (vector){0, 500, 0};
+  va2.data[2] = (vector){500, 500, 0};
+  va2.data[3] = (vector){500, 500, 0};
+  va2.data[4] = (vector){500, 0, 0};
+  va2.data[5] = (vector){0, 0, 0};
 
   pa2.data[0] = (point){0, 0};
-  pa2.data[1] = (point){1, 0};
-  pa2.data[2] = (point){0, 1};
-  pa2.data[3] = (point){1, 0};
-  pa2.data[4] = (point){1, 1};
-  pa2.data[5] = (point){0, 1};
+  pa2.data[1] = (point){0, 1};
+  pa2.data[2] = (point){1, 1};
+  pa2.data[3] = (point){1, 1};
+  pa2.data[4] = (point){1, 0};
+  pa2.data[5] = (point){0, 0};
 
   GLuint vao;
   glGenVertexArrays(1, &vao);
@@ -142,6 +145,7 @@ int main(int argc, char *args[]) {
       fps++;
     }
 
+    glViewport(0, 0, props.width, props.height);
     glClearColor(0.2, 0, 0, 0);
     engine_gl_check();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -151,33 +155,61 @@ int main(int argc, char *args[]) {
     vector_buffer_update(&va2, 6);
     point_buffer_update(&pa2, 6);
 
-    matrix ortho =
-        matrix_orthogonal_projection(0, props.width, props.height, 0, 0, 1);
+    GLuint program;
+
+    /* RENDER TO TEXTURE */
+    {
+      frame_bind(frm);
+      glClearColor(0.4, 0.4, 0, 0);
+      engine_gl_check();
+      glClear(GL_COLOR_BUFFER_BIT);
+      engine_gl_check();
+
+      shader_use(glyphs);
+
+      matrix ortho = matrix_orthogonal_projection(0, 200, 0, 200, 0, 1);
+      matrix_gl_uniform("projection", ortho);
+      glActiveTexture(GL_TEXTURE0);
+
+      glGetIntegerv(GL_CURRENT_PROGRAM, &program);
+      GLuint loc = glGetUniformLocation(program, "glyph_texture");
+      glUniform1i(loc, 0);
+      /*
+          print_point(default_font, (SDL_Point){0, props.height}, L"Visible?");
+          print_point(default_font, (SDL_Point){props.width - 200,
+         props.height}, L"Visible?");
+      */
+
+      // print_rect(default_font, (SDL_Rect){0, 0, 200, 200},
+      //            L"Hello World, what is going on in Japan (日本)? I hope
+      //            things " L"are going well, because if they were not going
+      //            well things " L"would not be going ok, they would be going
+      //            rather badly, is " L"not to say that bad is not good, but
+      //            inheritly it is.");
+      print_point(default_font, (SDL_Point){0, 200}, L"Visible X?");
+      frame_unbind(frm);
+    }
+    // END RENDER TO TEXTURE
+
+    glViewport(0, 0, props.width, props.height);
 
     shader_use(glyphs);
-
-    GLuint program;
     glGetIntegerv(GL_CURRENT_PROGRAM, &program);
-    // app_log("loc: %u %u", glGetAttribLocation(program, "vertex"),
-    //         glGetUniformLocation(program, "view"));
 
+    matrix ortho =
+        matrix_orthogonal_projection(0, props.width, 0, props.height, 0, 1);
     matrix_gl_uniform("projection", ortho);
-    matrix_gl_uniform("view", matrix_identity());
-    matrix_gl_uniform("model", matrix_identity());
 
     vector_buffer_bind(&va2, 0);
     point_buffer_bind(&pa2, 1);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
     GLuint loc = glGetUniformLocation(program, "glyph_texture");
     glUniform1i(loc, 0);
 
-    // glDrawArrays(GL_TRIANGLES, 0, 6);
-    print_point(default_font, (SDL_Point){0, 0}, L"Hello");
-
+    glBindTexture(GL_TEXTURE_2D, frm->texture);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
     engine_gl_check();
+
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     engine_gl_check();
 

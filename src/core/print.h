@@ -14,7 +14,9 @@
 typedef struct s_font_atlas {
   TTF_Font *font;
   struct s_font_atlas_glyph_set *glyphset[256];
+  struct s_font_atlas_glyph_set *active_glyphset;
 #ifdef USE_GL
+  int to_render;
   vector_buffer points;
   point_buffer uvs;
 #endif
