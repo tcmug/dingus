@@ -181,6 +181,12 @@ void _print_push_glyph(font_atlas *font, SDL_Rect glyph, SDL_Rect target) {
 
 void print_rect(font_atlas *font, SDL_Rect rect, const wchar_t *text) {
 
+  GLuint program;
+  glActiveTexture(GL_TEXTURE0);
+  glGetIntegerv(GL_CURRENT_PROGRAM, &program);
+  GLuint loc = glGetUniformLocation(program, "glyph_texture");
+  glUniform1i(loc, 0);
+
   SDL_Rect target = {rect.x, rect.y, 0, 0};
   for (int i = 0; i < wcslen(text); i++) {
 
@@ -222,6 +228,12 @@ void print_rect(font_atlas *font, SDL_Rect rect, const wchar_t *text) {
 }
 
 void print_point(font_atlas *font, SDL_Point TW_Point, const wchar_t *text) {
+
+  GLuint program;
+  glActiveTexture(GL_TEXTURE0);
+  glGetIntegerv(GL_CURRENT_PROGRAM, &program);
+  GLuint loc = glGetUniformLocation(program, "glyph_texture");
+  glUniform1i(loc, 0);
 
   SDL_Rect target = {TW_Point.x, TW_Point.y, 0, 0};
   for (int i = 0; i < wcslen(text); i++) {

@@ -110,14 +110,12 @@ int main(int argc, char *args[]) {
 
 #define WINDOW_DEFAULT (&props)
 
-  component *root = COMPONENT(
-      component, .update = &immediate, .render = &screen_render,
-      .rect = {0, 0, props.height, props.width},
-      CHILDREN(
-          CENTER(.rect = {0, 0, props.width, props.height},
-                 CHILDREN(TEXT(.text = L"Testing this text thing",
-                               .rect = {0, 0, 400, 40}),
-                          TEXT(.text = L"META", .rect = {0, 0, 100, 30})))));
+  real m = (props.height / 2 - 20);
+  component *root =
+      COMPONENT(component, .update = &immediate, .render = &screen_render,
+                .rect = {0, 0, props.height, props.width},
+                CHILDREN(TEXT(.text = L"Testing this text thing",
+                              .rect = {0, m, 100, 40})));
 
   while (running) {
     SDL_Event ev;
@@ -163,42 +161,23 @@ int main(int argc, char *args[]) {
       fps++;
     }
 
-    glViewport(0, 0, props.width, props.height);
-    glClearColor(0.2, 0, 0, 0);
-    engine_gl_check();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-    engine_gl_check();
-
-    root->render(root);
-
     TW_VectorBufferUpdate(&va, 3);
     TW_VectorBufferUpdate(&va2, 6);
     TW_PointBufferUpdate(&pa2, 6);
 
-    GLuint program;
+    glViewport(0, 0, props.width, props.height);
+    glClearColor(0.2, 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    engine_gl_check();
 
     /* RENDER TO TEXTURE */
     {
-      TW_TextureStartRender(frm);
-      glClearColor(0.4, 0.4, 0, 0);
-      engine_gl_check();
-      glClear(GL_COLOR_BUFFER_BIT);
-      engine_gl_check();
 
       TW_ShaderUse(glyphs);
+      TW_TextureStartRender(frm);
 
-      TW_Matrix ortho = TW_MatrixOrthogonalProjection(0, 200, 0, 200, 0, 1);
-      TW_MatrixGLUniform("projection", ortho);
-      glActiveTexture(GL_TEXTURE0);
-
-      glGetIntegerv(GL_CURRENT_PROGRAM, &program);
-      GLuint loc = glGetUniformLocation(program, "glyph_texture");
-      glUniform1i(loc, 0);
-      /*
-          print_point(default_font, (SDL_Point){0, props.height}, L"Visible?");
-          print_point(default_font, (SDL_Point){props.width - 200,
-         props.height}, L"Visible?");
-      */
+      glClearColor(0.4, 0.4, 0, 0);
+      glClear(GL_COLOR_BUFFER_BIT);
 
       print_rect(default_font, (SDL_Rect){0, 200, 200, 200},
                  L"Hello World, what is going on in Japan (日本)? I hope "
@@ -206,16 +185,21 @@ int main(int argc, char *args[]) {
                  L"well things would not be going ok, they would be going"
                  L"rather badly, is not to say that bad is not good, but"
                  L"inheritly it is.");
-      //   print_point(default_font, (SDL_Point){0, 200}, L"Visible X?");
+
       TW_TextureEndRender(frm);
     }
+
     // END RENDER TO TEXTURE
+
+    GLuint program;
 
     glViewport(0, 0, props.width, props.height);
 
-    TW_Matrix ortho =
-        TW_MatrixOrthogonalProjection(0, props.width, 0, props.height, 0, 1);
-    TW_MatrixGLUniform("projection", ortho);
+    TW_ShaderUse(glyphs);
+
+    TW_MatrixGLUniform(
+        "projection",
+        TW_MatrixOrthogonalProjection(0, props.width, 0, props.height, 0, 1));
 
     TW_ShaderUse(glyphs);
     glGetIntegerv(GL_CURRENT_PROGRAM, &program);
@@ -224,10 +208,28 @@ int main(int argc, char *args[]) {
 
     // Prior TW_TextureDraw, we need to take a TW_Shader in use +
     // set the orthogonal projection to the current viewport +
-    TW_TextureDraw(frm, (TW_Rectangle){100, 100, 200, 200});
-    TW_TextureDraw(frm, (TW_Rectangle){0, 0, 100, 100});
+    /*   TW_TextureDraw(frm, (TW_Rectangle){100, 100, 200, 200});*/
+
+    component_update_pass(root);
+
+    glViewport(0, 0, props.width, props.height);
+
+    // TW_ShaderUse(glyphs);
+    TW_MatrixGLUniform(
+        "projection",
+        TW_MatrixOrthogonalProjection(0, props.width, 0, props.height, 0, 1));
+
+    // TW_ShaderUse(glyphs);
+    // glGetIntegerv(GL_CURRENT_PROGRAM, &program);
+    // loc = glGetUniformLocation(program, "glyph_texture");
+    // glUniform1i(loc, 0);
+
+    root->render(root);
+    TW_TextureDraw(frm, (TW_Rectangle){25, 25, 50, 50});
 
     engine_gl_check();
+
+    glViewport(0, 0, props.width, props.height);
 
     TW_Vector dir = (TW_Vector){1, 1, -5};
     TW_Matrix projection = TW_MatrixPerspectiveProjection(0.01, 1000, 70, 1);
@@ -236,7 +238,6 @@ int main(int argc, char *args[]) {
     TW_Matrix model = TW_MatrixRotation(0, props.passed * 0.001, 0);
 
     TW_ShaderUse(flat);
-
     TW_MatrixGLUniform("projection", projection);
     TW_MatrixGLUniform("view", view);
     TW_MatrixGLUniform("model", model);
@@ -254,6 +255,7 @@ int main(int argc, char *args[]) {
     engine_gl_check();
 
     SDL_GL_SwapWindow(props.window);
+
     // FPS limit.
     const int end = SDL_GetTicks();
     if (fps_limit) {

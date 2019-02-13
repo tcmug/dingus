@@ -122,6 +122,8 @@ void TW_TextureDestroy(TW_Texture *t) {
 void TW_TextureStartRender(TW_Texture *t) {
   glBindFramebuffer(GL_FRAMEBUFFER, t->buffer);
   glViewport(0, 0, t->width, t->height);
+  TW_MatrixGLUniform("projection", TW_MatrixOrthogonalProjection(
+                                       0, t->width, 0, t->height, 0, 1));
 }
 
 void TW_TextureEndRender(TW_Texture *t) {
