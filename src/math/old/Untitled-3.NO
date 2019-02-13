@@ -596,7 +596,7 @@ class m4 {
 
 		void gl_uniform(const char *name) {
 			GLint loc = glGetUniformLocation(
-				shader::active->program,
+				TW_Shader::active->program,
 				name
 			);
 			engine_gl_check();

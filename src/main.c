@@ -17,7 +17,6 @@
 #include "components/text.h"
 #include "core/component.h"
 #include "core/engine.h"
-#include "core/frame.h"
 #include "core/log.h"
 #include "core/print.h"
 
@@ -65,20 +64,21 @@ int main(int argc, char *args[]) {
 
   srand(SDL_GetTicks());
 
-  shader flat = shader_load(RESOURCE("share/dingus/shaders/flat.vert"), 0,
-                            RESOURCE("share/dingus/shaders/flat.frag"));
+  TW_Shader flat = TW_ShaderLoad(RESOURCE("share/dingus/shaders/flat.vert"), 0,
+                                 RESOURCE("share/dingus/shaders/flat.frag"));
 
-  shader glyphs = shader_load(RESOURCE("share/dingus/shaders/glyph.vert"), 0,
-                              RESOURCE("share/dingus/shaders/glyph.frag"));
+  TW_Shader glyphs =
+      TW_ShaderLoad(RESOURCE("share/dingus/shaders/glyph.vert"), 0,
+                    RESOURCE("share/dingus/shaders/glyph.frag"));
 
   default_font = font_atlas_create(RESOURCE("share/dingus/DroidSans.ttf"), 20);
 
   TW_VectorBuffer va;
 
-  TW_Texture *frm = texture_render_target(200, 200);
+  TW_Texture *frm = TW_TextureRenderTarget(200, 200);
 
   // GL_STATIC_DRAW
-  vector_buffer_init(&va, 3, GL_STREAM_DRAW);
+  TW_VectorBufferInit(&va, 3, GL_STREAM_DRAW);
 
   va.data[0] = (TW_Vector){-1, -1, 0};
   va.data[1] = (TW_Vector){0, 1, 0};
@@ -87,12 +87,12 @@ int main(int argc, char *args[]) {
   TW_VectorBuffer va2;
   TW_PointBuffer pa2;
 
-  TW_Texture *te = texture_load("lord.png");
+  TW_Texture *te = TW_TextureLoad("lord.png");
   GLuint TW_Texture = te->TW_Texture;
 
   // GL_STATIC_DRAW
-  vector_buffer_init(&va2, 6, GL_STREAM_DRAW);
-  point_buffer_init(&pa2, 6, GL_STREAM_DRAW);
+  TW_VectorBufferInit(&va2, 6, GL_STREAM_DRAW);
+  TW_PointBufferInit(&pa2, 6, GL_STREAM_DRAW);
 
   va2.data[0] = (TW_Vector){0, 0, 0};
   va2.data[1] = (TW_Vector){0, 200, 0};
@@ -171,21 +171,21 @@ int main(int argc, char *args[]) {
 
     root->render(root);
 
-    vector_buffer_update(&va, 3);
-    vector_buffer_update(&va2, 6);
-    point_buffer_update(&pa2, 6);
+    TW_VectorBufferUpdate(&va, 3);
+    TW_VectorBufferUpdate(&va2, 6);
+    TW_PointBufferUpdate(&pa2, 6);
 
     GLuint program;
 
     /* RENDER TO TEXTURE */
     {
-      texture_start_render(frm);
+      TW_TextureStartRender(frm);
       glClearColor(0.4, 0.4, 0, 0);
       engine_gl_check();
       glClear(GL_COLOR_BUFFER_BIT);
       engine_gl_check();
 
-      shader_use(glyphs);
+      TW_ShaderUse(glyphs);
 
       TW_Matrix ortho = TW_MatrixOrthogonalProjection(0, 200, 0, 200, 0, 1);
       TW_MatrixGLUniform("projection", ortho);
@@ -207,7 +207,7 @@ int main(int argc, char *args[]) {
                  L"rather badly, is not to say that bad is not good, but"
                  L"inheritly it is.");
       //   print_point(default_font, (SDL_Point){0, 200}, L"Visible X?");
-      texture_end_render(frm);
+      TW_TextureEndRender(frm);
     }
     // END RENDER TO TEXTURE
 
@@ -217,15 +217,15 @@ int main(int argc, char *args[]) {
         TW_MatrixOrthogonalProjection(0, props.width, 0, props.height, 0, 1);
     TW_MatrixGLUniform("projection", ortho);
 
-    shader_use(glyphs);
+    TW_ShaderUse(glyphs);
     glGetIntegerv(GL_CURRENT_PROGRAM, &program);
     GLuint loc = glGetUniformLocation(program, "glyph_texture");
     glUniform1i(loc, 0);
 
-    // Prior texture_draw, we need to take a shader in use +
+    // Prior TW_TextureDraw, we need to take a TW_Shader in use +
     // set the orthogonal projection to the current viewport +
-    texture_draw(frm, (TW_Rectangle){100, 100, 200, 200});
-    texture_draw(frm, (TW_Rectangle){0, 0, 100, 100});
+    TW_TextureDraw(frm, (TW_Rectangle){100, 100, 200, 200});
+    TW_TextureDraw(frm, (TW_Rectangle){0, 0, 100, 100});
 
     engine_gl_check();
 
@@ -235,7 +235,7 @@ int main(int argc, char *args[]) {
         (TW_Vector){0, 0, 5}, (TW_Vector){0, 0, 0}, (TW_Vector){0, 1, 0});
     TW_Matrix model = TW_MatrixRotation(0, props.passed * 0.001, 0);
 
-    shader_use(flat);
+    TW_ShaderUse(flat);
 
     TW_MatrixGLUniform("projection", projection);
     TW_MatrixGLUniform("view", view);
@@ -245,7 +245,7 @@ int main(int argc, char *args[]) {
     // glGetIntegerv(GL_CURRENT_PROGRAM, &program);
     // app_log("loc: %u %u", glGetAttribLocation(program, "vertex"),
     //         glGetUniformLocation(program, "view"));
-    vector_buffer_bind(&va, 0);
+    TW_VectorBufferBind(&va, 0);
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
     engine_gl_check();

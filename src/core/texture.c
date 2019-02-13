@@ -3,7 +3,7 @@
 #include "buffer.h"
 #include "log.h"
 
-TW_Texture *texture_load(const char *filename) {
+TW_Texture *TW_TextureLoad(const char *filename) {
   TW_Texture *t = (TW_Texture *)malloc(sizeof(TW_Texture));
   SDL_Surface *surface = IMG_Load(filename);
 
@@ -57,7 +57,7 @@ TW_Texture *texture_load(const char *filename) {
   return t;
 }
 
-TW_Texture *texture_render_target(int w, int h) {
+TW_Texture *TW_TextureRenderTarget(int w, int h) {
 
   TW_Texture *f = (TW_Texture *)malloc(sizeof(TW_Texture));
 
@@ -112,29 +112,31 @@ TW_Texture *texture_render_target(int w, int h) {
   return f;
 }
 
-void texture_destroy(TW_Texture *t) {
+void TW_TextureDestroy(TW_Texture *t) {
   glDeleteTextures(1, &t->TW_Texture);
   if (t->buffer)
     glDeleteFrameBuffers(1, &t->buffer);
   free(t);
 }
 
-void texture_start_render(TW_Texture *t) {
+void TW_TextureStartRender(TW_Texture *t) {
   glBindFramebuffer(GL_FRAMEBUFFER, t->buffer);
   glViewport(0, 0, t->width, t->height);
 }
 
-void texture_end_render(TW_Texture *t) { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
+void TW_TextureEndRender(TW_Texture *t) {
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
 
-void texture_draw(TW_Texture *t, TW_Rectangle r) {
+void TW_TextureDraw(TW_Texture *t, TW_Rectangle r) {
 
   // GL_STATIC_DRAW
   static TW_VectorBuffer *va = 0;
   static TW_PointBuffer *pv = 0;
 
   if (!va) {
-    va = vector_buffer_create(4, GL_STREAM_DRAW);
-    pv = point_buffer_create(4, GL_STREAM_DRAW);
+    va = TW_VectorBufferCreate(4, GL_STREAM_DRAW);
+    pv = TW_PointBufferCreate(4, GL_STREAM_DRAW);
   }
 
   va->data[0] = (TW_Vector){r.x, r.y, 0};
@@ -147,10 +149,10 @@ void texture_draw(TW_Texture *t, TW_Rectangle r) {
   pv->data[2] = (TW_Point){1, 1};
   pv->data[3] = (TW_Point){1, 0};
 
-  vector_buffer_update(va, 4);
-  point_buffer_update(pv, 4);
-  vector_buffer_bind(va, 0);
-  point_buffer_bind(pv, 1);
+  TW_VectorBufferUpdate(va, 4);
+  TW_PointBufferUpdate(pv, 4);
+  TW_VectorBufferBind(va, 0);
+  TW_PointBufferBind(pv, 1);
 
   glBindTexture(GL_TEXTURE_2D, t->TW_Texture);
 

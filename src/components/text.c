@@ -20,10 +20,10 @@ int text_update(component *_self) {
 
   if (self->resized) {
     if (self->cache) {
-      texture_destroy(self->cache);
+      TW_TextureDestroy(self->cache);
     }
     self->resized = 0;
-    self->cache = texture_render_target(self->rect.w, self->rect.h);
+    self->cache = TW_TextureRenderTarget(self->rect.w, self->rect.h);
     app_debug("Resized TW_Texture");
   }
 

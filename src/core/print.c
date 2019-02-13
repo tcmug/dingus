@@ -106,11 +106,11 @@ void _print_flush(font_atlas *font) {
   if (font->to_render == 0) {
     return;
   }
-  vector_buffer_update(&font->points, font->to_render);
-  point_buffer_update(&font->uvs, font->to_render);
+  TW_VectorBufferUpdate(&font->points, font->to_render);
+  TW_PointBufferUpdate(&font->uvs, font->to_render);
 
-  vector_buffer_bind(&font->points, 0);
-  point_buffer_bind(&font->uvs, 1);
+  TW_VectorBufferBind(&font->points, 0);
+  TW_PointBufferBind(&font->uvs, 1);
 
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, font->active_glyphset->TW_Texture);
@@ -293,8 +293,8 @@ font_atlas *font_atlas_create(const char *fontName, int size) {
 
 #ifdef USE_GL
   fa->to_render = 0;
-  vector_buffer_init(&fa->points, 6 * 10, GL_STREAM_DRAW);
-  point_buffer_init(&fa->uvs, 6 * 10, GL_STREAM_DRAW);
+  TW_VectorBufferInit(&fa->points, 6 * 10, GL_STREAM_DRAW);
+  TW_PointBufferInit(&fa->uvs, 6 * 10, GL_STREAM_DRAW);
 #endif
   return fa;
 }

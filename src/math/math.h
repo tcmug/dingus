@@ -1,5 +1,5 @@
-#ifndef DINGUS_MATH_H
-#define DINGUS_MATH_H
+#ifndef TW_MATH_H
+#define TW_MATH_H
 
 #include <math.h>
 

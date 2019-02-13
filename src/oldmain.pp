@@ -20,7 +20,7 @@
 #include "core/log.h"
 #include "core/print.h"
 
-#include "core/shader.h"
+#include "core/TW_Shader.h"
 #include "core/vertex_array.h"
 #include "math/math.h"
 #include "math/nettle.h"
@@ -242,7 +242,7 @@ int main(int argc, char *args[]) {
   int hw = props.width / 2;
   int hh = props.height / 2;
 
-  shader flat = shader_load(RESOURCE("share/dingus/shaders/flat.vert"), 0,
+  TW_Shader flat = TW_ShaderLoad(RESOURCE("share/dingus/shaders/flat.vert"), 0,
                             RESOURCE("share/dingus/shaders/flat.frag"));
 
   vertex_array va;
@@ -397,7 +397,7 @@ int main(int argc, char *args[]) {
     engine_gl_check();
 
     vertex_buffer_update(&va, 3);
-    shader_use(flat);
+    TW_ShaderUse(flat);
 
     TW_MatrixGLUniform("projection", projection);
     TW_MatrixGLUniform("view", view);

@@ -1,4 +1,4 @@
-#include "shader.hpp"
+#include "TW_Shader.hpp"
 
 
 
@@ -9,10 +9,10 @@
 #include <TW_Vector>
 
 
-shader *shader::active = 0;
+TW_Shader *TW_Shader::active = 0;
 
 
-shader::shader(const char *vertex_name, const char *geometry_name, const char *fragment_name) {
+TW_Shader::TW_Shader(const char *vertex_name, const char *geometry_name, const char *fragment_name) {
 
 	this->geometry = 0;
 	this->fragment = 0;
@@ -52,7 +52,7 @@ shader::shader(const char *vertex_name, const char *geometry_name, const char *f
 	if (success == GL_FALSE) {
 		//We failed to compile.
 
-		printf("Shader linking failed.\n");
+		printf("TW_Shader linking failed.\n");
 
 		// GLint maxLength = 0;
 		// glGetShaderiv(s, GL_INFO_LOG_LENGTH, &maxLength);
@@ -71,7 +71,7 @@ shader::shader(const char *vertex_name, const char *geometry_name, const char *f
 
 
 
-GLuint shader::load(const char *filename, int type) {
+GLuint TW_Shader::load(const char *filename, int type) {
 
 	std::ifstream in(filename);
 	std::stringstream buffer;
@@ -79,7 +79,7 @@ GLuint shader::load(const char *filename, int type) {
 	std::string contents(buffer.str());
 
 	if (contents.length() == 0) {
-		std::cout << "Shader '" << filename << "' source is empty!" << std::endl;
+		std::cout << "TW_Shader '" << filename << "' source is empty!" << std::endl;
 		return 0;
 	}
 
@@ -105,7 +105,7 @@ GLuint shader::load(const char *filename, int type) {
 	if (success == GL_FALSE) {
 		//We failed to compile.
 
-		std::cout << "Shader '" << filename << "' failed compilation." << std::endl;
+		std::cout << "TW_Shader '" << filename << "' failed compilation." << std::endl;
 
 		// GLint maxLength = 0;
 		// glGetShaderiv(s, GL_INFO_LOG_LENGTH, &maxLength);
@@ -122,24 +122,24 @@ GLuint shader::load(const char *filename, int type) {
 	}
 
 	engine_gl_check();
-	printf("Shader '%s' compiled.\n", filename);
+	printf("TW_Shader '%s' compiled.\n", filename);
 	return s;
 }
 
 
-GLuint shader::var_loc(const char *name) {
+GLuint TW_Shader::var_loc(const char *name) {
 	return glGetUniformLocation(this->program, name);
 }
 
 
-void shader::enable() {
+void TW_Shader::enable() {
 	this->active = this;
 	glUseProgram(this->program);
 	engine_gl_check();
 }
 
 
-void shader::disable() {
+void TW_Shader::disable() {
 	if (this->active == this) {
 		this->active = 0;
 	}

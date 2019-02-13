@@ -12,14 +12,14 @@ typedef struct shader_t {
   GLuint geometry;
   GLuint vertex;
   GLuint fragment;
-} shader;
+} TW_Shader;
 
 GLuint _shader_load(const char *filename, int type);
 
-shader shader_load(const char *vertex_name, const char *geometry_name,
-                   const char *fragment_name) {
+TW_Shader TW_ShaderLoad(const char *vertex_name, const char *geometry_name,
+                        const char *fragment_name) {
 
-  shader s = {0};
+  TW_Shader s = {0};
   s.program = glCreateProgram();
 
   if (vertex_name) {
@@ -54,7 +54,7 @@ shader shader_load(const char *vertex_name, const char *geometry_name,
   if (success == GL_FALSE) {
     // We failed to compile.
 
-    app_warning("Shader linking failed.");
+    app_warning("TW_Shader linking failed.");
 
     // GLint maxLength = 0;
     // glGetShaderiv(s, GL_INFO_LOG_LENGTH, &maxLength);
@@ -76,7 +76,7 @@ GLuint _shader_load(const char *filename, int type) {
 
   FILE *f = fopen(filename, "rb");
   if (!f) {
-    app_warning("Shader file \"%s\" not found.", filename);
+    app_warning("TW_Shader file \"%s\" not found.", filename);
     return 0;
   }
   fseek(f, 0, SEEK_END);
@@ -84,14 +84,14 @@ GLuint _shader_load(const char *filename, int type) {
   fseek(f, 0, SEEK_SET);
 
   if (size == 0) {
-    app_warning("Shader file \"%s\" is empty.", filename);
+    app_warning("TW_Shader file \"%s\" is empty.", filename);
     fclose(f);
     return 0;
   }
 
   char *script = (char *)malloc(size + 1);
   if (!script) {
-    app_warning("Out of memory while reading shader file \"%s\".", filename);
+    app_warning("Out of memory while reading TW_Shader file \"%s\".", filename);
     return 0;
   }
 
@@ -115,7 +115,7 @@ GLuint _shader_load(const char *filename, int type) {
   if (success == GL_FALSE) {
     // We failed to compile.
 
-    app_warning("Shader file \"%s\" failed compilation.", filename);
+    app_warning("TW_Shader file \"%s\" failed compilation.", filename);
 
     // GLint maxLength = 0;
     // glGetShaderiv(s, GL_INFO_LOG_LENGTH, &maxLength);
@@ -132,11 +132,11 @@ GLuint _shader_load(const char *filename, int type) {
   }
 
   engine_gl_check();
-  app_log("Shader \"%s\" compiled.", filename);
+  app_log("TW_Shader \"%s\" compiled.", filename);
   return s;
 }
 
-void shader_use(shader s) {
+void TW_ShaderUse(TW_Shader s) {
   glUseProgram(s.program);
   engine_gl_check();
 }

@@ -24,16 +24,16 @@ typedef struct point_buffer_t {
   TW_Point *data;
 } TW_PointBuffer;
 
-void point_buffer_init(TW_PointBuffer *self, int size, GLenum u);
-TW_PointBuffer *point_buffer_create(int size, GLenum u);
-void point_buffer_destroy(TW_PointBuffer *self);
-void point_buffer_bind(TW_PointBuffer *self, int index);
-void point_buffer_update(TW_PointBuffer *self, int size);
+void TW_PointBufferInit(TW_PointBuffer *self, int size, GLenum u);
+TW_PointBuffer *TW_PointBufferCreate(int size, GLenum u);
+void TW_PointBufferDestroy(TW_PointBuffer *self);
+void TW_PointBufferBind(TW_PointBuffer *self, int index);
+void TW_PointBufferUpdate(TW_PointBuffer *self, int size);
 
-void vector_buffer_init(TW_VectorBuffer *self, int size, GLenum u);
-TW_VectorBuffer *vector_buffer_create(int size, GLenum u);
-void vector_buffer_destroy(TW_VectorBuffer *self);
-void vector_buffer_bind(TW_VectorBuffer *self, int index);
-void vector_buffer_update(TW_VectorBuffer *self, int size);
+void TW_VectorBufferInit(TW_VectorBuffer *self, int size, GLenum u);
+TW_VectorBuffer *TW_VectorBufferCreate(int size, GLenum u);
+void TW_VectorBufferDestroy(TW_VectorBuffer *self);
+void TW_VectorBufferBind(TW_VectorBuffer *self, int index);
+void TW_VectorBufferUpdate(TW_VectorBuffer *self, int size);
 
 #endif
