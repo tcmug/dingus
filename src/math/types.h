@@ -3,7 +3,7 @@
 
 #define real float
 
-typedef struct s_point {
+typedef struct point_t {
   union {
     struct {
       real x, y;
@@ -12,7 +12,17 @@ typedef struct s_point {
   };
 } point;
 
-typedef struct s_vector {
+typedef struct rectangle_t {
+  union {
+    struct {
+      real x, y, w, h;
+    };
+    real value[4];
+  };
+
+} rectangle;
+
+typedef struct vector_t {
   union {
     struct {
       real x, y, z;
@@ -21,7 +31,7 @@ typedef struct s_vector {
   };
 } vector;
 
-typedef struct s_matrix {
+typedef struct matrix_t {
   union {
     struct {
       real a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p;
@@ -30,21 +40,21 @@ typedef struct s_matrix {
   };
 } matrix;
 
-typedef struct s_sphere {
+typedef struct sphere_t {
   vector origin;
   real radius;
 } sphere;
 
-typedef struct s_plane {
+typedef struct plane_t {
   vector origin, normal;
   real normDistance;
 } plane;
 
-typedef struct s_triangle {
+typedef struct triangle_t {
   vector a, b, c;
 } triangle;
 
-typedef struct s_collision {
+typedef struct collision_t {
   sphere object;
   vector velocity;
 

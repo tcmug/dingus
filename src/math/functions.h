@@ -22,6 +22,8 @@ real vector_dot(vector a, vector b);
 vector vector_cross(vector a, vector b);
 vector vector_reflect(vector v, vector normal);
 
+int rectangle_includes(rectangle r, point p);
+
 matrix matrix_identity();
 matrix matrix_transposed(matrix m);
 vector matrix_mul_vector(matrix m, vector v);

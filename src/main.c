@@ -29,6 +29,16 @@
 
 #include "core/buffer.h"
 
+void screen_render(component *_self) {
+  window *props = (window *)_self->window;
+  component_render_children(_self);
+}
+
+int immediate(component *_self) {
+  window *props = (window *)_self->window;
+  return 1;
+}
+
 // elem_type
 int main(int argc, char *args[]) {
 
@@ -65,7 +75,7 @@ int main(int argc, char *args[]) {
 
   vector_buffer va;
 
-  frame *frm = frame_create(200, 200);
+  texture *frm = texture_render_target(200, 200);
 
   // GL_STATIC_DRAW
   vector_buffer_init(&va, 3, GL_STREAM_DRAW);
@@ -77,17 +87,18 @@ int main(int argc, char *args[]) {
   vector_buffer va2;
   point_buffer pa2;
 
-  GLuint texture = load_texture("lord.png");
+  texture *te = texture_load("lord.png");
+  GLuint texture = te->texture;
 
   // GL_STATIC_DRAW
   vector_buffer_init(&va2, 6, GL_STREAM_DRAW);
   point_buffer_init(&pa2, 6, GL_STREAM_DRAW);
 
   va2.data[0] = (vector){0, 0, 0};
-  va2.data[1] = (vector){0, 500, 0};
-  va2.data[2] = (vector){500, 500, 0};
-  va2.data[3] = (vector){500, 500, 0};
-  va2.data[4] = (vector){500, 0, 0};
+  va2.data[1] = (vector){0, 200, 0};
+  va2.data[2] = (vector){200, 200, 0};
+  va2.data[3] = (vector){200, 200, 0};
+  va2.data[4] = (vector){200, 0, 0};
   va2.data[5] = (vector){0, 0, 0};
 
   pa2.data[0] = (point){0, 0};
@@ -97,9 +108,16 @@ int main(int argc, char *args[]) {
   pa2.data[4] = (point){1, 0};
   pa2.data[5] = (point){0, 0};
 
-  GLuint vao;
-  glGenVertexArrays(1, &vao);
-  glBindVertexArray(vao);
+#define WINDOW_DEFAULT (&props)
+
+  component *root = COMPONENT(
+      component, .update = &immediate, .render = &screen_render,
+      .rect = {0, 0, props.height, props.width},
+      CHILDREN(
+          CENTER(.rect = {0, 0, props.width, props.height},
+                 CHILDREN(TEXT(.text = L"Testing this text thing",
+                               .rect = {0, 0, 400, 40}),
+                          TEXT(.text = L"META", .rect = {0, 0, 100, 30})))));
 
   while (running) {
     SDL_Event ev;
@@ -151,6 +169,8 @@ int main(int argc, char *args[]) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     engine_gl_check();
 
+    root->render(root);
+
     vector_buffer_update(&va, 3);
     vector_buffer_update(&va2, 6);
     point_buffer_update(&pa2, 6);
@@ -159,7 +179,7 @@ int main(int argc, char *args[]) {
 
     /* RENDER TO TEXTURE */
     {
-      frame_bind(frm);
+      texture_start_render(frm);
       glClearColor(0.4, 0.4, 0, 0);
       engine_gl_check();
       glClear(GL_COLOR_BUFFER_BIT);
@@ -180,37 +200,33 @@ int main(int argc, char *args[]) {
          props.height}, L"Visible?");
       */
 
-      // print_rect(default_font, (SDL_Rect){0, 0, 200, 200},
-      //            L"Hello World, what is going on in Japan (日本)? I hope
-      //            things " L"are going well, because if they were not going
-      //            well things " L"would not be going ok, they would be going
-      //            rather badly, is " L"not to say that bad is not good, but
-      //            inheritly it is.");
-      print_point(default_font, (SDL_Point){0, 200}, L"Visible X?");
-      frame_unbind(frm);
+      print_rect(default_font, (SDL_Rect){0, 200, 200, 200},
+                 L"Hello World, what is going on in Japan (日本)? I hope "
+                 L"things are going well, because if they were not going"
+                 L"well things would not be going ok, they would be going"
+                 L"rather badly, is not to say that bad is not good, but"
+                 L"inheritly it is.");
+      //   print_point(default_font, (SDL_Point){0, 200}, L"Visible X?");
+      texture_end_render(frm);
     }
     // END RENDER TO TEXTURE
 
     glViewport(0, 0, props.width, props.height);
 
-    shader_use(glyphs);
-    glGetIntegerv(GL_CURRENT_PROGRAM, &program);
-
     matrix ortho =
         matrix_orthogonal_projection(0, props.width, 0, props.height, 0, 1);
     matrix_gl_uniform("projection", ortho);
 
-    vector_buffer_bind(&va2, 0);
-    point_buffer_bind(&pa2, 1);
-
+    shader_use(glyphs);
+    glGetIntegerv(GL_CURRENT_PROGRAM, &program);
     GLuint loc = glGetUniformLocation(program, "glyph_texture");
     glUniform1i(loc, 0);
 
-    glBindTexture(GL_TEXTURE_2D, frm->texture);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    engine_gl_check();
+    // Prior texture_draw, we need to take a shader in use +
+    // set the orthogonal projection to the current viewport +
+    texture_draw(frm, (rectangle){100, 100, 200, 200});
+    texture_draw(frm, (rectangle){0, 0, 100, 100});
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
     engine_gl_check();
 
     vector dir = (vector){1, 1, -5};
@@ -248,8 +264,5 @@ int main(int argc, char *args[]) {
     }
   }
 
-  SDL_DestroyWindow(props.window);
-  SDL_Quit();
-
-  return 0;
+  return engine_shutdown(props);
 }

@@ -9,7 +9,7 @@
 
 extern font_atlas *default_font;
 
-typedef struct s_text {
+typedef struct text_t {
 #include "../core/component_props.inc"
   SDL_Color background;
   SDL_Color color;

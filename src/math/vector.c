@@ -1,5 +1,4 @@
-#ifndef VECTOR_H
-#define VECTOR_H
+
 #include "math.h"
 
 vector vector_add_vector(vector a, vector b) {
@@ -65,5 +64,3 @@ vector vector_reflect(vector v, vector normal) {
   return vector_add_vector(vector_mul_real(normal, -2 * vector_dot(v, normal)),
                            v);
 }
-
-#endif

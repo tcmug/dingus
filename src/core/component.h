@@ -2,23 +2,30 @@
 #define COMPONENT_H
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL_opengl.h>
+#include <SDL2/SDL_ttf.h>
 
-struct s_component;
+#include "../math/math.h"
 
-typedef void (*render_callback)(struct s_component *self);
-typedef void (*click_callback)(struct s_component *self, SDL_Point point);
-typedef int (*update_callback)(struct s_component *self);
+struct component_t;
 
-typedef struct s_component_state {
+typedef void (*render_callback)(struct component_t *self);
+typedef void (*click_callback)(struct component_t *self, point coords);
+typedef int (*update_callback)(struct component_t *self);
+
+typedef struct component_t_state {
 } component_state;
 
-typedef struct s_component {
+struct texture_t;
+
+typedef struct component_t {
 #include "component_props.inc"
 } component;
 
-typedef struct s_window {
+typedef struct window_t {
   SDL_Window *window;
-  SDL_Renderer *renderer;
   int height;
   int width;
   int passed;
@@ -32,13 +39,13 @@ component **component_list_create(int count, ...);
 void component_destroy(component *self);
 void component_render_children(component *self);
 void component_update_pass(component *self);
-component *component_at_point(component *self, SDL_Point point);
+component *component_at_point(component *self, point coords);
 
 void component_move(component *self, int x, int y);
 void component_resize(component *self, int w, int h);
 
 #define COMPONENT_DEFAULTS                                                     \
-  .window = WINDOW_DEFAULT, .children = 0, .update = 0, .texture = 0,          \
+  .window = WINDOW_DEFAULT, .children = 0, .update = 0, .cache = 0,            \
   .resized = 1, .rect = {0, 0, 0, 0}
 
 #define _NUMARGS(type, ...) (sizeof((type[]){__VA_ARGS__}) / sizeof(type))

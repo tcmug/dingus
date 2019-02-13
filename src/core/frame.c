@@ -59,8 +59,8 @@ frame *frame_create(int w, int h) {
 }
 
 void frame_destroy(frame *f) {
-  glDeleteFramebuffers(f->buffer);
-  glDeleteTextures(1, f->texture);
+  glDeleteFrameBuffers(1, &f->buffer);
+  glDeleteTextures(1, &f->texture);
 }
 
 void frame_bind(frame *f) {

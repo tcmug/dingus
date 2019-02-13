@@ -1,7 +1,7 @@
 
-#include "../core/log.h"
-
 #include "text.h"
+#include "../core/log.h"
+#include "../core/texture.h"
 
 font_atlas *default_font;
 
@@ -10,7 +10,7 @@ int text_update(component *_self) {
   window *props = (window *)_self->window;
 
   // Mark resized if text change causes size change.
-  SDL_Rect new_rect = _self->rect;
+  rectangle new_rect = _self->rect;
   print_size(default_font, self->text, &new_rect);
 
   if (new_rect.w != _self->rect.w || new_rect.h != _self->rect.h)
@@ -19,14 +19,11 @@ int text_update(component *_self) {
   self->rect = new_rect;
 
   if (self->resized) {
-    if (self->texture) {
-      SDL_DestroyTexture(self->texture);
+    if (self->cache) {
+      texture_destroy(self->cache);
     }
     self->resized = 0;
-    self->texture =
-        SDL_CreateTexture(props->renderer, SDL_PIXELFORMAT_RGBA8888,
-                          SDL_TEXTUREACCESS_TARGET, self->rect.w, self->rect.h);
-    SDL_SetTextureBlendMode(self->texture, SDL_BLENDMODE_BLEND);
+    self->cache = texture_render_target(self->rect.w, self->rect.h);
     app_debug("Resized texture");
   }
 
@@ -49,7 +46,7 @@ int text_update(component *_self) {
 void texture_render(component *_self) {
   window *props = (window *)_self->window;
   text *self = (text *)_self;
-  if (self->texture) {
-    SDL_RenderCopy(props->renderer, self->texture, 0, &self->rect);
+  if (self->cache) {
+    // SDL_RenderCopy(props->renderer, self->texture, 0, &self->rect);
   }
 }

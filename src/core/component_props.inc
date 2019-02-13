@@ -2,12 +2,12 @@
 // Component header properties
 /////
 
-struct s_component **children; // Component children.
-struct s_window *window;       // Window specs.
+struct component_t **children; // Component children.
+struct window_t *window;       // Window specs.
 
 int resized;
-SDL_Rect rect;        // Target rectangle.
-SDL_Texture *texture; // SDL Texture
+rectangle rect;          // Target rectangle.
+struct texture_t *cache; // SDL Texture
 
 update_callback update; // Update callback.
 render_callback render; // Render callback.

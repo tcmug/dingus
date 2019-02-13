@@ -3,7 +3,7 @@
 
 #include "engine.h"
 
-typedef struct s_frame {
+typedef struct frame_t {
   GLuint buffer;
   GLuint texture;
   int width;

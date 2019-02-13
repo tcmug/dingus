@@ -33,6 +33,7 @@ target_sources(dingus
 		src/core/print.c
 		src/core/component.c
 		src/core/frame.c
+		src/core/texture.c
 		src/math/vector.c
 		src/math/matrix.c
 		src/math/sphere.c

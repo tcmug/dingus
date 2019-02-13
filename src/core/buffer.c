@@ -8,6 +8,12 @@ void vector_buffer_init(vector_buffer *self, int size, GLenum u) {
   self->data = (vector *)malloc(sizeof(vector) * size);
 }
 
+vector_buffer *vector_buffer_create(int size, GLenum u) {
+  vector_buffer *v = (vector_buffer *)malloc(sizeof(vector_buffer));
+  vector_buffer_init(v, size, u);
+  return v;
+}
+
 void vector_buffer_destroy(vector_buffer *self) {
   glDeleteBuffers(1, &self->id);
   free(self->data);
@@ -44,6 +50,12 @@ void point_buffer_init(point_buffer *self, int size, GLenum u) {
   self->size = size;
   self->usage = u;
   self->data = (point *)malloc(sizeof(point) * size);
+}
+
+point_buffer *point_buffer_create(int size, GLenum u) {
+  point_buffer *v = (point_buffer *)malloc(sizeof(point_buffer));
+  point_buffer_init(v, size, u);
+  return v;
 }
 
 void point_buffer_destroy(point_buffer *self) {

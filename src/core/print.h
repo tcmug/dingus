@@ -11,10 +11,10 @@
 #include "buffer.h"
 #endif
 
-typedef struct s_font_atlas {
+typedef struct font_t_atlas {
   TTF_Font *font;
-  struct s_font_atlas_glyph_set *glyphset[256];
-  struct s_font_atlas_glyph_set *active_glyphset;
+  struct font_t_atlas_glyph_set *glyphset[256];
+  struct font_t_atlas_glyph_set *active_glyphset;
 #ifdef USE_GL
   int to_render;
   vector_buffer points;
@@ -33,6 +33,6 @@ void print_rect(font_atlas *font, SDL_Rect rect, const wchar_t *text);
 void print_point(font_atlas *font, SDL_Point point, const wchar_t *text);
 
 // Get printed text size on renderer using font.
-void print_size(font_atlas *font, const wchar_t *text, SDL_Rect *target);
+void print_size(font_atlas *font, const wchar_t *text, rectangle *target);
 
 #endif

@@ -3,7 +3,7 @@
 
 #include "../core/component.h"
 
-typedef struct s_center {
+typedef struct center_t {
 #include "../core/component_props.inc"
 } center;
 

@@ -7,7 +7,7 @@
 #define TEXTURE_WIDTH (512)
 #define TEXTURE_HEIGHT (512)
 
-typedef struct s_font_atlas_glyph_set {
+typedef struct font_t_atlas_glyph_set {
   Uint32 start;
 #ifdef USE_GL
   GLuint texture;
@@ -206,13 +206,14 @@ void print_rect(font_atlas *font, SDL_Rect rect, const wchar_t *text) {
     target.w = glyph->w;
     target.h = glyph->h;
 
-    _print_push_glyph(font, *glyph, target);
-
-    target.x += glyph->w;
-    if (target.x > rect.x + rect.w) {
+    if (target.x + glyph->w > rect.x + rect.w) {
       target.y -= glyph->h;
       target.x = rect.x;
     }
+
+    _print_push_glyph(font, *glyph, target);
+
+    target.x += glyph->w;
   }
 
 #ifdef USE_GL
@@ -257,7 +258,7 @@ void print_point(font_atlas *font, SDL_Point point, const wchar_t *text) {
 #endif
 }
 
-void print_size(font_atlas *font, const wchar_t *text, SDL_Rect *target) {
+void print_size(font_atlas *font, const wchar_t *text, rectangle *target) {
   target->w = 0;
   target->h = 0;
 

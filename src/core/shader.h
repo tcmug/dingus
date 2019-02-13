@@ -7,7 +7,7 @@
 #include "engine.h"
 #include "log.h"
 
-typedef struct s_shader {
+typedef struct shader_t {
   GLuint program;
   GLuint geometry;
   GLuint vertex;

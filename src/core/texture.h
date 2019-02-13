@@ -3,56 +3,18 @@
 
 #include "engine.h"
 
-GLuint load_texture(const char *filename) {
-  SDL_Surface *surface;
-  GLuint texture = 0;
+typedef struct texture_t {
+  GLuint buffer;
+  GLuint texture;
+  int width;
+  int height;
+} texture;
 
-  surface = IMG_Load(filename);
+texture *texture_render_target(int w, int h);
+texture *texture_load(const char *filename);
+void texture_destroy(texture *);
+void texture_start_render(texture *t);
+void texture_end_render(texture *t);
 
-  if (surface) {
-
-    int Mode = GL_RGBA;
-    int Colors = surface->format->BytesPerPixel;
-
-    if (Colors == 4) {
-      if (surface->format->Rmask == 0x000000ff)
-        Mode = GL_RGBA;
-      else
-        Mode = GL_BGRA;
-    } else if (Colors == 3) {
-      if (surface->format->Rmask == 0x000000ff)
-        Mode = GL_RGB;
-      else
-        Mode = GL_BGR;
-    } else {
-      Mode = GL_COLOR_INDEX;
-    }
-
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    float pixels[] = {1.0f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f,
-                      1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.5f};
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_FLOAT,
-    // pixels);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface->w, surface->h, 0, Mode,
-                 GL_UNSIGNED_BYTE, surface->pixels);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    engine_gl_check();
-
-    SDL_FreeSurface(surface);
-    printf("got %s\n", filename);
-  }
-  return texture;
-}
-
+void texture_draw(texture *t, rectangle r);
 #endif

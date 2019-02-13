@@ -4,6 +4,7 @@
 
 PFNGLGENERATEMIPMAPPROC glGenerateMipmap;
 PFNGLGENFRAMEBUFFERSPROC glGenFramebuffers;
+PFNGLDELETEFRAMEBUFFERSPROC glDeleteFrameBuffers;
 PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation;
 PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
 PFNGLFRAMEBUFFERTEXTUREPROC glFramebufferTexture;
@@ -16,6 +17,7 @@ PFNGLFRAMEBUFFERRENDERBUFFERPROC glFramebufferRenderbuffer;
 PFNGLBLITFRAMEBUFFERPROC glBlitFramebuffer;
 PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
 PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
+PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays;
 PFNGLUNIFORMMATRIX4FVPROC glUniformMatrix4fv;
 PFNGLBINDBUFFERPROC glBindBuffer;
 PFNGLBINDATTRIBLOCATIONPROC glBindAttribLocation;
@@ -39,6 +41,8 @@ PFNGLDELETEBUFFERSPROC glDeleteBuffers;
 PFNGLBUFFERDATAPROC glBufferData;
 PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
 PFNGLVERTEXATTRIBPOINTERPROC glVertexAttribPointer;
+
+GLuint global_vao = 0;
 
 #define GL_GET(var, type, name)                                                \
   var = (type)(SDL_GL_GetProcAddress(name));                                   \
@@ -96,6 +100,9 @@ window engine_init() {
 
   GL_GET(glGenerateMipmap, PFNGLGENERATEMIPMAPPROC, "glGenerateMipmap");
   GL_GET(glGenFramebuffers, PFNGLGENFRAMEBUFFERSPROC, "glGenFramebuffers");
+  GL_GET(glDeleteFrameBuffers, PFNGLDELETEFRAMEBUFFERSPROC,
+         "glDeleteFrameBuffers");
+
   GL_GET(glGetUniformLocation, PFNGLGETUNIFORMLOCATIONPROC,
          "glGetUniformLocation");
   GL_GET(glBindFramebuffer, PFNGLBINDFRAMEBUFFERPROC, "glBindFramebuffer");
@@ -114,6 +121,8 @@ window engine_init() {
   GL_GET(glBlitFramebuffer, PFNGLBLITFRAMEBUFFERPROC, "glBlitFramebuffer");
   GL_GET(glBindVertexArray, PFNGLBINDVERTEXARRAYPROC, "glBindVertexArray");
   GL_GET(glGenVertexArrays, PFNGLGENVERTEXARRAYSPROC, "glGenVertexArrays");
+  GL_GET(glDeleteVertexArrays, PFNGLDELETEVERTEXARRAYSPROC,
+         "glDeleteVertexArrays");
   GL_GET(glUniformMatrix4fv, PFNGLUNIFORMMATRIX4FVPROC, "glUniformMatrix4fv");
   GL_GET(glBindBuffer, PFNGLBINDBUFFERPROC, "glBindBuffer");
   GL_GET(glBindAttribLocation, PFNGLBINDATTRIBLOCATIONPROC,
@@ -157,11 +166,22 @@ window engine_init() {
 
   SDL_GL_SetSwapInterval(0);
 
+  // Stand in VAO, VBO requires this, so we provide one.
+  glGenVertexArrays(1, &global_vao);
+  glBindVertexArray(global_vao);
+
   engine_gl_check();
 
   app_log("Window created: %i %i", props.width, props.height);
 
   return props;
+}
+
+int engine_shutdown(window props) {
+  glDeleteVertexArrays(1, &global_vao);
+  SDL_DestroyWindow(props.window);
+  SDL_Quit();
+  return 0;
 }
 
 // #include <GL/glu.h>

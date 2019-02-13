@@ -3,7 +3,7 @@
 
 #include "../core/component.h"
 
-typedef struct s_right {
+typedef struct right_t {
 #include "../core/component_props.inc"
 } right;
 
