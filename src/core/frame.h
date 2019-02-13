@@ -5,7 +5,7 @@
 
 typedef struct frame_t {
   GLuint buffer;
-  GLuint texture;
+  GLuint TW_Texture;
   int width;
   int height;
 } frame;

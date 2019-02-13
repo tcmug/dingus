@@ -10,7 +10,7 @@ typedef struct point_t {
     };
     real value[2];
   };
-} point;
+} TW_Point;
 
 typedef struct rectangle_t {
   union {
@@ -20,7 +20,7 @@ typedef struct rectangle_t {
     real value[4];
   };
 
-} rectangle;
+} TW_Rectangle;
 
 typedef struct vector_t {
   union {
@@ -29,7 +29,7 @@ typedef struct vector_t {
     };
     real value[3];
   };
-} vector;
+} TW_Vector;
 
 typedef struct matrix_t {
   union {
@@ -38,29 +38,29 @@ typedef struct matrix_t {
     };
     real value[16];
   };
-} matrix;
+} TW_Matrix;
 
 typedef struct sphere_t {
-  vector origin;
+  TW_Vector origin;
   real radius;
-} sphere;
+} TW_Sphere;
 
 typedef struct plane_t {
-  vector origin, normal;
+  TW_Vector origin, normal;
   real normDistance;
-} plane;
+} TW_Plane;
 
 typedef struct triangle_t {
-  vector a, b, c;
-} triangle;
+  TW_Vector a, b, c;
+} TW_Triangle;
 
 typedef struct collision_t {
-  sphere object;
-  vector velocity;
+  TW_Sphere object;
+  TW_Vector velocity;
 
   int collided;
   real distance;
-  vector point;
-} collision;
+  TW_Vector TW_Point;
+} TW_Collision;
 
 #endif

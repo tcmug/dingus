@@ -11,9 +11,9 @@ typedef struct vector_buffer_t {
   GLenum usage;
 
   int size;
-  vector *data;
+  TW_Vector *data;
 
-} vector_buffer;
+} TW_VectorBuffer;
 
 typedef struct point_buffer_t {
 
@@ -21,19 +21,19 @@ typedef struct point_buffer_t {
   GLenum usage;
 
   int size;
-  point *data;
-} point_buffer;
+  TW_Point *data;
+} TW_PointBuffer;
 
-void point_buffer_init(point_buffer *self, int size, GLenum u);
-point_buffer *point_buffer_create(int size, GLenum u);
-void point_buffer_destroy(point_buffer *self);
-void point_buffer_bind(point_buffer *self, int index);
-void point_buffer_update(point_buffer *self, int size);
+void point_buffer_init(TW_PointBuffer *self, int size, GLenum u);
+TW_PointBuffer *point_buffer_create(int size, GLenum u);
+void point_buffer_destroy(TW_PointBuffer *self);
+void point_buffer_bind(TW_PointBuffer *self, int index);
+void point_buffer_update(TW_PointBuffer *self, int size);
 
-void vector_buffer_init(vector_buffer *self, int size, GLenum u);
-vector_buffer *vector_buffer_create(int size, GLenum u);
-void vector_buffer_destroy(vector_buffer *self);
-void vector_buffer_bind(vector_buffer *self, int index);
-void vector_buffer_update(vector_buffer *self, int size);
+void vector_buffer_init(TW_VectorBuffer *self, int size, GLenum u);
+TW_VectorBuffer *vector_buffer_create(int size, GLenum u);
+void vector_buffer_destroy(TW_VectorBuffer *self);
+void vector_buffer_bind(TW_VectorBuffer *self, int index);
+void vector_buffer_update(TW_VectorBuffer *self, int size);
 
 #endif

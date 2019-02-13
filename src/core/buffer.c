@@ -1,26 +1,26 @@
 #include "buffer.h"
 
-void vector_buffer_init(vector_buffer *self, int size, GLenum u) {
+void vector_buffer_init(TW_VectorBuffer *self, int size, GLenum u) {
   glGenBuffers(1, &self->id);
   engine_gl_check();
   self->size = size;
   self->usage = u;
-  self->data = (vector *)malloc(sizeof(vector) * size);
+  self->data = (TW_Vector *)malloc(sizeof(TW_Vector) * size);
 }
 
-vector_buffer *vector_buffer_create(int size, GLenum u) {
-  vector_buffer *v = (vector_buffer *)malloc(sizeof(vector_buffer));
+TW_VectorBuffer *vector_buffer_create(int size, GLenum u) {
+  TW_VectorBuffer *v = (TW_VectorBuffer *)malloc(sizeof(TW_VectorBuffer));
   vector_buffer_init(v, size, u);
   return v;
 }
 
-void vector_buffer_destroy(vector_buffer *self) {
+void vector_buffer_destroy(TW_VectorBuffer *self) {
   glDeleteBuffers(1, &self->id);
   free(self->data);
   engine_gl_check();
 }
 
-void vector_buffer_bind(vector_buffer *self, int index) {
+void vector_buffer_bind(TW_VectorBuffer *self, int index) {
 
   glBindBuffer(GL_ARRAY_BUFFER, self->id);
   engine_gl_check();
@@ -32,39 +32,39 @@ void vector_buffer_bind(vector_buffer *self, int index) {
   // glBindBuffer(GL_ARRAY_BUFFER, VertexVBOID);
   // glEnableClientState(GL_vector_buffer);
   // glVertexPointer(3, GL_FLOAT, sizeof(MyVertex), BUFFER_OFFSET(0));    // The
-  // starting point of the VBO, for the vertices
+  // starting TW_Point of the VBO, for the vertices
 }
 
-void vector_buffer_update(vector_buffer *self, int size) {
+void vector_buffer_update(TW_VectorBuffer *self, int size) {
   glBindBuffer(GL_ARRAY_BUFFER, self->id);
   glBufferData(GL_ARRAY_BUFFER,
-               sizeof(vector) * (size == -1 ? self->size : size),
+               sizeof(TW_Vector) * (size == -1 ? self->size : size),
                &self->data[0], self->usage);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   engine_gl_check();
 }
 
-void point_buffer_init(point_buffer *self, int size, GLenum u) {
+void point_buffer_init(TW_PointBuffer *self, int size, GLenum u) {
   glGenBuffers(1, &self->id);
   engine_gl_check();
   self->size = size;
   self->usage = u;
-  self->data = (point *)malloc(sizeof(point) * size);
+  self->data = (TW_Point *)malloc(sizeof(TW_Point) * size);
 }
 
-point_buffer *point_buffer_create(int size, GLenum u) {
-  point_buffer *v = (point_buffer *)malloc(sizeof(point_buffer));
+TW_PointBuffer *point_buffer_create(int size, GLenum u) {
+  TW_PointBuffer *v = (TW_PointBuffer *)malloc(sizeof(TW_PointBuffer));
   point_buffer_init(v, size, u);
   return v;
 }
 
-void point_buffer_destroy(point_buffer *self) {
+void point_buffer_destroy(TW_PointBuffer *self) {
   glDeleteBuffers(1, &self->id);
   free(self->data);
   engine_gl_check();
 }
 
-void point_buffer_bind(point_buffer *self, int index) {
+void point_buffer_bind(TW_PointBuffer *self, int index) {
 
   glBindBuffer(GL_ARRAY_BUFFER, self->id);
   engine_gl_check();
@@ -76,14 +76,14 @@ void point_buffer_bind(point_buffer *self, int index) {
   // glBindBuffer(GL_ARRAY_BUFFER, VertexVBOID);
   // glEnableClientState(GL_point_buffer);
   // glVertexPointer(3, GL_FLOAT, sizeof(MyVertex), BUFFER_OFFSET(0));    // The
-  // starting point of the VBO, for the vertices
+  // starting TW_Point of the VBO, for the vertices
 }
 
-void point_buffer_update(point_buffer *self, int size) {
+void point_buffer_update(TW_PointBuffer *self, int size) {
   glBindBuffer(GL_ARRAY_BUFFER, self->id);
   glBufferData(GL_ARRAY_BUFFER,
-               sizeof(point) * (size == -1 ? self->size : size), &self->data[0],
-               self->usage);
+               sizeof(TW_Point) * (size == -1 ? self->size : size),
+               &self->data[0], self->usage);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   engine_gl_check();
 }

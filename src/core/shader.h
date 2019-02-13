@@ -124,7 +124,7 @@ GLuint _shader_load(const char *filename, int type) {
     char msg[len];
 
     // The maxLength includes the NULL character
-    // std::vector<GLchar> errorLog(maxLength);
+    // std::TW_Vector<GLchar> errorLog(maxLength);
     glGetShaderInfoLog(s, len, 0, msg);
     app_warning(msg);
     glDeleteShader(s);

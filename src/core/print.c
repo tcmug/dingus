@@ -10,9 +10,9 @@
 typedef struct font_t_atlas_glyph_set {
   Uint32 start;
 #ifdef USE_GL
-  GLuint texture;
+  GLuint TW_Texture;
 #else
-  SDL_Texture *texture;
+  SDL_Texture *TW_Texture;
 #endif
   SDL_Rect glyphs[256];
 } font_atlas_glyph_set;
@@ -84,8 +84,8 @@ font_atlas_glyph_set *font_atlas_glyph_set_create(font_atlas *atlas, int set) {
 
 #ifdef USE_GL
   SDL_LockSurface(glyphs);
-  glGenTextures(1, &fs->texture);
-  glBindTexture(GL_TEXTURE_2D, fs->texture);
+  glGenTextures(1, &fs->TW_Texture);
+  glBindTexture(GL_TEXTURE_2D, fs->TW_Texture);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, TEXTURE_WIDTH, TEXTURE_HEIGHT, 0,
@@ -94,7 +94,7 @@ font_atlas_glyph_set *font_atlas_glyph_set_create(font_atlas *atlas, int set) {
   SDL_UnlockSurface(glyphs);
 
 #else
-  fs->texture = SDL_CreateTextureFromSurface(renderer, glyphs);
+  fs->TW_Texture = SDL_CreateTextureFromSurface(renderer, glyphs);
 #endif
 
   SDL_FreeSurface(glyphs);
@@ -113,7 +113,7 @@ void _print_flush(font_atlas *font) {
   point_buffer_bind(&font->uvs, 1);
 
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, font->active_glyphset->texture);
+  glBindTexture(GL_TEXTURE_2D, font->active_glyphset->TW_Texture);
 
   glDrawArrays(GL_TRIANGLES, 0, font->to_render);
   font->to_render = 0;
@@ -175,7 +175,7 @@ void _print_push_glyph(font_atlas *font, SDL_Rect glyph, SDL_Rect target) {
   }
 
 #else
-  SDL_RenderCopy(print_active_renderer, s->texture, glyph, &target);
+  SDL_RenderCopy(print_active_renderer, s->TW_Texture, glyph, &target);
 #endif
 }
 
@@ -194,8 +194,8 @@ void print_rect(font_atlas *font, SDL_Rect rect, const wchar_t *text) {
     const font_atlas_glyph_set *s = font->glyphset[set];
     const SDL_Rect *glyph = &s->glyphs[c & 0xFF];
 
-    // Track glyph texture changes & render any glyphs that are on the
-    // previous texture.
+    // Track glyph TW_Texture changes & render any glyphs that are on the
+    // previous TW_Texture.
     if (font->active_glyphset != s) {
 #ifdef USE_GL
       _print_flush(font);
@@ -221,9 +221,9 @@ void print_rect(font_atlas *font, SDL_Rect rect, const wchar_t *text) {
 #endif
 }
 
-void print_point(font_atlas *font, SDL_Point point, const wchar_t *text) {
+void print_point(font_atlas *font, SDL_Point TW_Point, const wchar_t *text) {
 
-  SDL_Rect target = {point.x, point.y, 0, 0};
+  SDL_Rect target = {TW_Point.x, TW_Point.y, 0, 0};
   for (int i = 0; i < wcslen(text); i++) {
 
     Uint16 c = text[i];
@@ -236,8 +236,8 @@ void print_point(font_atlas *font, SDL_Point point, const wchar_t *text) {
     const font_atlas_glyph_set *s = font->glyphset[set];
     const SDL_Rect *glyph = &s->glyphs[c & 0xFF];
 
-    // Track glyph texture changes & render any glyphs that are on the
-    // previous texture.
+    // Track glyph TW_Texture changes & render any glyphs that are on the
+    // previous TW_Texture.
     if (font->active_glyphset != s) {
 #ifdef USE_GL
       _print_flush(font);
@@ -258,7 +258,7 @@ void print_point(font_atlas *font, SDL_Point point, const wchar_t *text) {
 #endif
 }
 
-void print_size(font_atlas *font, const wchar_t *text, rectangle *target) {
+void print_size(font_atlas *font, const wchar_t *text, TW_Rectangle *target) {
   target->w = 0;
   target->h = 0;
 

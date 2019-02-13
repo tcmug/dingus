@@ -5,16 +5,16 @@
 
 typedef struct texture_t {
   GLuint buffer;
-  GLuint texture;
+  GLuint TW_Texture;
   int width;
   int height;
-} texture;
+} TW_Texture;
 
-texture *texture_render_target(int w, int h);
-texture *texture_load(const char *filename);
-void texture_destroy(texture *);
-void texture_start_render(texture *t);
-void texture_end_render(texture *t);
+TW_Texture *texture_render_target(int w, int h);
+TW_Texture *texture_load(const char *filename);
+void texture_destroy(TW_Texture *);
+void texture_start_render(TW_Texture *t);
+void texture_end_render(TW_Texture *t);
 
-void texture_draw(texture *t, rectangle r);
+void texture_draw(TW_Texture *t, TW_Rectangle r);
 #endif

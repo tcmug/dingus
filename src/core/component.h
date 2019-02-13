@@ -12,7 +12,7 @@
 struct component_t;
 
 typedef void (*render_callback)(struct component_t *self);
-typedef void (*click_callback)(struct component_t *self, point coords);
+typedef void (*click_callback)(struct component_t *self, TW_Point coords);
 typedef int (*update_callback)(struct component_t *self);
 
 typedef struct component_t_state {
@@ -39,7 +39,7 @@ component **component_list_create(int count, ...);
 void component_destroy(component *self);
 void component_render_children(component *self);
 void component_update_pass(component *self);
-component *component_at_point(component *self, point coords);
+component *component_at_point(component *self, TW_Point coords);
 
 void component_move(component *self, int x, int y);
 void component_resize(component *self, int w, int h);

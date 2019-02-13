@@ -58,63 +58,63 @@ void SDL_Circle(SDL_Renderer *renderer, int cx, int cy, int r) {
 // elem_type
 int main(int argc, char *args[]) {
 
-  vector a = {0, 0, 0};
-  vector b = {0, 1, -1};
-  vector c = {1, 0, 0};
-  triangle tri = {a, b, c};
+  TW_Vector a = {0, 0, 0};
+  TW_Vector b = {0, 1, -1};
+  TW_Vector c = {1, 0, 0};
+  TW_Triangle tri = {a, b, c};
 
-  plane p = triangle_to_plane(tri);
+  TW_Plane p = triangle_to_plane(tri);
   printf("%f %f %f, %f %f %f\n", p.origin.x, p.origin.y, p.origin.z, p.normal.x,
          p.normal.y, p.normal.z);
 
-  vector d = {0, 1, 0};
-  printf("%f\n", vector_distance_to_plane(d, p));
+  TW_Vector d = {0, 1, 0};
+  printf("%f\n", TW_VectorDistanceToPlane(d, p));
 
-  vector dir = {0, -1, -1};
-  printf("%i\n", plane_facing_direction(p, dir));
+  TW_Vector dir = {0, -1, -1};
+  printf("%i\n", TW_IsPlaneFacingDirection(p, dir));
 
   {
-    vector a = {0, 0, 0};
-    vector b = {1, 1, 0};
-    vector c = {2, 0, 0};
-    triangle tri = {a, b, c};
-    vector p = {1, 1.1, 0};
-    printf("%i\n", point_in_triangle(p, tri));
+    TW_Vector a = {0, 0, 0};
+    TW_Vector b = {1, 1, 0};
+    TW_Vector c = {2, 0, 0};
+    TW_Triangle tri = {a, b, c};
+    TW_Vector p = {1, 1.1, 0};
+    printf("%i\n", TW_PointInTriangle(p, tri));
   }
 
   printf("\n\n");
 
   {
-    vector a = {0, 0, 0};
-    vector b = {10, 10, 0};
-    vector c = {20, 0, 0};
-    vector p[4] = {{0, 2, 0}, {10, 15, 0}, {10, -2, 0}, {-5, -5, 0}};
+    TW_Vector a = {0, 0, 0};
+    TW_Vector b = {10, 10, 0};
+    TW_Vector c = {20, 0, 0};
+    TW_Vector p[4] = {{0, 2, 0}, {10, 15, 0}, {10, -2, 0}, {-5, -5, 0}};
 
-    vector closest = closest_point_on_line(a, b, p[0]);
+    TW_Vector closest = TW_ClosestPointOnPlane(a, b, p[0]);
     printf("Closest: %f %f %f\n", closest.x, closest.y, closest.z);
 
     for (int i = 0; i < 4; i++) {
-      closest = closest_point_on_triangle(a, b, c, p[i]);
+      closest = TW_ClosestPointOnTriangle(a, b, c, p[i]);
       printf("Tri closest: %f %f %f\n", closest.x, closest.y, closest.z);
     }
   }
   printf("\n\n");
 
   {
-    sphere s = {{0, 5, 0}, 1};
-    plane p = {{0, 0, 0}, vector_normalize((vector){1, 1, 0})};
-    vector v = vector_normalize((vector){-1, -1, 0});
-    vector closest = sphere_sweep_plane(s, v, p);
+    TW_Sphere s = {{0, 5, 0}, 1};
+    TW_Plane p = {{0, 0, 0}, TW_VectorNormalize((TW_Vector){1, 1, 0})};
+    TW_Vector v = TW_VectorNormalize((TW_Vector){-1, -1, 0});
+    TW_Vector closest = TW_SphereSweepPlane(s, v, p);
     printf("Sweep: %f %f %f\n", closest.x, closest.y, closest.z);
   }
   printf("\n\n");
 
   {
-    sphere s = {{1, 1, 5}, 1};
-    triangle t = {{0, 0, 0}, {1, 2, 0}, {2, 0, 0}};
-    vector v = vector_normalize((vector){0, 0, -5});
-    vector point;
-    real d = sphere_sweep_triangle(s, v, t, &point);
+    TW_Sphere s = {{1, 1, 5}, 1};
+    TW_Triangle t = {{0, 0, 0}, {1, 2, 0}, {2, 0, 0}};
+    TW_Vector v = TW_VectorNormalize((TW_Vector){0, 0, -5});
+    TW_Vector TW_Point;
+    real d = TW_SphereSweepTriangle(s, v, t, &TW_Point);
     print_vec("Sphere", s.origin);
     printf("Tri Sweep d: %f\n", d);
     // printf("Tri Sweep: %f %f %f\n", closest.x, closest.y, closest.z);
@@ -122,11 +122,11 @@ int main(int argc, char *args[]) {
   printf("\n\n");
 
   {
-    sphere s = {{-10, 0, 5}, 1};
-    triangle t = {{0, 0, 0}, {1, 2, 0}, {2, 0, 0}};
-    vector v = vector_normalize((vector){0, 0, -5});
-    vector point;
-    real d = sphere_sweep_triangle(s, v, t, &point);
+    TW_Sphere s = {{-10, 0, 5}, 1};
+    TW_Triangle t = {{0, 0, 0}, {1, 2, 0}, {2, 0, 0}};
+    TW_Vector v = TW_VectorNormalize((TW_Vector){0, 0, -5});
+    TW_Vector TW_Point;
+    real d = TW_SphereSweepTriangle(s, v, t, &TW_Point);
     print_vec("Sphere", s.origin);
     printf("Tri Sweep d: %f\n", d);
     // printf("Tri Sweep: %f %f %f\n", closest.x, closest.y, closest.z);
@@ -134,37 +134,37 @@ int main(int argc, char *args[]) {
   printf("\n\n");
 
   {
-    sphere s = {{2, 1, 5}, 1};
-    triangle t = {{0, 0, 0}, {1, 2, 0}, {2, 0, 0}};
-    vector v = {0, 0, -4};
-    vector point;
-    real d = sphere_sweep_triangle(s, v, t, &point);
+    TW_Sphere s = {{2, 1, 5}, 1};
+    TW_Triangle t = {{0, 0, 0}, {1, 2, 0}, {2, 0, 0}};
+    TW_Vector v = {0, 0, -4};
+    TW_Vector TW_Point;
+    real d = TW_SphereSweepTriangle(s, v, t, &TW_Point);
     print_vec("Sphere", s.origin);
     printf("Tri Sweep d: %f\n", d);
     // printf("Tri Sweep: %f %f %f\n", closest.x, closest.y, closest.z);
   }
   printf("\n\n");
   {
-    sphere s = {{0, 10, 0}, 1};
-    triangle t = {{-5, 5, 5}, {-5, 5, -5}, {5, -5, 0}};
-    vector v = {0, -20, 0};
-    vector point;
+    TW_Sphere s = {{0, 10, 0}, 1};
+    TW_Triangle t = {{-5, 5, 5}, {-5, 5, -5}, {5, -5, 0}};
+    TW_Vector v = {0, -20, 0};
+    TW_Vector TW_Point;
     print_vec("Sphere", s.origin);
-    real d = sphere_sweep_triangle(s, v, t, &point);
-    vector dest =
-        vector_add_vector(s.origin, vector_mul_real(vector_normalize(v), d));
+    real d = TW_SphereSweepTriangle(s, v, t, &TW_Point);
+    TW_Vector dest =
+        TW_VectorAddVector(s.origin, TW_VectorMulReal(TW_VectorNormalize(v), d));
     printf("Tri Sweep d: %f\n", d);
     print_vec("Sphere dest", dest);
     // printf("Tri Sweep: %f %f %f\n", closest.x, closest.y, closest.z);
   }
 
-  // triangle triangles[] = {{{-13, 5, 0}, {-13, 5, 5}, {-10, 0, 0}},
+  // TW_Triangle triangles[] = {{{-13, 5, 0}, {-13, 5, 5}, {-10, 0, 0}},
   //                         {{-5, 0, 0}, {5, 0, 5}, {5, 0, 0}},
 
   //                         {{-10, -10, 0}, {30, -4, 5}, {30, -4, 0}}};
   // int num_spheres = 1;
-  // sphere spheres[] = {{{-14, 20, 0}, 3}, {{8, 20, 0}, 4}};
-  // vector sphere_vectors[] = {{
+  // TW_Sphere spheres[] = {{{-14, 20, 0}, 3}, {{8, 20, 0}, 4}};
+  // TW_Vector sphere_vectors[] = {{
   //                                0,
   //                                -0.01,
   //                                0,
@@ -172,14 +172,14 @@ int main(int argc, char *args[]) {
 
   printf("\n\n");
   {
-    sphere s = {{-13, 20, 0}, 1};
-    triangle t = {{-13, 5, 0}, {-13, 5, 5}, {-10, 0, 0}};
-    vector v = {0, -20, 0};
-    vector point;
+    TW_Sphere s = {{-13, 20, 0}, 1};
+    TW_Triangle t = {{-13, 5, 0}, {-13, 5, 5}, {-10, 0, 0}};
+    TW_Vector v = {0, -20, 0};
+    TW_Vector TW_Point;
     print_vec("Sphere", s.origin);
-    real d = sphere_sweep_triangle(s, v, t, &point);
-    vector dest =
-        vector_add_vector(s.origin, vector_mul_real(vector_normalize(v), d));
+    real d = TW_SphereSweepTriangle(s, v, t, &TW_Point);
+    TW_Vector dest =
+        TW_VectorAddVector(s.origin, TW_VectorMulReal(TW_VectorNormalize(v), d));
     printf("Tri Sweep d: %f\n", d);
     print_vec("Sphere dest", dest);
     // printf("Tri Sweep: %f %f %f\n", closest.x, closest.y, closest.z);
@@ -222,14 +222,14 @@ int main(int argc, char *args[]) {
   srand(SDL_GetTicks());
 
   int num_triangles = 3;
-  // TRIANGLE ORIENTATION IS IMPORTAAAANT!! Backface lets sphere through in
+  // TRIANGLE ORIENTATION IS IMPORTAAAANT!! Backface lets TW_Sphere through in
   // weird ways
-  triangle triangles[] = {{{-15, 5, 5}, {-15, 5, -5}, {-10, -5, 0}},
+  TW_Triangle triangles[] = {{{-15, 5, 5}, {-15, 5, -5}, {-10, -5, 0}},
                           {{-5, 0, 5}, {-5, 0, -5}, {5, 1, 0}},
                           {{-10, -10, 5}, {-10, -10, -5}, {30, -4, 0}}};
   int num_spheres = 2;
-  sphere spheres[] = {{{0, 20, 0}, 2}, {{8, 20, 0}, 2.8}};
-  vector sphere_vectors[] = {{
+  TW_Sphere spheres[] = {{{0, 20, 0}, 2}, {{8, 20, 0}, 2.8}};
+  TW_Vector sphere_vectors[] = {{
                                  0,
                                  0,
                                  0,
@@ -248,9 +248,9 @@ int main(int argc, char *args[]) {
   vertex_array va;
   vertex_array_init(&va, 3, GL_STREAM_DRAW);
 
-  va.data[0] = (vector){-1, -1, -5};
-  va.data[1] = (vector){0, 1, -5};
-  va.data[2] = (vector){1, -1, -5};
+  va.data[0] = (TW_Vector){-1, -1, -5};
+  va.data[1] = (TW_Vector){0, 1, -5};
+  va.data[2] = (TW_Vector){1, -1, -5};
 
   while (running) {
     SDL_Event ev;
@@ -260,11 +260,11 @@ int main(int argc, char *args[]) {
         running = 0;
         break;
       case SDL_MOUSEBUTTONDOWN: {
-        SDL_Point point = {ev.motion.x, ev.motion.y};
-        component *self = component_at_point(root, point);
-        app_log("component at point (%i, %i) is %p", point.x, point.y, self);
+        SDL_Point TW_Point = {ev.motion.x, ev.motion.y};
+        component *self = component_at_point(root, TW_Point);
+        app_log("component at TW_Point (%i, %i) is %p", TW_Point.x, TW_Point.y, self);
         if (self->click) {
-          self->click(self, point);
+          self->click(self, TW_Point);
         }
       } break;
       case SDL_KEYUP:
@@ -311,7 +311,7 @@ int main(int argc, char *args[]) {
     // SDL_SetRenderDrawColor(props.renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
     /*
     for (int i = 0; i < num_triangles; i++) {
-      triangle *tri = &triangles[i];
+      TW_Triangle *tri = &triangles[i];
       SDL_RenderDrawLine(props.renderer, hw + (tri->a.x * 10),
                          hh + (tri->a.y * -10), hw + (tri->c.x * 10),
                          hh + (tri->c.y * -10));
@@ -319,46 +319,46 @@ int main(int argc, char *args[]) {
 
 
     for (int i = 0; i < num_spheres; i++) {
-      sphere *s = &spheres[i];
+      TW_Sphere *s = &spheres[i];
 
-      vector gravity = {0, -10 * (props.frame_time / 1000.0), 0};
-      sphere_vectors[i] = vector_add_vector(sphere_vectors[i], gravity);
+      TW_Vector gravity = {0, -10 * (props.frame_time / 1000.0), 0};
+      sphere_vectors[i] = TW_VectorAddVector(sphere_vectors[i], gravity);
 
-      collision col;
+      TW_Collision col;
       col.object = *s;
       col.velocity =
-          vector_mul_real(sphere_vectors[i], props.frame_time / 1000.0);
+          TW_VectorMulReal(sphere_vectors[i], props.frame_time / 1000.0);
 
-      while (vector_length(col.velocity) > 0.0001) {
-        if (test_triangles(&col, num_triangles, triangles)) {
+      while (TW_VectorLength(col.velocity) > 0.0001) {
+        if (TW_TestTriangles(&col, num_triangles, triangles)) {
 
-          real movement_distance = vector_length(col.velocity);
-          vector movement_normal = vector_normalize(col.velocity);
+          real movement_distance = TW_VectorLength(col.velocity);
+          TW_Vector movement_normal = TW_VectorNormalize(col.velocity);
 
-          vector to_move =
-              vector_mul_real(movement_normal, col.distance - 0.0001);
+          TW_Vector to_move =
+              TW_VectorMulReal(movement_normal, col.distance - 0.0001);
           real movement_left = movement_distance - col.distance;
 
-          s->origin = vector_add_vector(s->origin, to_move);
-          col.velocity = vector_mul_real(movement_normal, movement_left);
+          s->origin = TW_VectorAddVector(s->origin, to_move);
+          col.velocity = TW_VectorMulReal(movement_normal, movement_left);
 
           // Reflect based on hit normal:
-          vector normal =
-              vector_normalize(vector_sub_vector(s->origin, col.point));
+          TW_Vector normal =
+              TW_VectorNormalize(TW_VectorSubVector(s->origin, col.TW_Point));
 
-          col.velocity = vector_reflect(col.velocity, normal);
-          sphere_vectors[i] = vector_reflect(sphere_vectors[i], normal);
+          col.velocity = TW_VectorReflect(col.velocity, normal);
+          sphere_vectors[i] = TW_VectorReflect(sphere_vectors[i], normal);
 
         } else {
-          s->origin = vector_add_vector(s->origin, col.velocity);
-          col.velocity = (vector){0, 0, 0};
+          s->origin = TW_VectorAddVector(s->origin, col.velocity);
+          col.velocity = (TW_Vector){0, 0, 0};
         }
       }
 
       if (s->origin.y < -10) {
         s->origin.y = 10;
         s->origin.x = (rand() % 10) - 5;
-        sphere_vectors[i] = (vector){0, 0, 0};
+        sphere_vectors[i] = (TW_Vector){0, 0, 0};
       }
 
       //Octree based blocks?
@@ -366,10 +366,10 @@ int main(int argc, char *args[]) {
 
       // On contact:
       // - collect info on surface
-      // - point on surface
-      // - sliding plane
+      // - TW_Point on surface
+      // - sliding TW_Plane
       // - distance
-      // - point on ellipsoid (sphere)
+      // - TW_Point on ellipsoid (TW_Sphere)
 
 
       SDL_Circle(props.renderer, hw + (s->origin.x * 10),
@@ -387,9 +387,9 @@ int main(int argc, char *args[]) {
     SDL_RenderPresent(props.renderer);
     */
 
-    matrix projection = matrix_perspective_projection(0.01, 1000, 70, 1);
-    matrix view = matrix_identity();
-    matrix model = matrix_identity();
+    TW_Matrix projection = TW_MatrixPerspectiveProjection(0.01, 1000, 70, 1);
+    TW_Matrix view = TW_MatrixIdentity();
+    TW_Matrix model = TW_MatrixIdentity();
 
     glClearColor(0.2, 0, 0, 0);
     engine_gl_check();
@@ -399,9 +399,9 @@ int main(int argc, char *args[]) {
     vertex_buffer_update(&va, 3);
     shader_use(flat);
 
-    matrix_gl_uniform("projection", projection);
-    matrix_gl_uniform("view", view);
-    matrix_gl_uniform("model", model);
+    TW_MatrixGLUniform("projection", projection);
+    TW_MatrixGLUniform("view", view);
+    TW_MatrixGLUniform("model", model);
 
     // GLuint program;
     // glGetIntegerv(GL_CURRENT_PROGRAM, &program);

@@ -5,56 +5,58 @@
 
 #define print_vec(str, vec) printf("%s: %f %f %f\n", str, vec.x, vec.y, vec.z)
 
-vector vector_add_vector(vector a, vector b);
-vector vector_add_real(vector a, real b);
-vector vector_sub_vector(vector a, vector b);
-vector vector_sub_real(vector a, real b);
-vector vector_mul_vector(vector a, vector b);
-vector vector_mul_real(vector a, real b);
-vector vector_div_vector(vector a, vector b);
-vector vector_div_real(vector a, real b);
-real vector_length_squared(vector a);
-real vector_length(vector a);
-vector vector_normalize(vector a);
-real distance_between_vectors(vector a, vector b);
-real squared_distance_between_vectors(vector a, vector b);
-real vector_dot(vector a, vector b);
-vector vector_cross(vector a, vector b);
-vector vector_reflect(vector v, vector normal);
+TW_Vector TW_VectorAddVector(TW_Vector a, TW_Vector b);
+TW_Vector TW_VectorAddReal(TW_Vector a, real b);
+TW_Vector TW_VectorSubVector(TW_Vector a, TW_Vector b);
+TW_Vector TW_VectorSubReal(TW_Vector a, real b);
+TW_Vector TW_VectorMulVector(TW_Vector a, TW_Vector b);
+TW_Vector TW_VectorMulReal(TW_Vector a, real b);
+TW_Vector TW_VectorDivVector(TW_Vector a, TW_Vector b);
+TW_Vector TW_VectorDivReal(TW_Vector a, real b);
+real TW_VectorLengthSquared(TW_Vector a);
+real TW_VectorLength(TW_Vector a);
+TW_Vector TW_VectorNormalize(TW_Vector a);
+real TW_VectorsDistance(TW_Vector a, TW_Vector b);
+real TW_VectorsSquaredDistance(TW_Vector a, TW_Vector b);
+real TW_VectorDot(TW_Vector a, TW_Vector b);
+TW_Vector TW_VectorCross(TW_Vector a, TW_Vector b);
+TW_Vector TW_VectorReflect(TW_Vector v, TW_Vector normal);
 
-int rectangle_includes(rectangle r, point p);
+int TW_RectangleIncludesPoint(TW_Rectangle r, TW_Point p);
 
-matrix matrix_identity();
-matrix matrix_transposed(matrix m);
-vector matrix_mul_vector(matrix m, vector v);
-matrix matrix_translation(matrix m, vector v);
-matrix matrix_scaling(matrix m, vector v);
-vector matrix_project_vector(matrix m, vector v);
-matrix matrix_mul_matrix(matrix a, matrix b);
-void matrix_gl_uniform(const char *name, matrix m);
-matrix matrix_from_vector(vector eye, vector to, vector up);
-matrix matrix_perspective_projection(real near, real far, real fov, real ratio);
-matrix matrix_rotation(real psi, real theta, real phi);
-matrix matrix_orthogonal_projection(real left, real right, real bottom,
-                                    real top, real near, real far);
+TW_Matrix TW_MatrixIdentity();
+TW_Matrix TW_MatrixTransposed(TW_Matrix m);
+TW_Vector TW_MatrixMulVector(TW_Matrix m, TW_Vector v);
+TW_Matrix TW_MatrixTranslation(TW_Matrix m, TW_Vector v);
+TW_Matrix TW_MatrixScaling(TW_Matrix m, TW_Vector v);
+TW_Vector TW_MatrixProjectVector(TW_Matrix m, TW_Vector v);
+TW_Matrix TW_MatrixMulMatrix(TW_Matrix a, TW_Matrix b);
+void TW_MatrixGLUniform(const char *name, TW_Matrix m);
+TW_Matrix TW_MatrixFromVector(TW_Vector eye, TW_Vector to, TW_Vector up);
+TW_Matrix TW_MatrixPerspectiveProjection(real near, real far, real fov,
+                                         real ratio);
+TW_Matrix TW_MatrixRotation(real psi, real theta, real phi);
+TW_Matrix TW_MatrixOrthogonalProjection(real left, real right, real bottom,
+                                        real top, real near, real far);
 
-int plane_facing_direction(plane p, vector d);
-real vector_distance_to_plane(vector a, plane p);
+int TW_IsPlaneFacingDirection(TW_Plane p, TW_Vector d);
+real TW_VectorDistanceToPlane(TW_Vector a, TW_Plane p);
 
-real sphere_distance_to_plane(sphere s, plane p);
+real TW_SphereDistanceToPlane(TW_Sphere s, TW_Plane p);
 
-plane triangle_to_plane(triangle tri);
+TW_Plane triangle_to_plane(TW_Triangle tri);
 
-real ray_intersect_plane(vector planeOrigin, vector planeNormal,
-                         vector rayOrigin, vector rayVector);
-real ray_intersect_sphere(vector rO, vector rV, vector sO, real sR);
-vector sphere_sweep_plane(sphere s, vector v, plane p);
-vector closest_point_on_line(vector a, vector b, vector p);
-vector closest_point_on_triangle(vector a, vector b, vector c, vector p);
-real sphere_sweep_triangle(sphere s, vector v, triangle t, vector *touch_point);
-int test_triangles(collision *collision, int num_triangles,
-                   triangle *triangles);
-int point_in_triangle(vector point, triangle t);
-real sphere_triangle_sweep(sphere s, vector v, triangle t);
+real TW_RayIntersectPlane(TW_Vector planeOrigin, TW_Vector planeNormal,
+                          TW_Vector rayOrigin, TW_Vector rayVector);
+real TW_RayIntersectSphere(TW_Vector rO, TW_Vector rV, TW_Vector sO, real sR);
+TW_Vector TW_SphereSweepPlane(TW_Sphere s, TW_Vector v, TW_Plane p);
+TW_Vector TW_ClosestPointOnPlane(TW_Vector a, TW_Vector b, TW_Vector p);
+TW_Vector TW_ClosestPointOnTriangle(TW_Vector a, TW_Vector b, TW_Vector c,
+                                    TW_Vector p);
+real TW_SphereSweepTriangle(TW_Sphere s, TW_Vector v, TW_Triangle t,
+                            TW_Vector *touch_point);
+int TW_TestTriangles(TW_Collision *TW_Collision, int num_triangles,
+                     TW_Triangle *triangles);
+int TW_PointInTriangle(TW_Vector TW_Point, TW_Triangle t);
 
 #endif

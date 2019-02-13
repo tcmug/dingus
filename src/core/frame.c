@@ -13,8 +13,8 @@ frame *frame_create(int w, int h) {
   glGenFramebuffers(1, &f->buffer);
   glBindFramebuffer(GL_FRAMEBUFFER, f->buffer);
 
-  glGenTextures(1, &f->texture);
-  glBindTexture(GL_TEXTURE_2D, f->texture);
+  glGenTextures(1, &f->TW_Texture);
+  glBindTexture(GL_TEXTURE_2D, f->TW_Texture);
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -26,9 +26,9 @@ frame *frame_create(int w, int h) {
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, f->width, f->height, 0, GL_RGB,
                GL_FLOAT, 0);
 
-  // Attach 2D texture to this FBO
+  // Attach 2D TW_Texture to this FBO
   glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
-                         GL_TEXTURE_2D, f->texture, 0);
+                         GL_TEXTURE_2D, f->TW_Texture, 0);
 
   glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
 
@@ -60,7 +60,7 @@ frame *frame_create(int w, int h) {
 
 void frame_destroy(frame *f) {
   glDeleteFrameBuffers(1, &f->buffer);
-  glDeleteTextures(1, &f->texture);
+  glDeleteTextures(1, &f->TW_Texture);
 }
 
 void frame_bind(frame *f) {

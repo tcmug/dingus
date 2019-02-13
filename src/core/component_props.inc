@@ -6,7 +6,7 @@ struct component_t **children; // Component children.
 struct window_t *window;       // Window specs.
 
 int resized;
-rectangle rect;          // Target rectangle.
+TW_Rectangle rect;       // Target TW_Rectangle.
 struct texture_t *cache; // SDL Texture
 
 update_callback update; // Update callback.

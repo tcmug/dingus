@@ -6,7 +6,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include <vector>
+#include <TW_Vector>
 
 
 shader *shader::active = 0;
@@ -61,7 +61,7 @@ shader::shader(const char *vertex_name, const char *geometry_name, const char *f
 		char msg[len];
 
 		// The maxLength includes the NULL character
-		//std::vector<GLchar> errorLog(maxLength);
+		//std::TW_Vector<GLchar> errorLog(maxLength);
 		glGetProgramInfoLog(this->program, len, 0, msg);
 		std::cout << msg << std::endl;
 	}
@@ -114,7 +114,7 @@ GLuint shader::load(const char *filename, int type) {
 		char msg[len];
 
 		// The maxLength includes the NULL character
-		//std::vector<GLchar> errorLog(maxLength);
+		//std::TW_Vector<GLchar> errorLog(maxLength);
 		glGetShaderInfoLog(s, len, 0, msg);
 		std::cout << msg << std::endl;
 		glDeleteShader(s);

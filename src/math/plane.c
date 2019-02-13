@@ -1,10 +1,10 @@
 
 #include "math.h"
 
-inline int plane_facing_direction(plane p, vector d) {
-  return vector_dot(p.normal, d) <= 0;
+inline int TW_IsPlaneFacingDirection(TW_Plane p, TW_Vector d) {
+  return TW_VectorDot(p.normal, d) <= 0;
 }
 
-inline real vector_distance_to_plane(vector a, plane p) {
-  return vector_dot(a, p.normal) + p.normDistance;
+inline real TW_VectorDistanceToPlane(TW_Vector a, TW_Plane p) {
+  return TW_VectorDot(a, p.normal) + p.normDistance;
 }
