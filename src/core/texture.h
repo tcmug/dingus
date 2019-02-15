@@ -8,6 +8,8 @@ typedef struct texture_t {
   GLuint TW_Texture;
   int width;
   int height;
+  GLint previous_viewport[4];
+  GLuint previous_buffer;
 } TW_Texture;
 
 TW_Texture *TW_TextureRenderTarget(int w, int h);

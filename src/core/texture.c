@@ -64,6 +64,9 @@ TW_Texture *TW_TextureRenderTarget(int w, int h) {
   f->width = w;
   f->height = h;
 
+  GLuint previous_framebuffer;
+  glGetIntegerv(GL_FRAMEBUFFER_BINDING, &previous_framebuffer);
+
   glGenFramebuffers(1, &f->buffer);
   glBindFramebuffer(GL_FRAMEBUFFER, f->buffer);
 
@@ -107,7 +110,7 @@ TW_Texture *TW_TextureRenderTarget(int w, int h) {
     app_log("Goddamn");
   }
 
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glBindFramebuffer(GL_FRAMEBUFFER, previous_framebuffer);
   glBindTexture(GL_TEXTURE_2D, 0);
   return f;
 }
@@ -120,14 +123,16 @@ void TW_TextureDestroy(TW_Texture *t) {
 }
 
 void TW_TextureStartRender(TW_Texture *t) {
+  glGetIntegerv(GL_FRAMEBUFFER_BINDING, &t->previous_buffer);
+  glGetIntegerv(GL_VIEWPORT, t->previous_viewport);
   glBindFramebuffer(GL_FRAMEBUFFER, t->buffer);
   glViewport(0, 0, t->width, t->height);
-  TW_MatrixGLUniform("projection", TW_MatrixOrthogonalProjection(
-                                       0, t->width, 0, t->height, 0, 1));
 }
 
 void TW_TextureEndRender(TW_Texture *t) {
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glViewport(t->previous_viewport[0], t->previous_viewport[1],
+             t->previous_viewport[2], t->previous_viewport[3]);
 }
 
 void TW_TextureDraw(TW_Texture *t, TW_Rectangle r) {

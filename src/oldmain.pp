@@ -25,17 +25,17 @@
 #include "math/math.h"
 #include "math/nettle.h"
 
-void screen_render(component *_self) {
-  window *props = (window *)_self->window;
+void screen_render(TW_Component *_self) {
+  TW_Window *props = (TW_Window *)_self->TW_Window;
   component_render_children(_self);
 }
 
-int immediate(component *_self) {
-  window *props = (window *)_self->window;
+int immediate(TW_Component *_self) {
+  TW_Window *props = (TW_Window *)_self->TW_Window;
   return 1;
 }
 
-void boo(component *_self, SDL_Point pt) {
+void boo(TW_Component *_self, SDL_Point pt) {
   text *self = (text *)_self;
   self->color = (SDL_Color){255, 0, 0, 255};
 }
@@ -187,19 +187,19 @@ int main(int argc, char *args[]) {
 
   printf("\n\n");
 
-  window props = engine_init();
+  TW_Window props = engine_init();
 
   int running = 1;
   int fps_limit = 60, fps = 60, real_fps = 0, fps_counter = 1000;
   int previous = SDL_GetTicks();
 
   wchar_t fps_display_string[0xFF];
-  component *fps_display;
+  TW_Component *fps_display;
 
 #define WINDOW_DEFAULT (&props)
 
-  component *root = COMPONENT(
-      component, .update = &immediate, .render = &screen_render,
+  TW_Component *root = TW_Component(
+      TW_Component, .update = &immediate, .render = &screen_render,
       .rect = {0, 0, props.height, props.width},
       CHILDREN(
           fps_display = TEXT(.text = fps_display_string,
@@ -261,8 +261,8 @@ int main(int argc, char *args[]) {
         break;
       case SDL_MOUSEBUTTONDOWN: {
         SDL_Point TW_Point = {ev.motion.x, ev.motion.y};
-        component *self = component_at_point(root, TW_Point);
-        app_log("component at TW_Point (%i, %i) is %p", TW_Point.x, TW_Point.y, self);
+        TW_Component *self = component_at_point(root, TW_Point);
+        app_log("TW_Component at TW_Point (%i, %i) is %p", TW_Point.x, TW_Point.y, self);
         if (self->click) {
           self->click(self, TW_Point);
         }
@@ -276,10 +276,10 @@ int main(int argc, char *args[]) {
           fullscreen = !fullscreen;
           if (fullscreen) {
             app_log("Enter fullscreen mode.");
-            SDL_SetWindowFullscreen(props.window, SDL_WINDOW_FULLSCREEN);
+            SDL_SetWindowFullscreen(props.TW_Window, SDL_WINDOW_FULLSCREEN);
           } else {
             app_log("Exit fullscreen mode.");
-            SDL_SetWindowFullscreen(props.window, 0);
+            SDL_SetWindowFullscreen(props.TW_Window, 0);
           }
         }
       }
@@ -291,7 +291,7 @@ int main(int argc, char *args[]) {
     props.passed += frame_time;
     previous = start;
 
-    SDL_GetWindowSize(props.window, &root->rect.w, &root->rect.h);
+    SDL_GetWindowSize(props.TW_Window, &root->rect.w, &root->rect.h);
 
     fps_counter += frame_time;
     if (fps_counter >= 1000) {
@@ -299,7 +299,7 @@ int main(int argc, char *args[]) {
       fps = 1;
       fps_counter -= 1000;
       swprintf(fps_display_string, 0xFF, L"FPS: %u", real_fps);
-      fps_display->update((component *)fps_display);
+      fps_display->update((TW_Component *)fps_display);
     } else {
       fps++;
     }
@@ -415,7 +415,7 @@ int main(int argc, char *args[]) {
 
     engine_gl_check();
 
-    SDL_GL_SwapWindow(props.window);
+    SDL_GL_SwapWindow(props.TW_Window);
     // FPS limit.
     const int end = SDL_GetTicks();
     if (fps_limit) {
@@ -426,7 +426,7 @@ int main(int argc, char *args[]) {
     }
   }
 
-  SDL_DestroyWindow(props.window);
+  SDL_DestroyWindow(props.TW_Window);
   SDL_Quit();
 
   return 0;

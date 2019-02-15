@@ -5,45 +5,46 @@
 
 font_atlas *default_font;
 
-int text_update(component *_self) {
-  text *self = (text *)_self;
-  window *props = (window *)_self->window;
+int text_update(TW_Component *_self) {
+  /*
+    text *self = (text *)_self;
 
-  // Mark resized if text change causes size change.
-  TW_Rectangle new_rect = _self->rect;
-  print_size(default_font, self->text, &new_rect);
+    // Mark resized if text change causes size change.
+    TW_Rectangle new_rect = _self->rect;
+    print_size(default_font, self->text, &new_rect);
 
-  if (new_rect.w != _self->rect.w || new_rect.h != _self->rect.h)
-    self->resized = 1;
+    if (new_rect.w != _self->rect.w || new_rect.h != _self->rect.h)
+      self->resized = 1;
 
-  self->rect = new_rect;
+    self->rect = new_rect;
 
-  if (self->resized) {
-    if (self->cache) {
-      TW_TextureDestroy(self->cache);
+    if (self->resized) {
+      if (self->cache) {
+        TW_TextureDestroy(self->cache);
+      }
+      self->resized = 0;
+      self->cache = TW_TextureRenderTarget(self->rect.w, self->rect.h);
+      app_log("Resized TW_Texture x");
     }
-    self->resized = 0;
-    self->cache = TW_TextureRenderTarget(self->rect.w, self->rect.h);
-    app_log("Resized TW_Texture");
-  }
 
-  SDL_Rect rect = {0, self->rect.h, self->rect.w, self->rect.h};
-
-  TW_TextureStartRender(self->cache);
-  glClearColor(0, 0, 0.6, 0);
-  glClear(GL_COLOR_BUFFER_BIT);
-  print_rect(default_font, rect, self->text);
-  TW_TextureEndRender(self->cache);
+    SDL_Rect rect = {0, self->rect.h, self->rect.w, self->rect.h};
+    TW_TextureStartRender(self->cache);
+    TW_MatrixGLUniform("projection",
+                       TW_MatrixOrthogonalProjection(0, self->cache->width, 0,
+                                                     self->cache->height, 0,
+    1)); glClearColor(0, 0, 0.6, 0); glClear(GL_COLOR_BUFFER_BIT);
+    print_rect(default_font, rect, self->text);
+    TW_TextureEndRender(self->cache);*/
   return 0;
 }
 
-void texture_render(component *_self) {
-  window *props = (window *)_self->window;
+void text_render(TW_Component *_self) {
+  TW_Window *props = (TW_Window *)_self->TW_Window;
   text *self = (text *)_self;
-  if (self->cache) {
-    TW_TextureDraw(self->cache, self->rect);
-    // SDL_RenderCopy(props->renderer, self->TW_Texture, 0, &self->rect);
-  }
+  SDL_Rect rect = {self->rect.x, self->rect.y + self->rect.h, self->rect.w,
+                   self->rect.h};
+  print_rect(default_font, rect, self->text);
+  // app_log("%u %u %u %u", rect.x, rect.y, rect.w, rect.h);
 }
 
 /*

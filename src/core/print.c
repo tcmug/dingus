@@ -80,7 +80,7 @@ font_atlas_glyph_set *font_atlas_glyph_set_create(font_atlas *atlas, int set) {
     SDL_FreeSurface(surface);
   }
 
-  SDL_SaveBMP(glyphs, "glyph.bmp");
+  // SDL_SaveBMP(glyphs, "glyph.bmp");
 
 #ifdef USE_GL
   SDL_LockSurface(glyphs);
@@ -184,7 +184,7 @@ void print_rect(font_atlas *font, SDL_Rect rect, const wchar_t *text) {
   GLuint program;
   glActiveTexture(GL_TEXTURE0);
   glGetIntegerv(GL_CURRENT_PROGRAM, &program);
-  GLuint loc = glGetUniformLocation(program, "glyph_texture");
+  GLuint loc = glGetUniformLocation(program, "surface");
   glUniform1i(loc, 0);
 
   SDL_Rect target = {rect.x, rect.y, 0, 0};
@@ -232,7 +232,7 @@ void print_point(font_atlas *font, SDL_Point TW_Point, const wchar_t *text) {
   GLuint program;
   glActiveTexture(GL_TEXTURE0);
   glGetIntegerv(GL_CURRENT_PROGRAM, &program);
-  GLuint loc = glGetUniformLocation(program, "glyph_texture");
+  GLuint loc = glGetUniformLocation(program, "surface");
   glUniform1i(loc, 0);
 
   SDL_Rect target = {TW_Point.x, TW_Point.y, 0, 0};

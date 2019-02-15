@@ -15,6 +15,7 @@
 #include "components/center.h"
 #include "components/right.h"
 #include "components/text.h"
+#include "components/view.h"
 #include "core/component.h"
 #include "core/engine.h"
 #include "core/log.h"
@@ -28,54 +29,63 @@
 
 #include "core/buffer.h"
 
-void screen_render(component *_self) {
-  window *props = (window *)_self->window;
-  component_render_children(_self);
-}
+TW_VectorBuffer va;
+TW_Shader flat, uishader;
 
-int immediate(component *_self) {
-  window *props = (window *)_self->window;
+int mainUpdate(TW_Component *_self) {
+
+  TW_ComponentViewUpdate(_self);
+  TW_TextureStartRender(_self->cache);
+
+  glClearColor(0.2, 0, 0, 0);
+  glClear(GL_COLOR_BUFFER_BIT);
+  engine_gl_check();
+
+  TW_Vector dir = (TW_Vector){1, 1, -5};
+  TW_Matrix projection = TW_MatrixPerspectiveProjection(0.01, 1000, 70, 1);
+  TW_Matrix view = TW_MatrixFromVector(
+      (TW_Vector){0, 0, 5}, (TW_Vector){0, 0, 0}, (TW_Vector){0, 1, 0});
+
+  static float a = 0;
+  a += 0.01;
+  TW_Matrix model = TW_MatrixRotation(a, a, 0);
+
+  TW_ShaderUse(flat);
+  TW_MatrixGLUniform("projection", projection);
+  TW_MatrixGLUniform("view", view);
+  TW_MatrixGLUniform("model", model);
+
+  TW_VectorBufferBind(&va, 0);
+  glDrawArrays(GL_TRIANGLES, 0, 3);
+
+  TW_TextureEndRender(_self->cache);
+
   return 1;
 }
 
 // elem_type
 int main(int argc, char *args[]) {
 
-  // TW_Vector c, d;
-  // TW_Vector a = {0, 0, 0};
-  // TW_Vector b = {0, 0, 0};
-
-  // c = TW_VectorCross(a, b);
-  // d = TW_VectorAddVector(c, a);
-
-  // int *dd = 0;
-  // (*dd) = 2;
-
-  window props = engine_init();
+  TW_Window props = engine_init();
 
   int running = 1;
   int fps_limit = 60, fps = 60, real_fps = 0, fps_counter = 1000;
   int previous = SDL_GetTicks();
 
-  wchar_t fps_display_string[0xFF];
-  component *fps_display;
+  wchar_t fps_display_string[0xFF] = {0};
+  TW_Component *fps_display;
 
   int fullscreen = 0;
 
   srand(SDL_GetTicks());
 
-  TW_Shader flat = TW_ShaderLoad(RESOURCE("share/dingus/shaders/flat.vert"), 0,
-                                 RESOURCE("share/dingus/shaders/flat.frag"));
+  flat = TW_ShaderLoad(RESOURCE("share/dingus/shaders/flat.vert"), 0,
+                       RESOURCE("share/dingus/shaders/flat.frag"));
 
-  TW_Shader glyphs =
-      TW_ShaderLoad(RESOURCE("share/dingus/shaders/glyph.vert"), 0,
-                    RESOURCE("share/dingus/shaders/glyph.frag"));
+  uishader = TW_ShaderLoad(RESOURCE("share/dingus/shaders/ui.vert"), 0,
+                           RESOURCE("share/dingus/shaders/ui.frag"));
 
   default_font = font_atlas_create(RESOURCE("share/dingus/DroidSans.ttf"), 20);
-
-  TW_VectorBuffer va;
-
-  TW_Texture *frm = TW_TextureRenderTarget(200, 200);
 
   // GL_STATIC_DRAW
   TW_VectorBufferInit(&va, 3, GL_STREAM_DRAW);
@@ -84,39 +94,30 @@ int main(int argc, char *args[]) {
   va.data[1] = (TW_Vector){0, 1, 0};
   va.data[2] = (TW_Vector){1, -1, 0};
 
-  TW_VectorBuffer va2;
-  TW_PointBuffer pa2;
-
-  TW_Texture *te = TW_TextureLoad("lord.png");
-  GLuint TW_Texture = te->TW_Texture;
-
-  // GL_STATIC_DRAW
-  TW_VectorBufferInit(&va2, 6, GL_STREAM_DRAW);
-  TW_PointBufferInit(&pa2, 6, GL_STREAM_DRAW);
-
-  va2.data[0] = (TW_Vector){0, 0, 0};
-  va2.data[1] = (TW_Vector){0, 200, 0};
-  va2.data[2] = (TW_Vector){200, 200, 0};
-  va2.data[3] = (TW_Vector){200, 200, 0};
-  va2.data[4] = (TW_Vector){200, 0, 0};
-  va2.data[5] = (TW_Vector){0, 0, 0};
-
-  pa2.data[0] = (TW_Point){0, 0};
-  pa2.data[1] = (TW_Point){0, 1};
-  pa2.data[2] = (TW_Point){1, 1};
-  pa2.data[3] = (TW_Point){1, 1};
-  pa2.data[4] = (TW_Point){1, 0};
-  pa2.data[5] = (TW_Point){0, 0};
-
 #define WINDOW_DEFAULT (&props)
 
-  real m = (props.height / 2 - 20);
-  component *root =
-      COMPONENT(component, .update = &immediate, .render = &screen_render,
-                .rect = {0, 0, props.height, props.width},
-                CHILDREN(TEXT(.text = L"Testing this text thing",
-                              .rect = {0, m, 100, 40})));
+  TW_Component *root =
+      VIEW(.rect = {0, 0, props.width, props.height},
+           CHILDREN(fps_display =
+                        TEXT(.rect = {0, 0, props.width, props.height},
+                             .text = fps_display_string,
+                             .background = {255, 255, 255, 32})));
 
+  /*
+
+    TW_Component *root =
+        VIEW(.rect = {0, 0, props.height, props.width},
+             CHILDREN(fps_display =
+                          TEXT(.rect = {0, 0, props.width, props.height},
+                               .text = fps_display_string,
+                               .background = {255, 255, 255, 32}),
+                      RIGHT(.rect = {0, 0, props.width, props.height},
+                            CHILDREN(TEXT(.text = L"Aligned right",
+                                          .background = {255, 255, 255, 32}))),
+                      CENTER(.rect = {0, 0, props.width, props.height},
+                             CHILDREN(TEXT(.text = L"Testing this text thing"),
+                                      TEXT(.text = L"META")))));
+  */
   while (running) {
     SDL_Event ev;
     while (SDL_PollEvent(&ev)) {
@@ -125,7 +126,13 @@ int main(int argc, char *args[]) {
         running = 0;
         break;
       case SDL_MOUSEBUTTONDOWN: {
-        SDL_Point TW_Point = {ev.motion.x, ev.motion.y};
+        TW_Point coord = {ev.motion.x, props.height - ev.motion.y};
+        TW_Component *self = component_at_point(root, coord);
+        app_log("TW_Component at TW_Point (%f, %f) is %p", coord.x, coord.y,
+                self);
+        if (self && self->click) {
+          self->click(self, coord);
+        }
       } break;
       case SDL_KEYUP:
         switch (ev.key.keysym.sym) {
@@ -136,10 +143,10 @@ int main(int argc, char *args[]) {
           fullscreen = !fullscreen;
           if (fullscreen) {
             app_log("Enter fullscreen mode.");
-            SDL_SetWindowFullscreen(props.window, SDL_WINDOW_FULLSCREEN);
+            SDL_SetWindowFullscreen(props.TW_Window, SDL_WINDOW_FULLSCREEN);
           } else {
             app_log("Exit fullscreen mode.");
-            SDL_SetWindowFullscreen(props.window, 0);
+            SDL_SetWindowFullscreen(props.TW_Window, 0);
           }
         }
       }
@@ -157,104 +164,30 @@ int main(int argc, char *args[]) {
       fps = 1;
       fps_counter -= 1000;
       app_log("FPS: %u", real_fps);
+      swprintf(fps_display_string, 0xFF, L"FPS: %u", real_fps);
+      TW_ShaderUse(uishader);
+      fps_display->update((TW_Component *)fps_display);
+      ((TW_ComponentView *)root)->rerender = 1;
     } else {
       fps++;
     }
 
     TW_VectorBufferUpdate(&va, 3);
-    TW_VectorBufferUpdate(&va2, 6);
-    TW_PointBufferUpdate(&pa2, 6);
 
     glViewport(0, 0, props.width, props.height);
     glClearColor(0.2, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     engine_gl_check();
 
-    /* RENDER TO TEXTURE */
-    {
+    GLuint program, loc;
 
-      TW_ShaderUse(glyphs);
-      TW_TextureStartRender(frm);
-
-      glClearColor(0.4, 0.4, 0, 0);
-      glClear(GL_COLOR_BUFFER_BIT);
-
-      print_rect(default_font, (SDL_Rect){0, 200, 200, 200},
-                 L"Hello World, what is going on in Japan (日本)? I hope "
-                 L"things are going well, because if they were not going"
-                 L"well things would not be going ok, they would be going"
-                 L"rather badly, is not to say that bad is not good, but"
-                 L"inheritly it is.");
-
-      TW_TextureEndRender(frm);
-    }
-
-    // END RENDER TO TEXTURE
-
-    GLuint program;
-
-    glViewport(0, 0, props.width, props.height);
-
-    TW_ShaderUse(glyphs);
-
-    TW_MatrixGLUniform(
-        "projection",
-        TW_MatrixOrthogonalProjection(0, props.width, 0, props.height, 0, 1));
-
-    TW_ShaderUse(glyphs);
+    TW_ShaderUse(uishader);
     glGetIntegerv(GL_CURRENT_PROGRAM, &program);
-    GLuint loc = glGetUniformLocation(program, "glyph_texture");
-    glUniform1i(loc, 0);
-
-    // Prior TW_TextureDraw, we need to take a TW_Shader in use +
-    // set the orthogonal projection to the current viewport +
-    /*   TW_TextureDraw(frm, (TW_Rectangle){100, 100, 200, 200});*/
-
-    component_update_pass(root);
-
-    glViewport(0, 0, props.width, props.height);
-
-    // TW_ShaderUse(glyphs);
-    TW_MatrixGLUniform(
-        "projection",
-        TW_MatrixOrthogonalProjection(0, props.width, 0, props.height, 0, 1));
-
-    // TW_ShaderUse(glyphs);
-    // glGetIntegerv(GL_CURRENT_PROGRAM, &program);
-    // loc = glGetUniformLocation(program, "glyph_texture");
-    // glUniform1i(loc, 0);
+    glUniform1i(glGetUniformLocation(program, "surface"), 0);
 
     root->render(root);
-    TW_TextureDraw(frm, (TW_Rectangle){25, 25, 50, 50});
 
-    engine_gl_check();
-
-    glViewport(0, 0, props.width, props.height);
-
-    TW_Vector dir = (TW_Vector){1, 1, -5};
-    TW_Matrix projection = TW_MatrixPerspectiveProjection(0.01, 1000, 70, 1);
-    TW_Matrix view = TW_MatrixFromVector(
-        (TW_Vector){0, 0, 5}, (TW_Vector){0, 0, 0}, (TW_Vector){0, 1, 0});
-    TW_Matrix model = TW_MatrixRotation(0, props.passed * 0.001, 0);
-
-    TW_ShaderUse(flat);
-    TW_MatrixGLUniform("projection", projection);
-    TW_MatrixGLUniform("view", view);
-    TW_MatrixGLUniform("model", model);
-
-    // GLuint program;
-    // glGetIntegerv(GL_CURRENT_PROGRAM, &program);
-    // app_log("loc: %u %u", glGetAttribLocation(program, "vertex"),
-    //         glGetUniformLocation(program, "view"));
-    TW_VectorBufferBind(&va, 0);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-
-    engine_gl_check();
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    engine_gl_check();
-
-    SDL_GL_SwapWindow(props.window);
+    SDL_GL_SwapWindow(props.TW_Window);
 
     // FPS limit.
     const int end = SDL_GetTicks();

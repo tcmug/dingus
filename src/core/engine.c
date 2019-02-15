@@ -51,9 +51,9 @@ GLuint global_vao = 0;
     return props;                                                              \
   }
 
-window engine_init() {
+TW_Window engine_init() {
 
-  window props;
+  TW_Window props;
 
   props.width = 800;
   props.height = 600;
@@ -66,18 +66,18 @@ window engine_init() {
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
 
-  props.window = SDL_CreateWindow(
+  props.TW_Window = SDL_CreateWindow(
       "Dingus", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, props.width,
       props.height,
       SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_OPENGL);
 
-  if (props.window == NULL) {
+  if (props.TW_Window == NULL) {
     printf("SDL_Init failed: %s\n", SDL_GetError());
-    app_log("Could not create window...\n");
+    app_log("Could not create TW_Window...\n");
     return props;
   }
 
-  SDL_GLContext gl_context = SDL_GL_CreateContext(props.window);
+  SDL_GLContext gl_context = SDL_GL_CreateContext(props.TW_Window);
   printf("OPENGL %s / GLSL %s\n", glGetString(GL_VERSION),
          glGetString(GL_SHADING_LANGUAGE_VERSION));
 
@@ -172,14 +172,14 @@ window engine_init() {
 
   engine_gl_check();
 
-  app_log("Window created: %i %i", props.width, props.height);
+  app_log("TW_Window created: %i %i", props.width, props.height);
 
   return props;
 }
 
-int engine_shutdown(window props) {
+int engine_shutdown(TW_Window props) {
   glDeleteVertexArrays(1, &global_vao);
-  SDL_DestroyWindow(props.window);
+  SDL_DestroyWindow(props.TW_Window);
   SDL_Quit();
   return 0;
 }

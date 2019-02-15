@@ -28,16 +28,18 @@ target_sources(dingus
 		src/components/text.c
 		src/components/right.c
 		src/components/center.c
+		src/components/view.c		
 		src/core/engine.c
 		src/core/buffer.c
 		src/core/print.c
+		src/core/shader.c		
 		src/core/component.c
 		src/core/texture.c
 		src/math/vector.c
 		src/math/matrix.c
 		src/math/sphere.c
 		src/math/triangle.c
-		src/math/matrix.c
+		src/math/rectangle.c
 		src/math/nettle.c
 )
 

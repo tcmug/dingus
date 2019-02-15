@@ -11,8 +11,8 @@
 
 void _engine_gl_check(const char *file, const char *function, int line);
 
-window engine_init();
-int engine_shutdown(window props);
+TW_Window engine_init();
+int engine_shutdown(TW_Window props);
 
 #define engine_gl_check() (_engine_gl_check(__FILE__, __FUNCTION__, __LINE__))
 

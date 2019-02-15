@@ -1,13 +1,13 @@
 #version 330
 
-uniform sampler2D glyph_texture;
+uniform sampler2D surface;
 in vec2 uv;
 
 layout(location = 0) out vec4 color;
 
 void main()
 {
-    color = texture(glyph_texture, uv);
+    color = texture(surface, uv);
 }
 
 
