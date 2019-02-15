@@ -11,7 +11,8 @@
 
 struct component_t;
 
-typedef void (*render_callback)(struct component_t *self);
+typedef void (*render_callback)(const struct component_t *parent,
+                                struct component_t *self);
 typedef void (*click_callback)(struct component_t *self, TW_Point coords);
 typedef int (*update_callback)(struct component_t *self);
 
@@ -35,6 +36,7 @@ typedef struct window_t {
 
 TW_Component *component_create(TW_Component props);
 TW_Component **component_list_create(int count, ...);
+void TW_ComponentRerender(TW_Component *);
 
 void component_destroy(TW_Component *self);
 void component_render_children(TW_Component *self);
@@ -45,8 +47,8 @@ void component_move(TW_Component *self, int x, int y);
 void component_resize(TW_Component *self, int w, int h);
 
 #define COMPONENT_DEFAULTS                                                     \
-  .TW_Window = WINDOW_DEFAULT, .children = 0, .update = 0, .cache = 0,         \
-  .resized = 1, .rect = {0, 0, 0, 0}
+  .TW_Window = WINDOW_DEFAULT, .children = 0, .cache = 0, .resized = 1,        \
+  .rect = {0, 0, 0, 0}
 
 #define _NUMARGS(type, ...) (sizeof((type[]){__VA_ARGS__}) / sizeof(type))
 

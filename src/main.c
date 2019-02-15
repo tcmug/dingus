@@ -34,7 +34,6 @@ TW_Shader flat, uishader;
 
 int mainUpdate(TW_Component *_self) {
 
-  TW_ComponentViewUpdate(_self);
   TW_TextureStartRender(_self->cache);
 
   glClearColor(0.2, 0, 0, 0);
@@ -97,11 +96,23 @@ int main(int argc, char *args[]) {
 #define WINDOW_DEFAULT (&props)
 
   TW_Component *root =
-      VIEW(.rect = {0, 0, props.width, props.height},
-           CHILDREN(fps_display =
-                        TEXT(.rect = {0, 0, props.width, props.height},
-                             .text = fps_display_string,
-                             .background = {255, 255, 255, 32})));
+      VIEW(.color = {0.3, 0, 0, 0}, .rect = {0, 0, props.width, props.height},
+           CHILDREN(
+               fps_display = TEXT(.rect = {0, 0, props.width, props.height},
+                                  .text = fps_display_string),
+               VIEW(.rect = {400, 10, 300, 300}, .color = {1, 0, 1, 0},
+                    CHILDREN(
+                        TEXT(.rect = {0, 0, 300, 300}, .text = L"test"),
+                        VIEW(.rect = {150, 150, 150, 150},
+                             .color = {0, 1, 1, 0},
+                             CHILDREN(TEXT(.rect = {0, 0, 150, 150},
+                                           .text = L"in", ),
+                                      VIEW(.rect = {75, 75, 75, 75},
+                                           .color = {1, 0, 0, 0},
+                                           CHILDREN(TEXT(.rect = {0, 0, 75, 75},
+                                                         .text = L"here", )))
+
+                                          ))))));
 
   /*
 
@@ -122,6 +133,16 @@ int main(int argc, char *args[]) {
     SDL_Event ev;
     while (SDL_PollEvent(&ev)) {
       switch (ev.type) {
+      case SDL_WINDOWEVENT: {
+        switch (ev.window.event) {
+        case SDL_WINDOWEVENT_SIZE_CHANGED:
+          root->rect.w = props.width = ev.window.data1;
+          root->rect.h = props.height = ev.window.data2;
+          root->resized = 1;
+          TW_ComponentRerender(root);
+          break;
+        }
+      } break;
       case SDL_QUIT:
         running = 0;
         break;
@@ -166,8 +187,8 @@ int main(int argc, char *args[]) {
       app_log("FPS: %u", real_fps);
       swprintf(fps_display_string, 0xFF, L"FPS: %u", real_fps);
       TW_ShaderUse(uishader);
-      fps_display->update((TW_Component *)fps_display);
-      ((TW_ComponentView *)root)->rerender = 1;
+      // fps_display->update((TW_Component *)fps_display);
+      TW_ComponentRerender(fps_display);
     } else {
       fps++;
     }
@@ -185,7 +206,7 @@ int main(int argc, char *args[]) {
     glGetIntegerv(GL_CURRENT_PROGRAM, &program);
     glUniform1i(glGetUniformLocation(program, "surface"), 0);
 
-    root->render(root);
+    root->render(0, root);
 
     SDL_GL_SwapWindow(props.TW_Window);
 

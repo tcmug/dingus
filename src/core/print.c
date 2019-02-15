@@ -213,7 +213,7 @@ void print_rect(font_atlas *font, SDL_Rect rect, const wchar_t *text) {
     target.h = glyph->h;
 
     if (target.x + glyph->w > rect.x + rect.w) {
-      target.y -= glyph->h;
+      target.y += glyph->h;
       target.x = rect.x;
     }
 

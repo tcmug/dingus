@@ -14,16 +14,18 @@ void component_render_children(TW_Component *self) {
   if (self->children)
     for (int i = 0; self->children[i]; i++)
       if (self->children[i]->render)
-        self->children[i]->render(self->children[i]);
+        self->children[i]->render(self, self->children[i]);
 }
 
-void component_update_pass(TW_Component *self) {
-  if (self->update)
-    self->update(self);
-  if (self->children)
-    for (int i = 0; self->children[i]; i++)
-      component_update_pass(self->children[i]);
-}
+void TW_ComponentRerender(TW_Component *self) { self->rerender = 1; }
+
+// void component_update_pass(TW_Component *self) {
+//   if (self->update)
+//     self->update(self);
+//   if (self->children)
+//     for (int i = 0; self->children[i]; i++)
+//       component_update_pass(self->children[i]);
+// }
 
 TW_Component *component_at_point(TW_Component *self, TW_Point coord) {
   if (TW_RectangleIncludesPoint(self->rect, coord)) {

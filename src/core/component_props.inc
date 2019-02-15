@@ -8,9 +8,9 @@ struct window_t *TW_Window;    // TW_Window specs.
 int resized;
 TW_Rectangle rect;       // Target TW_Rectangle.
 struct texture_t *cache; // SDL Texture
+int rerender;
 
 // mount_callback mount;
-update_callback update; // Update callback.
 render_callback render; // Render callback.
 click_callback click;   // Click callback.
 

@@ -11,15 +11,13 @@ extern font_atlas *default_font;
 
 typedef struct TW_ComponentView_t {
 #include "../core/component_props.inc"
-  int rerender;
+  real color[4];
 } TW_ComponentView;
 
-int TW_ComponentViewUpdate(TW_Component *);
-void TW_ComponentViewRender(TW_Component *);
+void TW_ComponentViewRender(const TW_Component *parent, TW_Component *);
 
 #define VIEW_DEFAULTS                                                          \
-  .update = &TW_ComponentViewUpdate, .render = &TW_ComponentViewRender,        \
-  .rerender = 1
+  .render = &TW_ComponentViewRender, .rerender = 1, .color = {1, 0, 1, 0}
 
 #define VIEW(...)                                                              \
   ((TW_Component *)TW_Component(TW_ComponentView, VIEW_DEFAULTS, __VA_ARGS__))

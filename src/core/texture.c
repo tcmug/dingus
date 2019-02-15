@@ -64,7 +64,8 @@ TW_Texture *TW_TextureRenderTarget(int w, int h) {
   f->width = w;
   f->height = h;
 
-  GLuint previous_framebuffer;
+  GLuint previous_framebuffer, previous_texture;
+  glGetIntegerv(GL_TEXTURE_BINDING_2D, &previous_texture);
   glGetIntegerv(GL_FRAMEBUFFER_BINDING, &previous_framebuffer);
 
   glGenFramebuffers(1, &f->buffer);
@@ -111,7 +112,8 @@ TW_Texture *TW_TextureRenderTarget(int w, int h) {
   }
 
   glBindFramebuffer(GL_FRAMEBUFFER, previous_framebuffer);
-  glBindTexture(GL_TEXTURE_2D, 0);
+  glBindTexture(GL_TEXTURE_2D, previous_texture);
+  //  glBindTexture(GL_TEXTURE_2D, 0);
   return f;
 }
 
@@ -130,7 +132,7 @@ void TW_TextureStartRender(TW_Texture *t) {
 }
 
 void TW_TextureEndRender(TW_Texture *t) {
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glBindFramebuffer(GL_FRAMEBUFFER, t->previous_buffer);
   glViewport(t->previous_viewport[0], t->previous_viewport[1],
              t->previous_viewport[2], t->previous_viewport[3]);
 }

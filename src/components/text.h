@@ -14,16 +14,15 @@ typedef struct text_t {
   SDL_Color background;
   SDL_Color color;
   const wchar_t *text;
-} text;
+} TW_Text;
 
-int text_update(TW_Component *);
-void text_render(TW_Component *);
+void TW_TextRender(const TW_Component *parent, TW_Component *);
 
 #define TEXT_DEFAULTS                                                          \
-  .update = &text_update, .render = &text_render,                              \
-  .color = {255, 255, 255, 255}, .background = {0, 0, 0, 255}
+  .render = &TW_TextRender, .color = {255, 255, 255, 255},                     \
+  .background = {0, 0, 0, 255}
 
 #define TEXT(...)                                                              \
-  ((TW_Component *)TW_Component(text, TEXT_DEFAULTS, __VA_ARGS__))
+  ((TW_Component *)TW_Component(TW_Text, TEXT_DEFAULTS, __VA_ARGS__))
 
 #endif

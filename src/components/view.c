@@ -14,24 +14,10 @@ screen (passthrough rendering)
 
 */
 
-int TW_ComponentViewUpdate(TW_Component *_self) {
-  TW_Window *props = (TW_Window *)_self->TW_Window;
-  TW_ComponentView *self = (TW_ComponentView *)_self;
-
-  if (self->resized) {
-    if (self->cache) {
-      TW_TextureDestroy(self->cache);
-    }
-    self->resized = 0;
-    self->cache = TW_TextureRenderTarget(self->rect.w, self->rect.h);
-    app_log("View resized");
-  }
-}
-
 #include "../core/shader.h"
 extern TW_Shader uishader;
 
-void TW_ComponentViewRender(TW_Component *_self) {
+void TW_ComponentViewRender(const TW_Component *parent, TW_Component *_self) {
 
   TW_Window *props = (TW_Window *)_self->TW_Window;
   TW_ComponentView *self = (TW_ComponentView *)_self;
@@ -42,27 +28,31 @@ void TW_ComponentViewRender(TW_Component *_self) {
     }
     self->rerender = 1;
     self->resized = 0;
-    self->cache = TW_TextureRenderTarget(self->rect.w - self->rect.x,
-                                         self->rect.h - self->rect.y);
+    self->cache = TW_TextureRenderTarget(self->rect.w, self->rect.h);
   }
 
   if (self->rerender) {
     TW_TextureStartRender(self->cache);
-    glClearColor(0, 0.5, 0.6, 0);
+    glClearColor(self->color[0], self->color[1], self->color[2],
+                 self->color[3]);
     glClear(GL_COLOR_BUFFER_BIT);
     TW_MatrixGLUniform(
         "projection",
         TW_MatrixOrthogonalProjection(0, self->rect.w, 0, self->rect.h, 0, 1));
     component_render_children(_self);
     TW_TextureEndRender(self->cache);
+    self->rerender = 0;
   }
 
-  GLuint program;
-  TW_ShaderUse(uishader);
-  glGetIntegerv(GL_CURRENT_PROGRAM, &program);
-  glUniform1i(glGetUniformLocation(program, "surface"), 0);
-  TW_MatrixGLUniform("projection", TW_MatrixOrthogonalProjection(
-                                       0, self->rect.w, 0, self->rect.h, 0, 1));
+  if (parent) {
+    TW_MatrixGLUniform("projection",
+                       TW_MatrixOrthogonalProjection(0, parent->rect.w, 0,
+                                                     parent->rect.h, 0, 1));
+  } else {
+    TW_MatrixGLUniform(
+        "projection",
+        TW_MatrixOrthogonalProjection(0, self->rect.w, 0, self->rect.h, 0, 1));
+  }
 
   TW_TextureDraw(self->cache, self->rect);
 }
