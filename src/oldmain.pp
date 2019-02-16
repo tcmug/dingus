@@ -27,7 +27,7 @@
 
 void screen_render(TW_Component *_self) {
   TW_Window *props = (TW_Window *)_self->TW_Window;
-  component_render_children(_self);
+  TW_ComponentRenderChildren(_self);
 }
 
 int immediate(TW_Component *_self) {
@@ -261,7 +261,7 @@ int main(int argc, char *args[]) {
         break;
       case SDL_MOUSEBUTTONDOWN: {
         SDL_Point TW_Point = {ev.motion.x, ev.motion.y};
-        TW_Component *self = component_at_point(root, TW_Point);
+        TW_Component *self = TW_ComponentAtPoint(root, TW_Point);
         app_log("TW_Component at TW_Point (%i, %i) is %p", TW_Point.x, TW_Point.y, self);
         if (self->click) {
           self->click(self, TW_Point);
@@ -306,7 +306,7 @@ int main(int argc, char *args[]) {
 
     // SDL_SetRenderDrawColor(props.renderer, 0, 0, 0, 0);
     // SDL_RenderClear(props.renderer);
-    // component_update_pass(root);
+    // TW_ComponentUpdatePass(root);
     // root->render(root);
     // SDL_SetRenderDrawColor(props.renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
     /*

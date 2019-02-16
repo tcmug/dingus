@@ -39,7 +39,7 @@ void TW_ComponentViewRender(const TW_Component *parent, TW_Component *_self) {
     TW_MatrixGLUniform(
         "projection",
         TW_MatrixOrthogonalProjection(0, self->rect.w, 0, self->rect.h, 0, 1));
-    component_render_children(_self);
+    TW_ComponentRenderChildren(_self);
     TW_TextureEndRender(self->cache);
     self->rerender = 0;
   }

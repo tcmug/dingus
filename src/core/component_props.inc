@@ -3,6 +3,7 @@
 /////
 
 struct component_t **children; // TW_Component children.
+struct component_t *parent;    // TW_Component parent component.
 struct window_t *TW_Window;    // TW_Window specs.
 
 int resized;

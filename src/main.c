@@ -148,7 +148,7 @@ int main(int argc, char *args[]) {
         break;
       case SDL_MOUSEBUTTONDOWN: {
         TW_Point coord = {ev.motion.x, props.height - ev.motion.y};
-        TW_Component *self = component_at_point(root, coord);
+        TW_Component *self = TW_ComponentAtPoint(root, coord);
         app_log("TW_Component at TW_Point (%f, %f) is %p", coord.x, coord.y,
                 self);
         if (self && self->click) {

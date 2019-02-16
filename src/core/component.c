@@ -10,48 +10,58 @@
 #include "component.h"
 #include "log.h"
 
-void component_render_children(TW_Component *self) {
+void TW_ComponentRenderChildren(TW_Component *self) {
   if (self->children)
     for (int i = 0; self->children[i]; i++)
       if (self->children[i]->render)
         self->children[i]->render(self, self->children[i]);
 }
 
-void TW_ComponentRerender(TW_Component *self) { self->rerender = 1; }
+void TW_ComponentRerender(TW_Component *self) {
+  TW_Component *c = self;
+  while (c) {
+    c->rerender = 1;
+    c = c->parent;
+  }
+}
 
-// void component_update_pass(TW_Component *self) {
+// void TW_ComponentUpdatePass(TW_Component *self) {
 //   if (self->update)
 //     self->update(self);
 //   if (self->children)
 //     for (int i = 0; self->children[i]; i++)
-//       component_update_pass(self->children[i]);
+//       TW_ComponentUpdatePass(self->children[i]);
 // }
 
-TW_Component *component_at_point(TW_Component *self, TW_Point coord) {
+TW_Component *TW_ComponentAtPoint(TW_Component *self, TW_Point coord) {
+  app_log("%p", self);
+  TW_Component *match = 0;
   if (TW_RectangleIncludesPoint(self->rect, coord)) {
-    if (self->children)
+    match = self;
+    if (self->children) {
+      TW_Point temp = {coord.x - self->rect.x, coord.y - self->rect.y};
       for (int i = 0; self->children[i]; i++) {
-        TW_Component *test = component_at_point(self->children[i], coord);
+        TW_Component *test = TW_ComponentAtPoint(self->children[i], temp);
         if (test)
-          return test;
+          match = test;
       }
-    return self;
+    }
   }
-  return 0;
+  return match;
 }
 
-void component_move(TW_Component *self, int x, int y) {
+void TW_ComponentMove(TW_Component *self, int x, int y) {
   self->rect.x = x;
   self->rect.y = y;
 }
 
-void component_resize(TW_Component *self, int w, int h) {
+void TW_ComponentResize(TW_Component *self, int w, int h) {
   self->resized = 1;
   self->rect.w = w;
   self->rect.h = h;
 }
 
-TW_Component **component_list_create(int count, ...) {
+TW_Component **TW_ComponentListCreate(int count, ...) {
   int i = 0;
   va_list args;
   va_start(args, count);
@@ -65,11 +75,11 @@ TW_Component **component_list_create(int count, ...) {
   return children;
 }
 
-void component_destroy(TW_Component *self) {
+void TW_ComponentDestroy(TW_Component *self) {
   if (self->children) {
     int i = 0;
     while (self->children[i]) {
-      component_destroy(self->children[i++]);
+      TW_ComponentDestroy(self->children[i++]);
     }
   }
   free(self->children);

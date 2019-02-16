@@ -9,7 +9,7 @@ typedef struct center_t {
 
 int center_update(TW_Component *);
 
-#define CENTER_DEFAULTS .render = component_render_children
+#define CENTER_DEFAULTS .render = TW_ComponentRenderChildren
 
 #define CENTER(...)                                                            \
   ((TW_Component *)TW_Component(center, CENTER_DEFAULTS, __VA_ARGS__))
