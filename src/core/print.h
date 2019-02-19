@@ -17,8 +17,8 @@ typedef struct font_t_atlas {
   struct font_t_atlas_glyph_set *active_glyphset;
 #ifdef USE_GL
   int to_render;
-  TW_VectorBuffer points;
-  TW_PointBuffer uvs;
+  TW_Vector3Buffer points;
+  TW_Vector2Buffer uvs;
 #endif
 } font_atlas;
 
@@ -30,7 +30,7 @@ font_atlas *font_atlas_create(const char *fontName, int size);
 void print_rect(font_atlas *font, SDL_Rect rect, const wchar_t *text);
 
 // Print text on renderer using font.
-void print_point(font_atlas *font, SDL_Point TW_Point, const wchar_t *text);
+void print_point(font_atlas *font, SDL_Point TW_Vector2, const wchar_t *text);
 
 // Get printed text size on renderer using font.
 void print_size(font_atlas *font, const wchar_t *text, TW_Rectangle *target);

@@ -27,6 +27,7 @@ target_sources(dingus
 	PRIVATE
 		src/components/text.c
 		src/components/right.c
+		src/components/top.c
 		src/components/center.c
 		src/components/view.c		
 		src/core/engine.c

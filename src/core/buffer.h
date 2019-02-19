@@ -4,36 +4,36 @@
 #include "../core/engine.h"
 #include "../math/math.h"
 
-typedef struct vector_buffer_t {
+typedef struct TW_Vector2Buffer_t {
+
+  GLuint id;
+  GLenum usage;
+
+  int size;
+  TW_Vector2 *data;
+} TW_Vector2Buffer;
+
+typedef struct TW_Vector3Buffer_t {
 
   GLuint id;
   GLuint vaid;
   GLenum usage;
 
   int size;
-  TW_Vector *data;
+  TW_Vector3 *data;
 
-} TW_VectorBuffer;
+} TW_Vector3Buffer;
 
-typedef struct point_buffer_t {
+void TW_Vector2BufferInit(TW_Vector2Buffer *self, int size, GLenum u);
+TW_Vector2Buffer *TW_Vector2BufferCreate(int size, GLenum u);
+void TW_Vector2BufferDestroy(TW_Vector2Buffer *self);
+void TW_Vector2BufferBind(TW_Vector2Buffer *self, int index);
+void TW_Vector2BufferUpdate(TW_Vector2Buffer *self, int size);
 
-  GLuint id;
-  GLenum usage;
-
-  int size;
-  TW_Point *data;
-} TW_PointBuffer;
-
-void TW_PointBufferInit(TW_PointBuffer *self, int size, GLenum u);
-TW_PointBuffer *TW_PointBufferCreate(int size, GLenum u);
-void TW_PointBufferDestroy(TW_PointBuffer *self);
-void TW_PointBufferBind(TW_PointBuffer *self, int index);
-void TW_PointBufferUpdate(TW_PointBuffer *self, int size);
-
-void TW_VectorBufferInit(TW_VectorBuffer *self, int size, GLenum u);
-TW_VectorBuffer *TW_VectorBufferCreate(int size, GLenum u);
-void TW_VectorBufferDestroy(TW_VectorBuffer *self);
-void TW_VectorBufferBind(TW_VectorBuffer *self, int index);
-void TW_VectorBufferUpdate(TW_VectorBuffer *self, int size);
+void TW_Vector3BufferInit(TW_Vector3Buffer *self, int size, GLenum u);
+TW_Vector3Buffer *TW_Vector3BufferCreate(int size, GLenum u);
+void TW_Vector3BufferDestroy(TW_Vector3Buffer *self);
+void TW_Vector3BufferBind(TW_Vector3Buffer *self, int index);
+void TW_Vector3BufferUpdate(TW_Vector3Buffer *self, int size);
 
 #endif

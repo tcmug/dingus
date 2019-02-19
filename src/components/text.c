@@ -41,8 +41,7 @@ int text_update(TW_Component *_self) {
 void TW_TextRender(const TW_Component *parent, TW_Component *_self) {
   TW_Window *props = (TW_Window *)_self->TW_Window;
   TW_Text *self = (TW_Text *)_self;
-  SDL_Rect rect = {self->rect.x, self->rect.h - self->rect.y, self->rect.w,
-                   self->rect.h};
+  SDL_Rect rect = {self->rect.x, self->rect.y, self->rect.w, self->rect.h};
   print_rect(default_font, rect, self->text);
   // app_log("%u %u %u %u", rect.x, rect.y, rect.w, rect.h);
 }

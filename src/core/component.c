@@ -33,13 +33,13 @@ void TW_ComponentRerender(TW_Component *self) {
 //       TW_ComponentUpdatePass(self->children[i]);
 // }
 
-TW_Component *TW_ComponentAtPoint(TW_Component *self, TW_Point coord) {
+TW_Component *TW_ComponentAtPoint(TW_Component *self, TW_Vector2 coord) {
   app_log("%p", self);
   TW_Component *match = 0;
   if (TW_RectangleIncludesPoint(self->rect, coord)) {
     match = self;
     if (self->children) {
-      TW_Point temp = {coord.x - self->rect.x, coord.y - self->rect.y};
+      TW_Vector2 temp = {coord.x - self->rect.x, coord.y - self->rect.y};
       for (int i = 0; self->children[i]; i++) {
         TW_Component *test = TW_ComponentAtPoint(self->children[i], temp);
         if (test)
@@ -56,9 +56,12 @@ void TW_ComponentMove(TW_Component *self, int x, int y) {
 }
 
 void TW_ComponentResize(TW_Component *self, int w, int h) {
-  self->resized = 1;
-  self->rect.w = w;
-  self->rect.h = h;
+  if (self->rect.w != w || self->rect.h != h) {
+    self->resized = 1;
+    self->rect.w = w;
+    self->rect.h = h;
+    TW_ComponentRerender(self);
+  }
 }
 
 TW_Component **TW_ComponentListCreate(int count, ...) {

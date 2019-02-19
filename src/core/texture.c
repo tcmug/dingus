@@ -140,28 +140,28 @@ void TW_TextureEndRender(TW_Texture *t) {
 void TW_TextureDraw(TW_Texture *t, TW_Rectangle r) {
 
   // GL_STATIC_DRAW
-  static TW_VectorBuffer *va = 0;
-  static TW_PointBuffer *pv = 0;
+  static TW_Vector3Buffer *va = 0;
+  static TW_Vector2Buffer *pv = 0;
 
   if (!va) {
-    va = TW_VectorBufferCreate(4, GL_STREAM_DRAW);
-    pv = TW_PointBufferCreate(4, GL_STREAM_DRAW);
+    va = TW_Vector3BufferCreate(4, GL_STREAM_DRAW);
+    pv = TW_Vector2BufferCreate(4, GL_STREAM_DRAW);
   }
 
-  va->data[0] = (TW_Vector){r.x, r.y, 0};
-  va->data[1] = (TW_Vector){r.x, r.y + r.h, 0};
-  va->data[2] = (TW_Vector){r.x + r.w, r.y + r.h, 0};
-  va->data[3] = (TW_Vector){r.x + r.w, r.y, 0};
+  va->data[0] = (TW_Vector3){r.x, r.y, 0};
+  va->data[1] = (TW_Vector3){r.x, r.y + r.h, 0};
+  va->data[2] = (TW_Vector3){r.x + r.w, r.y + r.h, 0};
+  va->data[3] = (TW_Vector3){r.x + r.w, r.y, 0};
 
-  pv->data[0] = (TW_Point){0, 0};
-  pv->data[1] = (TW_Point){0, 1};
-  pv->data[2] = (TW_Point){1, 1};
-  pv->data[3] = (TW_Point){1, 0};
+  pv->data[0] = (TW_Vector2){0, 0};
+  pv->data[1] = (TW_Vector2){0, 1};
+  pv->data[2] = (TW_Vector2){1, 1};
+  pv->data[3] = (TW_Vector2){1, 0};
 
-  TW_VectorBufferUpdate(va, 4);
-  TW_PointBufferUpdate(pv, 4);
-  TW_VectorBufferBind(va, 0);
-  TW_PointBufferBind(pv, 1);
+  TW_Vector3BufferUpdate(va, 4);
+  TW_Vector2BufferUpdate(pv, 4);
+  TW_Vector3BufferBind(va, 0);
+  TW_Vector2BufferBind(pv, 1);
 
   glBindTexture(GL_TEXTURE_2D, t->TW_Texture);
 

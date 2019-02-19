@@ -20,7 +20,7 @@ class MatrixTemplate {
 		}
 
 		/*
-		 * Load an identity math::TW_Vector
+		 * Load an identity math::TW_Vector3
 		 */
 		void identity() {
 			this->TW_Matrix[0] = 1;
@@ -134,7 +134,7 @@ class MatrixTemplate {
 		}
 
 		/*
-		 * TW_Matrix multiplication with math::TW_Vector
+		 * TW_Matrix multiplication with math::TW_Vector3
 		 */
 		VectorTemplate <ValueType> transform(const VectorTemplate <ValueType> &other) const {
 			return
@@ -146,7 +146,7 @@ class MatrixTemplate {
 		}
 
 		/*
-		 * Reverse TW_Matrix multiplication with math::TW_Vector
+		 * Reverse TW_Matrix multiplication with math::TW_Vector3
 		 */
 		VectorTemplate <ValueType> reverseTransform(const VectorTemplate <ValueType> &other) const {
 			return
@@ -158,7 +158,7 @@ class MatrixTemplate {
 		}
 
 		/*
-		 * Reverse TW_Matrix multiplication with math::TW_Vector
+		 * Reverse TW_Matrix multiplication with math::TW_Vector3
 		 */
 		VectorTemplate <ValueType> reverseRotate(const VectorTemplate <ValueType> &other) const {
 			return
@@ -173,18 +173,18 @@ class MatrixTemplate {
 		/*
 		 * Project
 		 */
-		VectorTemplate <ValueType> project(const VectorTemplate <ValueType> &TW_Vector) const {
+		VectorTemplate <ValueType> project(const VectorTemplate <ValueType> &TW_Vector3) const {
 			VectorTemplate <ValueType> out;
-			out.x = TW_Vector.x * TW_Matrix[0] + TW_Vector.y * TW_Matrix[4] + TW_Vector.z * TW_Matrix[8] + TW_Matrix[12];
-			out.y = TW_Vector.x * TW_Matrix[1] + TW_Vector.y * TW_Matrix[5] + TW_Vector.z * TW_Matrix[9] + TW_Matrix[13];
-			out.z = TW_Vector.x * TW_Matrix[2] + TW_Vector.y * TW_Matrix[6] + TW_Vector.z * TW_Matrix[10] + TW_Matrix[14];
-			ValueType t = 1.0 / (TW_Vector.x * TW_Matrix[3] + TW_Vector.y * TW_Matrix[7] + TW_Vector.z * TW_Matrix[11] + TW_Matrix[15]);
+			out.x = TW_Vector3.x * TW_Matrix[0] + TW_Vector3.y * TW_Matrix[4] + TW_Vector3.z * TW_Matrix[8] + TW_Matrix[12];
+			out.y = TW_Vector3.x * TW_Matrix[1] + TW_Vector3.y * TW_Matrix[5] + TW_Vector3.z * TW_Matrix[9] + TW_Matrix[13];
+			out.z = TW_Vector3.x * TW_Matrix[2] + TW_Vector3.y * TW_Matrix[6] + TW_Vector3.z * TW_Matrix[10] + TW_Matrix[14];
+			ValueType t = 1.0 / (TW_Vector3.x * TW_Matrix[3] + TW_Vector3.y * TW_Matrix[7] + TW_Vector3.z * TW_Matrix[11] + TW_Matrix[15]);
 			out *= t;
 			return out;
 		}
 
 		/**
-		 * Align rotation along a TW_Vector
+		 * Align rotation along a TW_Vector3
 		 */
 		void alignToVector(const VectorTemplate <ValueType> &dir, const VectorTemplate <ValueType> &_up) {
 			VectorTemplate <ValueType> up = _up;
@@ -219,20 +219,20 @@ class MatrixTemplate {
 		/**
 		 * Set translation
 		 */
-		void setTranslation(const VectorTemplate <ValueType> &TW_Vector) {
-			this->TW_Matrix[12] = TW_Vector.x;
-			this->TW_Matrix[13] = TW_Vector.y;
-			this->TW_Matrix[14] = TW_Vector.z;
+		void setTranslation(const VectorTemplate <ValueType> &TW_Vector3) {
+			this->TW_Matrix[12] = TW_Vector3.x;
+			this->TW_Matrix[13] = TW_Vector3.y;
+			this->TW_Matrix[14] = TW_Vector3.z;
 		}
 
 		/**
 		 * Set scale
 		 */
-		void scale(const VectorTemplate <ValueType> &TW_Vector) {
+		void scale(const VectorTemplate <ValueType> &TW_Vector3) {
 			ClassType scale;
-			scale.values[0][0] *= TW_Vector.x;
-			scale.values[1][1] *= TW_Vector.y;
-			scale.values[2][2] *= TW_Vector.z;
+			scale.values[0][0] *= TW_Vector3.x;
+			scale.values[1][1] *= TW_Vector3.y;
+			scale.values[2][2] *= TW_Vector3.z;
 			*this = *this * scale;
 		}
 

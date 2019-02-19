@@ -29,9 +29,9 @@ TW_Matrix TW_MatrixTransposed(TW_Matrix m) {
                      m.c, m.g, m.k, m.o, m.d, m.h, m.l, m.p};
 }
 
-TW_Vector TW_MatrixMulVector(TW_Matrix m, TW_Vector v) {
+TW_Vector3 TW_MatrixMulVector(TW_Matrix m, TW_Vector3 v) {
   /*
-  Multiplication of a TW_Matrix with a TW_Vector (3) is:
+  Multiplication of a TW_Matrix with a TW_Vector3 (3) is:
 
     a b c d     x     ax + by + cz + dw
     e f g h  *  y  =  ex + fy + gz + hw
@@ -40,7 +40,7 @@ TW_Vector TW_MatrixMulVector(TW_Matrix m, TW_Vector v) {
 
   */
   const real v_w = 1;
-  return (TW_Vector){
+  return (TW_Vector3){
       m.a * v.x + m.b + v.y + m.c * v.z + m.d * v_w,
       m.e * v.x + m.f + v.y + m.g * v.z + m.h * v_w,
       m.i * v.x + m.j + v.y + m.k * v.z + m.l * v_w
@@ -48,7 +48,7 @@ TW_Vector TW_MatrixMulVector(TW_Matrix m, TW_Vector v) {
   };
 }
 
-TW_Matrix TW_MatrixTranslation(TW_Matrix m, TW_Vector v) {
+TW_Matrix TW_MatrixTranslation(TW_Matrix m, TW_Vector3 v) {
   /*
   Translation is:
     1 0 0 x
@@ -59,7 +59,7 @@ TW_Matrix TW_MatrixTranslation(TW_Matrix m, TW_Vector v) {
   return (TW_Matrix){1, 0, 0, v.x, 0, 1, 0, v.y, 0, 0, 1, v.z, 0, 0, 0, 1};
 }
 
-TW_Matrix TW_MatrixScaling(TW_Matrix m, TW_Vector v) {
+TW_Matrix TW_MatrixScaling(TW_Matrix m, TW_Vector3 v) {
   /*
   Scaling by x,y,z is:
   from:
@@ -71,14 +71,14 @@ TW_Matrix TW_MatrixScaling(TW_Matrix m, TW_Vector v) {
   return (TW_Matrix){v.x, 0, 0, 0, 0, v.y, 0, 0, v.z, 0, 0, 0, 0, 1};
 }
 
-TW_Vector TW_MatrixProjectVector(TW_Matrix m, TW_Vector v) {
-  TW_Vector out;
+TW_Vector3 TW_MatrixProjectVector(TW_Matrix m, TW_Vector3 v) {
+  TW_Vector3 out;
   out.x = v.x * m.value[0] + v.y * m.value[4] + v.z * m.value[8] + m.value[12];
   out.y = v.x * m.value[1] + v.y * m.value[5] + v.z * m.value[9] + m.value[13];
   out.z = v.x * m.value[2] + v.y * m.value[6] + v.z * m.value[10] + m.value[14];
   real t = 1.0 / (v.x * m.value[3] + v.y * m.value[7] + v.z * m.value[11] +
                   m.value[15]);
-  return TW_VectorMulReal(out, t);
+  return TW_Vector3MulReal(out, t);
 }
 
 TW_Matrix TW_MatrixMulMatrix(TW_Matrix a, TW_Matrix b) {
@@ -126,11 +126,11 @@ void TW_MatrixGLUniform(const char *name, TW_Matrix m) {
   // engine_gl_check();
 }
 
-TW_Matrix TW_MatrixFromVector(TW_Vector eye, TW_Vector to, TW_Vector up) {
+TW_Matrix TW_MatrixFromVector(TW_Vector3 eye, TW_Vector3 to, TW_Vector3 up) {
 
-  TW_Vector zaxis = TW_VectorNormalize(TW_VectorSubVector(eye, to));
-  TW_Vector xaxis = TW_VectorNormalize(TW_VectorCross(up, zaxis));
-  TW_Vector yaxis = TW_VectorCross(zaxis, xaxis);
+  TW_Vector3 zaxis = TW_Vector3Normalize(TW_Vector3SubVector(eye, to));
+  TW_Vector3 xaxis = TW_Vector3Normalize(TW_Vector3Cross(up, zaxis));
+  TW_Vector3 yaxis = TW_Vector3Cross(zaxis, xaxis);
 
   return (TW_Matrix){xaxis.x,
                      yaxis.x,
@@ -144,9 +144,9 @@ TW_Matrix TW_MatrixFromVector(TW_Vector eye, TW_Vector to, TW_Vector up) {
                      yaxis.z,
                      zaxis.z,
                      0,
-                     -TW_VectorDot(xaxis, eye),
-                     -TW_VectorDot(yaxis, eye),
-                     -TW_VectorDot(zaxis, eye),
+                     -TW_Vector3Dot(xaxis, eye),
+                     -TW_Vector3Dot(yaxis, eye),
+                     -TW_Vector3Dot(zaxis, eye),
                      1};
 }
 

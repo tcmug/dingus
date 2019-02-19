@@ -3,15 +3,6 @@
 
 #define real float
 
-typedef struct point_t {
-  union {
-    struct {
-      real x, y;
-    };
-    real value[2];
-  };
-} TW_Point;
-
 typedef struct rectangle_t {
   union {
     struct {
@@ -22,14 +13,32 @@ typedef struct rectangle_t {
 
 } TW_Rectangle;
 
-typedef struct vector_t {
+typedef struct TW_Vecto2_t {
+  union {
+    struct {
+      real x, y;
+    };
+    real value[2];
+  };
+} TW_Vector2;
+
+typedef struct TW_Vector3_t {
   union {
     struct {
       real x, y, z;
     };
     real value[3];
   };
-} TW_Vector;
+} TW_Vector3;
+
+typedef struct TW_Vector4_t {
+  union {
+    struct {
+      real x, y, z, w;
+    };
+    real value[4];
+  };
+} TW_Vector4;
 
 typedef struct matrix_t {
   union {
@@ -41,26 +50,26 @@ typedef struct matrix_t {
 } TW_Matrix;
 
 typedef struct sphere_t {
-  TW_Vector origin;
+  TW_Vector3 origin;
   real radius;
 } TW_Sphere;
 
 typedef struct plane_t {
-  TW_Vector origin, normal;
+  TW_Vector3 origin, normal;
   real normDistance;
 } TW_Plane;
 
 typedef struct triangle_t {
-  TW_Vector a, b, c;
+  TW_Vector3 a, b, c;
 } TW_Triangle;
 
 typedef struct collision_t {
   TW_Sphere object;
-  TW_Vector velocity;
+  TW_Vector3 velocity;
 
   int collided;
   real distance;
-  TW_Vector TW_Point;
+  TW_Vector3 TW_Vector2;
 } TW_Collision;
 
 #endif

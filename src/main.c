@@ -15,6 +15,7 @@
 #include "components/center.h"
 #include "components/right.h"
 #include "components/text.h"
+#include "components/top.h"
 #include "components/view.h"
 #include "core/component.h"
 #include "core/engine.h"
@@ -29,7 +30,7 @@
 
 #include "core/buffer.h"
 
-TW_VectorBuffer va;
+TW_Vector3Buffer va;
 TW_Shader flat, uishader;
 
 int mainUpdate(TW_Component *_self) {
@@ -40,10 +41,10 @@ int mainUpdate(TW_Component *_self) {
   glClear(GL_COLOR_BUFFER_BIT);
   engine_gl_check();
 
-  TW_Vector dir = (TW_Vector){1, 1, -5};
+  TW_Vector3 dir = (TW_Vector3){1, 1, -5};
   TW_Matrix projection = TW_MatrixPerspectiveProjection(0.01, 1000, 70, 1);
   TW_Matrix view = TW_MatrixFromVector(
-      (TW_Vector){0, 0, 5}, (TW_Vector){0, 0, 0}, (TW_Vector){0, 1, 0});
+      (TW_Vector3){0, 0, 5}, (TW_Vector3){0, 0, 0}, (TW_Vector3){0, 1, 0});
 
   static float a = 0;
   a += 0.01;
@@ -54,7 +55,7 @@ int mainUpdate(TW_Component *_self) {
   TW_MatrixGLUniform("view", view);
   TW_MatrixGLUniform("model", model);
 
-  TW_VectorBufferBind(&va, 0);
+  TW_Vector3BufferBind(&va, 0);
   glDrawArrays(GL_TRIANGLES, 0, 3);
 
   TW_TextureEndRender(_self->cache);
@@ -87,32 +88,38 @@ int main(int argc, char *args[]) {
   default_font = font_atlas_create(RESOURCE("share/dingus/DroidSans.ttf"), 20);
 
   // GL_STATIC_DRAW
-  TW_VectorBufferInit(&va, 3, GL_STREAM_DRAW);
+  TW_Vector3BufferInit(&va, 3, GL_STREAM_DRAW);
 
-  va.data[0] = (TW_Vector){-1, -1, 0};
-  va.data[1] = (TW_Vector){0, 1, 0};
-  va.data[2] = (TW_Vector){1, -1, 0};
+  va.data[0] = (TW_Vector3){-1, -1, 0};
+  va.data[1] = (TW_Vector3){0, 1, 0};
+  va.data[2] = (TW_Vector3){1, -1, 0};
 
 #define WINDOW_DEFAULT (&props)
+
+  wchar_t *msg = L"BOX";
 
   TW_Component *root =
       VIEW(.color = {0.3, 0, 0, 0}, .rect = {0, 0, props.width, props.height},
            CHILDREN(
-               fps_display = TEXT(.rect = {0, 0, props.width, props.height},
-                                  .text = fps_display_string),
-               VIEW(.rect = {400, 10, 300, 300}, .color = {1, 0, 1, 0},
-                    CHILDREN(
-                        TEXT(.rect = {0, 0, 300, 300}, .text = L"test"),
-                        VIEW(.rect = {150, 150, 150, 150},
-                             .color = {0, 1, 1, 0},
-                             CHILDREN(TEXT(.rect = {0, 0, 150, 150},
-                                           .text = L"in", ),
-                                      VIEW(.rect = {75, 75, 75, 75},
-                                           .color = {1, 0, 0, 0},
-                                           CHILDREN(TEXT(.rect = {0, 0, 75, 75},
-                                                         .text = L"here", )))
+               TOP_RIGHT(CHILDREN(
+                   fps_display =
+                       TEXT(.rect = {0, props.height, 100, props.height},
+                            .text = fps_display_string))),
+               RIGHT(CHILDREN(
+                   VIEW(.rect = {400, 10, 300, 300}, .color = {1, 0, 1, 0},
+                        CHILDREN(
+                            TEXT(.rect = {0, 300, 300, 300}, .text = msg),
+                            VIEW(.rect = {150, 150, 150, 150},
+                                 .color = {0, 1, 1, 0},
+                                 CHILDREN(
+                                     TEXT(.rect = {0, 150, 150, 150},
+                                          .text = msg, ),
+                                     VIEW(.rect = {75, 75, 75, 75},
+                                          .color = {1, 0, 0, 0},
+                                          CHILDREN(TEXT(.rect = {0, 75, 75, 75},
+                                                        .text = msg, )))
 
-                                          ))))));
+                                         ))))))));
 
   /*
 
@@ -131,15 +138,15 @@ int main(int argc, char *args[]) {
   */
   while (running) {
     SDL_Event ev;
-    while (SDL_PollEvent(&ev)) {
+    if (SDL_WaitEvent(&ev)) {
       switch (ev.type) {
       case SDL_WINDOWEVENT: {
         switch (ev.window.event) {
         case SDL_WINDOWEVENT_SIZE_CHANGED:
-          root->rect.w = props.width = ev.window.data1;
-          root->rect.h = props.height = ev.window.data2;
-          root->resized = 1;
-          TW_ComponentRerender(root);
+          props.width = ev.window.data1;
+          props.height = ev.window.data2;
+          TW_ComponentResize(root, props.width, props.height);
+          TW_ComponentRerender(fps_display);
           break;
         }
       } break;
@@ -147,9 +154,9 @@ int main(int argc, char *args[]) {
         running = 0;
         break;
       case SDL_MOUSEBUTTONDOWN: {
-        TW_Point coord = {ev.motion.x, props.height - ev.motion.y};
+        TW_Vector2 coord = {ev.motion.x, props.height - ev.motion.y};
         TW_Component *self = TW_ComponentAtPoint(root, coord);
-        app_log("TW_Component at TW_Point (%f, %f) is %p", coord.x, coord.y,
+        app_log("TW_Component at TW_Vector2 (%f, %f) is %p", coord.x, coord.y,
                 self);
         if (self && self->click) {
           self->click(self, coord);
@@ -173,49 +180,52 @@ int main(int argc, char *args[]) {
       }
     }
 
-    const int start = SDL_GetTicks();
-    const int frame_time = (start - previous);
-    props.frame_time = frame_time;
-    props.passed += frame_time;
-    previous = start;
+    if (root->rerender) {
+      const int start = SDL_GetTicks();
+      const int frame_time = (start - previous);
+      props.frame_time = frame_time;
+      props.passed += frame_time;
+      previous = start;
 
-    fps_counter += frame_time;
-    if (fps_counter >= 1000) {
-      real_fps = fps;
-      fps = 1;
-      fps_counter -= 1000;
-      app_log("FPS: %u", real_fps);
-      swprintf(fps_display_string, 0xFF, L"FPS: %u", real_fps);
+      fps_counter += frame_time;
+      if (fps_counter >= 1000) {
+        real_fps = fps;
+        fps = 1;
+        fps_counter -= 1000;
+        app_log("FPS: %u", real_fps);
+        swprintf(fps_display_string, 0xFF, L"FPS: %u", real_fps);
+        TW_ShaderUse(uishader);
+        TW_ComponentRerender(fps_display);
+      } else {
+        // fps_display->update((TW_Component *)fps_display);
+        fps++;
+      }
+
+      TW_Vector3BufferUpdate(&va, 3);
+
+      glViewport(0, 0, props.width, props.height);
+      glClearColor(0.2, 0, 0, 0);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
+              GL_STENCIL_BUFFER_BIT);
+      engine_gl_check();
+
+      GLuint program, loc;
+
       TW_ShaderUse(uishader);
-      // fps_display->update((TW_Component *)fps_display);
-      TW_ComponentRerender(fps_display);
-    } else {
-      fps++;
-    }
+      glGetIntegerv(GL_CURRENT_PROGRAM, &program);
+      glUniform1i(glGetUniformLocation(program, "surface"), 0);
 
-    TW_VectorBufferUpdate(&va, 3);
+      root->render(0, root);
 
-    glViewport(0, 0, props.width, props.height);
-    glClearColor(0.2, 0, 0, 0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-    engine_gl_check();
+      SDL_GL_SwapWindow(props.TW_Window);
 
-    GLuint program, loc;
-
-    TW_ShaderUse(uishader);
-    glGetIntegerv(GL_CURRENT_PROGRAM, &program);
-    glUniform1i(glGetUniformLocation(program, "surface"), 0);
-
-    root->render(0, root);
-
-    SDL_GL_SwapWindow(props.TW_Window);
-
-    // FPS limit.
-    const int end = SDL_GetTicks();
-    if (fps_limit) {
-      const int to_delay = ((1000 / fps_limit) - (end - start));
-      if (to_delay > 0) {
-        SDL_Delay(to_delay);
+      // FPS limit.
+      const int end = SDL_GetTicks();
+      if (fps_limit) {
+        const int to_delay = ((1000 / fps_limit) - (end - start));
+        if (to_delay > 0) {
+          SDL_Delay(to_delay);
+        }
       }
     }
   }

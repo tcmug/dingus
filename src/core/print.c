@@ -106,11 +106,11 @@ void _print_flush(font_atlas *font) {
   if (font->to_render == 0) {
     return;
   }
-  TW_VectorBufferUpdate(&font->points, font->to_render);
-  TW_PointBufferUpdate(&font->uvs, font->to_render);
+  TW_Vector3BufferUpdate(&font->points, font->to_render);
+  TW_Vector2BufferUpdate(&font->uvs, font->to_render);
 
-  TW_VectorBufferBind(&font->points, 0);
-  TW_PointBufferBind(&font->uvs, 1);
+  TW_Vector3BufferBind(&font->points, 0);
+  TW_Vector2BufferBind(&font->uvs, 1);
 
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, font->active_glyphset->TW_Texture);
@@ -213,7 +213,7 @@ void print_rect(font_atlas *font, SDL_Rect rect, const wchar_t *text) {
     target.h = glyph->h;
 
     if (target.x + glyph->w > rect.x + rect.w) {
-      target.y += glyph->h;
+      target.y -= glyph->h;
       target.x = rect.x;
     }
 
@@ -227,7 +227,7 @@ void print_rect(font_atlas *font, SDL_Rect rect, const wchar_t *text) {
 #endif
 }
 
-void print_point(font_atlas *font, SDL_Point TW_Point, const wchar_t *text) {
+void print_point(font_atlas *font, SDL_Point TW_Vector2, const wchar_t *text) {
 
   GLuint program;
   glActiveTexture(GL_TEXTURE0);
@@ -235,7 +235,7 @@ void print_point(font_atlas *font, SDL_Point TW_Point, const wchar_t *text) {
   GLuint loc = glGetUniformLocation(program, "surface");
   glUniform1i(loc, 0);
 
-  SDL_Rect target = {TW_Point.x, TW_Point.y, 0, 0};
+  SDL_Rect target = {TW_Vector2.x, TW_Vector2.y, 0, 0};
   for (int i = 0; i < wcslen(text); i++) {
 
     Uint16 c = text[i];
@@ -305,8 +305,8 @@ font_atlas *font_atlas_create(const char *fontName, int size) {
 
 #ifdef USE_GL
   fa->to_render = 0;
-  TW_VectorBufferInit(&fa->points, 6 * 10, GL_STREAM_DRAW);
-  TW_PointBufferInit(&fa->uvs, 6 * 10, GL_STREAM_DRAW);
+  TW_Vector3BufferInit(&fa->points, 6 * 10, GL_STREAM_DRAW);
+  TW_Vector2BufferInit(&fa->uvs, 6 * 10, GL_STREAM_DRAW);
 #endif
   return fa;
 }
