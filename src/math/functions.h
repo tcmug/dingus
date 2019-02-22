@@ -21,6 +21,7 @@ real TW_Vector3sSquaredDistance(TW_Vector3 a, TW_Vector3 b);
 real TW_Vector3Dot(TW_Vector3 a, TW_Vector3 b);
 TW_Vector3 TW_Vector3Cross(TW_Vector3 a, TW_Vector3 b);
 TW_Vector3 TW_Vector3Reflect(TW_Vector3 v, TW_Vector3 normal);
+void TW_Vector3GLUniform(const char *name, TW_Vector3 c);
 
 int TW_RectangleIncludesPoint(TW_Rectangle r, TW_Vector2 p);
 

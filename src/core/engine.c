@@ -22,6 +22,7 @@ PFNGLUNIFORMMATRIX4FVPROC glUniformMatrix4fv;
 PFNGLBINDBUFFERPROC glBindBuffer;
 PFNGLBINDATTRIBLOCATIONPROC glBindAttribLocation;
 PFNGLUNIFORM1IPROC glUniform1i;
+PFNGLUNIFORM3FVPROC glUniform3fv;
 PFNGLCREATEPROGRAMPROC glCreateProgram;
 PFNGLDELETEPROGRAMPROC glDeleteProgram;
 PFNGLATTACHSHADERPROC glAttachShader;
@@ -128,6 +129,7 @@ TW_Window engine_init() {
   GL_GET(glBindAttribLocation, PFNGLBINDATTRIBLOCATIONPROC,
          "glBindAttribLocation");
   GL_GET(glUniform1i, PFNGLUNIFORM1IPROC, "glUniform1i");
+  GL_GET(glUniform3fv, PFNGLUNIFORM3FVPROC, "glUniform3fv");
   GL_GET(glCreateProgram, PFNGLCREATEPROGRAMPROC, "glCreateProgram");
   GL_GET(glDeleteProgram, PFNGLDELETEPROGRAMPROC, "glDeleteProgram");
   GL_GET(glAttachShader, PFNGLATTACHSHADERPROC, "glAttachShader");

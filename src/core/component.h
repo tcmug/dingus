@@ -72,4 +72,6 @@ void TW_ComponentResize(TW_Component *self, int w, int h);
 
 #define CHILDREN(...) .children = LIST(__VA_ARGS__)
 
+#define COMPONENT(...) ((TW_Component *)TW_Component(TW_Component, __VA_ARGS__))
+
 #endif

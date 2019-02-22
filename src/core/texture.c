@@ -28,8 +28,8 @@ TW_Texture *TW_TextureLoad(const char *filename) {
       Mode = GL_COLOR_INDEX;
     }
 
-    glGenTextures(1, &t->TW_Texture);
-    glBindTexture(GL_TEXTURE_2D, t->TW_Texture);
+    glGenTextures(1, &t->texture);
+    glBindTexture(GL_TEXTURE_2D, t->texture);
 
     t->width = surface->w;
     t->height = surface->h;
@@ -57,10 +57,11 @@ TW_Texture *TW_TextureLoad(const char *filename) {
   return t;
 }
 
-TW_Texture *TW_TextureRenderTarget(int w, int h) {
+TW_Texture *TW_TextureRenderTarget(int w, int h, int hasdepth) {
 
   TW_Texture *f = (TW_Texture *)malloc(sizeof(TW_Texture));
 
+  f->depth = 0;
   f->width = w;
   f->height = h;
 
@@ -71,8 +72,8 @@ TW_Texture *TW_TextureRenderTarget(int w, int h) {
   glGenFramebuffers(1, &f->buffer);
   glBindFramebuffer(GL_FRAMEBUFFER, f->buffer);
 
-  glGenTextures(1, &f->TW_Texture);
-  glBindTexture(GL_TEXTURE_2D, f->TW_Texture);
+  glGenTextures(1, &f->texture);
+  glBindTexture(GL_TEXTURE_2D, f->texture);
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -86,26 +87,26 @@ TW_Texture *TW_TextureRenderTarget(int w, int h) {
 
   // Attach 2D TW_Texture to this FBO
   glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
-                         GL_TEXTURE_2D, f->TW_Texture, 0);
+                         GL_TEXTURE_2D, f->texture, 0);
 
   glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
 
-  /*
-  GLuint depthrenderbuffer;
-  glGenRenderbuffers(1, &depthrenderbuffer);
-  glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
-  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1024, 768);
-  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-  GL_RENDERBUFFER, depthrenderbuffer);
+  if (hasdepth == 1) {
+    glGenRenderbuffers(1, &f->depth);
+    glBindRenderbuffer(GL_RENDERBUFFER, f->depth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, f->width,
+                          f->height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                              GL_RENDERBUFFER, f->depth);
 
-  // Set "renderedTexture" as our colour attachement #0
-  glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderedTexture,
-  0);
-
-  // Set the list of draw buffers.
-  GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
-  glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
-  */
+    // // Set "renderedTexture" as our colour attachement #0
+    // glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+    // renderedTexture, 0);
+  }
+  // // Set the list of draw buffers.
+  // GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
+  // glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
+  // */
 
   if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
     app_log("Goddamn");
@@ -118,7 +119,10 @@ TW_Texture *TW_TextureRenderTarget(int w, int h) {
 }
 
 void TW_TextureDestroy(TW_Texture *t) {
-  glDeleteTextures(1, &t->TW_Texture);
+  if (t->texture)
+    glDeleteTextures(1, &t->texture);
+  if (t->depth)
+    glDeleteTextures(1, &t->depth);
   if (t->buffer)
     glDeleteFrameBuffers(1, &t->buffer);
   free(t);
@@ -163,7 +167,7 @@ void TW_TextureDraw(TW_Texture *t, TW_Rectangle r) {
   TW_Vector3BufferBind(va, 0);
   TW_Vector2BufferBind(pv, 1);
 
-  glBindTexture(GL_TEXTURE_2D, t->TW_Texture);
+  glBindTexture(GL_TEXTURE_2D, t->texture);
 
   glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 

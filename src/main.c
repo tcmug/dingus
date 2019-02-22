@@ -30,8 +30,32 @@
 
 #include "core/buffer.h"
 
+#define APP_LOOP_EVENT_BLOCKS_RENDER
+
 TW_Vector3Buffer va;
 TW_Shader flat, uishader;
+
+void PolyRender(const TW_Component *root, TW_Component *self) {
+
+  TW_Vector3 dir = (TW_Vector3){1, 1, -5};
+  TW_Matrix projection = TW_MatrixPerspectiveProjection(0.01, 1000, 70, 1);
+  TW_Matrix view = TW_MatrixFromVector(
+      (TW_Vector3){0, 0, 5}, (TW_Vector3){0, 0, 0}, (TW_Vector3){0, 1, 0});
+
+  static float a = 0;
+  a += 0.01;
+  TW_Matrix model = TW_MatrixRotation(a, a, 0);
+
+  TW_ShaderUse(flat);
+  TW_MatrixGLUniform("projection", projection);
+  TW_MatrixGLUniform("view", view);
+  TW_MatrixGLUniform("model", model);
+
+  TW_Vector3BufferBind(&va, 0);
+  glDrawArrays(GL_TRIANGLES, 0, 3);
+  TW_ShaderUse(uishader);
+  TW_ComponentRerender(self);
+}
 
 int mainUpdate(TW_Component *_self) {
 
@@ -101,6 +125,8 @@ int main(int argc, char *args[]) {
   TW_Component *root =
       VIEW(.color = {0.3, 0, 0, 0}, .rect = {0, 0, props.width, props.height},
            CHILDREN(
+               VIEW(.rect = {0, 0, 320, 240}, .color = {0, 0, 0, 0},
+                    CHILDREN(COMPONENT(.render = PolyRender))),
                TOP_RIGHT(CHILDREN(
                    fps_display =
                        TEXT(.rect = {0, props.height, 100, props.height},
@@ -112,12 +138,14 @@ int main(int argc, char *args[]) {
                             VIEW(.rect = {150, 150, 150, 150},
                                  .color = {0, 1, 1, 0},
                                  CHILDREN(
-                                     TEXT(.rect = {0, 150, 150, 150},
+                                     TEXT(.color = {0, 0, 1},
+                                          .rect = {0, 150, 150, 150},
                                           .text = msg, ),
                                      VIEW(.rect = {75, 75, 75, 75},
                                           .color = {1, 0, 0, 0},
-                                          CHILDREN(TEXT(.rect = {0, 75, 75, 75},
-                                                        .text = msg, )))
+                                          CHILDREN(TEXT(.color = {0, 0, 0},
+                                                        .rect = {0, 75, 75, 75},
+                                                        .text = msg)))
 
                                          ))))))));
 
@@ -138,7 +166,11 @@ int main(int argc, char *args[]) {
   */
   while (running) {
     SDL_Event ev;
+#ifdef APP_LOOP_EVENT_BLOCKS_RENDER
+    if (SDL_PollEvent(&ev)) {
+#else
     if (SDL_WaitEvent(&ev)) {
+#endif
       switch (ev.type) {
       case SDL_WINDOWEVENT: {
         switch (ev.window.event) {
@@ -181,6 +213,7 @@ int main(int argc, char *args[]) {
     }
 
     if (root->rerender) {
+
       const int start = SDL_GetTicks();
       const int frame_time = (start - previous);
       props.frame_time = frame_time;
@@ -195,6 +228,7 @@ int main(int argc, char *args[]) {
         app_log("FPS: %u", real_fps);
         swprintf(fps_display_string, 0xFF, L"FPS: %u", real_fps);
         TW_ShaderUse(uishader);
+        TW_Vector3GLUniform("tint", (TW_Vector3){1, 1, 1});
         TW_ComponentRerender(fps_display);
       } else {
         // fps_display->update((TW_Component *)fps_display);
@@ -212,6 +246,7 @@ int main(int argc, char *args[]) {
       GLuint program, loc;
 
       TW_ShaderUse(uishader);
+      TW_Vector3GLUniform("tint", (TW_Vector3){1, 1, 1});
       glGetIntegerv(GL_CURRENT_PROGRAM, &program);
       glUniform1i(glGetUniformLocation(program, "surface"), 0);
 

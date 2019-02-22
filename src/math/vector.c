@@ -1,6 +1,8 @@
 
 #include "math.h"
 
+#include "../core/engine.h"
+
 TW_Vector3 TW_Vector3AddVector(TW_Vector3 a, TW_Vector3 b) {
   return (TW_Vector3){a.x + b.x, a.y + b.y, a.z + b.z};
 }
@@ -65,4 +67,14 @@ TW_Vector3 TW_Vector3Cross(TW_Vector3 a, TW_Vector3 b) {
 TW_Vector3 TW_Vector3Reflect(TW_Vector3 v, TW_Vector3 normal) {
   return TW_Vector3AddVector(
       TW_Vector3MulReal(normal, -2 * TW_Vector3Dot(v, normal)), v);
+}
+
+void TW_Vector3GLUniform(const char *name, TW_Vector3 c) {
+  GLint program;
+  glGetIntegerv(GL_CURRENT_PROGRAM, &program);
+  // engine_gl_check();
+  GLint loc = glGetUniformLocation(program, name);
+  // engine_gl_check();
+  glUniform3fv(loc, 1, c.value);
+  // engine_gl_check();
 }

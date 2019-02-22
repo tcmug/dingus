@@ -17,7 +17,7 @@ typedef struct TW_ComponentView_t {
 void TW_ComponentViewRender(const TW_Component *parent, TW_Component *);
 
 #define VIEW_DEFAULTS                                                          \
-  .render = &TW_ComponentViewRender, .rerender = 1, .color = {1, 0, 1, 0}
+  .render = &TW_ComponentViewRender, .rerender = 1, .color = {1, 1, 1, 0}
 
 #define VIEW(...)                                                              \
   ((TW_Component *)TW_Component(TW_ComponentView, VIEW_DEFAULTS, __VA_ARGS__))

@@ -36,6 +36,7 @@ extern PFNGLUNIFORMMATRIX4FVPROC glUniformMatrix4fv;
 extern PFNGLBINDBUFFERPROC glBindBuffer;
 extern PFNGLBINDATTRIBLOCATIONPROC glBindAttribLocation;
 extern PFNGLUNIFORM1IPROC glUniform1i;
+extern PFNGLUNIFORM3FVPROC glUniform3fv;
 extern PFNGLCREATEPROGRAMPROC glCreateProgram;
 extern PFNGLDELETEPROGRAMPROC glDeleteProgram;
 extern PFNGLATTACHSHADERPROC glAttachShader;

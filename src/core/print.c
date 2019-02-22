@@ -103,9 +103,11 @@ font_atlas_glyph_set *font_atlas_glyph_set_create(font_atlas *atlas, int set) {
 }
 
 void _print_flush(font_atlas *font) {
+
   if (font->to_render == 0) {
     return;
   }
+
   TW_Vector3BufferUpdate(&font->points, font->to_render);
   TW_Vector2BufferUpdate(&font->uvs, font->to_render);
 
@@ -188,6 +190,7 @@ void print_rect(font_atlas *font, SDL_Rect rect, const wchar_t *text) {
   glUniform1i(loc, 0);
 
   SDL_Rect target = {rect.x, rect.y, 0, 0};
+
   for (int i = 0; i < wcslen(text); i++) {
 
     Uint16 c = text[i];
