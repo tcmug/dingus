@@ -52,39 +52,9 @@ void PolyRender(const TW_Component *root, TW_Component *self) {
   TW_MatrixGLUniform("model", model);
 
   TW_Vector3BufferBind(&va, 0);
-  glDrawArrays(GL_TRIANGLES, 0, 3);
+  glDrawArrays(GL_TRIANGLES, 0, va.size);
   TW_ShaderUse(uishader);
   TW_ComponentRerender(self);
-}
-
-int mainUpdate(TW_Component *_self) {
-
-  TW_TextureStartRender(_self->cache);
-
-  glClearColor(0.2, 0, 0, 0);
-  glClear(GL_COLOR_BUFFER_BIT);
-  engine_gl_check();
-
-  TW_Vector3 dir = (TW_Vector3){1, 1, -5};
-  TW_Matrix projection = TW_MatrixPerspectiveProjection(0.01, 1000, 70, 1);
-  TW_Matrix view = TW_MatrixFromVector(
-      (TW_Vector3){0, 0, 5}, (TW_Vector3){0, 0, 0}, (TW_Vector3){0, 1, 0});
-
-  static float a = 0;
-  a += 0.01;
-  TW_Matrix model = TW_MatrixRotation(a, a, 0);
-
-  TW_ShaderUse(flat);
-  TW_MatrixGLUniform("projection", projection);
-  TW_MatrixGLUniform("view", view);
-  TW_MatrixGLUniform("model", model);
-
-  TW_Vector3BufferBind(&va, 0);
-  glDrawArrays(GL_TRIANGLES, 0, 3);
-
-  TW_TextureEndRender(_self->cache);
-
-  return 1;
 }
 
 // elem_type
@@ -112,11 +82,28 @@ int main(int argc, char *args[]) {
   default_font = font_atlas_create(RESOURCE("share/dingus/DroidSans.ttf"), 20);
 
   // GL_STATIC_DRAW
-  TW_Vector3BufferInit(&va, 3, GL_STREAM_DRAW);
+  TW_Vector3BufferInit(&va, 9, GL_STREAM_DRAW);
+  TW_Vector3 offset = {0};
 
-  va.data[0] = (TW_Vector3){-1, -1, 0};
-  va.data[1] = (TW_Vector3){0, 1, 0};
-  va.data[2] = (TW_Vector3){1, -1, 0};
+  offset.x = -1;
+  offset.y = 1;
+  va.data[0] = TW_Vector3SubVector((TW_Vector3){-1, -1, 0}, offset);
+  va.data[1] = TW_Vector3SubVector((TW_Vector3){0, 1, 0}, offset);
+  va.data[2] = TW_Vector3SubVector((TW_Vector3){1, -1, 0}, offset);
+
+  offset.x = 1;
+  offset.y = 1;
+  va.data[3] = TW_Vector3SubVector((TW_Vector3){-1, -1, 0}, offset);
+  va.data[4] = TW_Vector3SubVector((TW_Vector3){0, 1, 0}, offset);
+  va.data[5] = TW_Vector3SubVector((TW_Vector3){1, -1, 0}, offset);
+
+  offset.x = 0;
+  offset.y = -1;
+  va.data[6] = TW_Vector3SubVector((TW_Vector3){-1, -1, 0}, offset);
+  va.data[7] = TW_Vector3SubVector((TW_Vector3){0, 1, 0}, offset);
+  va.data[8] = TW_Vector3SubVector((TW_Vector3){1, -1, 0}, offset);
+
+  TW_Vector3BufferUpdate(&va, va.size);
 
 #define WINDOW_DEFAULT (&props)
 
@@ -126,7 +113,7 @@ int main(int argc, char *args[]) {
       VIEW(.color = {0.3, 0, 0, 0}, .rect = {0, 0, props.width, props.height},
            CHILDREN(
                VIEW(.rect = {0, 0, 320, 240}, .color = {0, 0, 0, 0},
-                    CHILDREN(COMPONENT(.render = PolyRender))),
+                    .hasDepth = 1, CHILDREN(COMPONENT(.render = PolyRender))),
                TOP_RIGHT(CHILDREN(
                    fps_display =
                        TEXT(.rect = {0, props.height, 100, props.height},
@@ -234,8 +221,6 @@ int main(int argc, char *args[]) {
         // fps_display->update((TW_Component *)fps_display);
         fps++;
       }
-
-      TW_Vector3BufferUpdate(&va, 3);
 
       glViewport(0, 0, props.width, props.height);
       glClearColor(0.2, 0, 0, 0);

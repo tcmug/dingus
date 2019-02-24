@@ -183,10 +183,10 @@ void _print_push_glyph(font_atlas *font, SDL_Rect glyph, SDL_Rect target) {
 
 void print_rect(font_atlas *font, SDL_Rect rect, const wchar_t *text) {
 
-  GLuint program;
+  GLint program;
   glActiveTexture(GL_TEXTURE0);
   glGetIntegerv(GL_CURRENT_PROGRAM, &program);
-  GLuint loc = glGetUniformLocation(program, "surface");
+  GLint loc = glGetUniformLocation(program, "surface");
   glUniform1i(loc, 0);
 
   SDL_Rect target = {rect.x, rect.y, 0, 0};

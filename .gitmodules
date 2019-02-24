@@ -1,3 +1,12 @@
 [submodule "cmake"]
-	path = cmake
+	path = lib/sdl2-cmake-scripts
 	url = https://github.com/tcbrindle/sdl2-cmake-scripts.git
+[submodule "lib/uthash"]
+	path = lib/uthash
+	url = https://github.com/troydhanson/uthash.git
+[submodule "lib/snow"]
+	path = lib/snow
+	url = https://github.com/mortie/snow.git
+[submodule "lib/linmath"]
+	path = lib/linmath
+	url = https://github.com/datenwolf/linmath.h

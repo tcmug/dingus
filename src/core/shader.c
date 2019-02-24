@@ -1,11 +1,14 @@
 
 #include "shader.h"
 
+GLuint _shader_load(const char *filename, int type);
+
 TW_Shader TW_ShaderLoad(const char *vertex_name, const char *geometry_name,
                         const char *fragment_name) {
 
   TW_Shader s = {0};
   s.program = glCreateProgram();
+  engine_gl_check();
 
   if (vertex_name) {
     s.vertex = _shader_load(vertex_name, GL_VERTEX_SHADER);
@@ -68,7 +71,7 @@ GLuint _shader_load(const char *filename, int type) {
   int size = ftell(f);
   fseek(f, 0, SEEK_SET);
 
-  if (size == 0) {
+  if (!size > 0) {
     app_warning("TW_Shader file \"%s\" is empty.", filename);
     fclose(f);
     return 0;

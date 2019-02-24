@@ -15,7 +15,8 @@ void TW_ComponentViewRender(const TW_Component *parent, TW_Component *_self) {
     }
     self->rerender = 1;
     self->resized = 0;
-    self->cache = TW_TextureRenderTarget(self->rect.w, self->rect.h, 1);
+    self->cache =
+        TW_TextureRenderTarget(self->rect.w, self->rect.h, self->hasDepth);
   }
 
   if (self->rerender) {

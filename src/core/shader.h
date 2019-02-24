@@ -14,10 +14,8 @@ typedef struct shader_t {
   GLuint fragment;
 } TW_Shader;
 
-GLuint _shader_load(const char *filename, int type);
 TW_Shader TW_ShaderLoad(const char *vertex_name, const char *geometry_name,
                         const char *fragment_name);
-GLuint _shader_load(const char *filename, int type);
 void TW_ShaderUse(TW_Shader s);
 
 #endif
