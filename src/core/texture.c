@@ -124,7 +124,7 @@ void TW_TextureDestroy(TW_Texture *t) {
   if (t->depth)
     glDeleteTextures(1, &t->depth);
   if (t->buffer)
-    glDeleteFrameBuffers(1, &t->buffer);
+    glDeleteFramebuffers(1, &t->buffer);
   free(t);
 }
 
