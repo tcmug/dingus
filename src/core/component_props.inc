@@ -2,9 +2,9 @@
 // TW_Component header properties
 /////
 
+struct TW_Window *window;      // TW_Window specs.
 struct component_t **children; // TW_Component children.
 struct component_t *parent;    // TW_Component parent component.
-struct window_t *TW_Window;    // TW_Window specs.
 
 int resized;
 TW_Rectangle rect;       // Target TW_Rectangle.

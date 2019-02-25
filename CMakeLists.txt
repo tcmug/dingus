@@ -50,6 +50,7 @@ target_sources(dingus
 
 target_link_libraries(dingus
 	m
+	lua
 	SDL2_image
 	SDL2
 	SDL2_ttf

@@ -26,12 +26,21 @@ typedef struct component_t {
 } TW_Component;
 
 typedef struct window_t {
-  SDL_Window *TW_Window;
+
+  SDL_Window *sdl_window;
+  struct lua_State *lua;
+
   int height;
   int width;
+  int resizable;
+  int vsync;
+  int high_dpi;
+  int frame_limit;
+
   int passed;
   int frame_time;
   int frame;
+
 } TW_Window;
 
 TW_Component *TW_ComponentCreate(TW_Component props);
@@ -47,7 +56,7 @@ void TW_ComponentMove(TW_Component *self, int x, int y);
 void TW_ComponentResize(TW_Component *self, int w, int h);
 
 #define COMPONENT_DEFAULTS                                                     \
-  .TW_Window = WINDOW_DEFAULT, .children = 0, .cache = 0, .resized = 1,        \
+  .window = WINDOW_DEFAULT, .children = 0, .cache = 0, .resized = 1,           \
   .rect = {0, 0, 0, 0}, .parent = 0
 
 #define _NUMARGS(type, ...) (sizeof((type[]){__VA_ARGS__}) / sizeof(type))

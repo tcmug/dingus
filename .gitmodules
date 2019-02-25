@@ -10,3 +10,6 @@
 [submodule "lib/linmath"]
 	path = lib/linmath
 	url = https://github.com/datenwolf/linmath.h
+[submodule "lib/shared-modules"]
+	path = lib/shared-modules
+	url = https://github.com/flathub/shared-modules.git

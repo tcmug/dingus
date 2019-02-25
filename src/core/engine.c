@@ -2,6 +2,10 @@
 #include "engine.h"
 #include "log.h"
 
+#include <lauxlib.h>
+#include <lua.h>
+#include <lualib.h>
+
 GLuint global_vao = 0;
 
 #define GL_GET(var, type, name)                                                \
@@ -11,12 +15,63 @@ GLuint global_vao = 0;
     return props;                                                              \
   }
 
-TW_Window engine_init() {
+int lua_get_table_int(lua_State *L, const char *key, int def) {
+  int value;
+  lua_pushstring(L, key);
+  lua_gettable(L, -2);
+  if (lua_isnumber(L, -1)) {
+    value = lua_tointeger(L, -1);
+  } else {
+    value = def;
+  }
+  lua_pop(L, 1);
+  return value;
+}
 
-  TW_Window props;
+int engine_shutdown(TW_Window *props) {
+  glDeleteVertexArrays(1, &global_vao);
+  SDL_DestroyWindow(props->sdl_window);
+  SDL_Quit();
+  lua_close(props->lua);
+  free(props);
+  return 0;
+}
 
-  props.width = 800;
-  props.height = 600;
+void _engine_gl_check(const char *file, const char *function, int line) {
+  GLenum err;
+  while ((err = glGetError()) != GL_NO_ERROR) {
+    printf("%s: %u => %s (%s)\n", file, line, function);
+    //, gluErrorString(err));
+    exit(1);
+  }
+}
+
+int _engine_load_config(TW_Window *props) {
+  props->lua = luaL_newstate();
+  if (luaL_dofile(props->lua, RESOURCE("share/dingus/scripts/start.lua"))) {
+    app_log("Couldn't load file: %s\n", lua_tostring(props->lua, -1));
+    return 0;
+  }
+
+  lua_getglobal(props->lua, "preferences");
+  if (lua_isnil(props->lua, -1)) {
+    app_log("No preferences - using defaults.");
+    lua_newtable(props->lua);
+  }
+
+  props->width = lua_get_table_int(props->lua, "width", 800);
+  props->height = lua_get_table_int(props->lua, "height", 600);
+  props->frame_limit = lua_get_table_int(props->lua, "frame_limit", 60);
+  props->vsync = lua_get_table_int(props->lua, "vsync", 1);
+  props->resizable = lua_get_table_int(props->lua, "resizable", 0);
+  props->high_dpi = lua_get_table_int(props->lua, "high_dpi", 0);
+
+  lua_pop(props->lua, -1);
+
+  return 1;
+}
+
+int _engine_sdl_init(TW_Window *props) {
 
   SDL_Init(SDL_INIT_VIDEO);
   TTF_Init();
@@ -26,31 +81,39 @@ TW_Window engine_init() {
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
 
-  props.TW_Window = SDL_CreateWindow(
-      "Dingus", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, props.width,
-      props.height,
-      SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_OPENGL);
+  Uint32 flags = SDL_WINDOW_OPENGL;
 
-  if (props.TW_Window == NULL) {
-    printf("SDL_Init failed: %s\n", SDL_GetError());
-    app_log("Could not create TW_Window...\n");
-    return props;
+  if (props->resizable) {
+    flags |= SDL_WINDOW_RESIZABLE;
+  }
+  if (props->high_dpi) {
+    flags |= SDL_WINDOW_ALLOW_HIGHDPI;
   }
 
-  SDL_GLContext gl_context = SDL_GL_CreateContext(props.TW_Window);
+  props->sdl_window = SDL_CreateWindow("Dingus", SDL_WINDOWPOS_UNDEFINED,
+                                       SDL_WINDOWPOS_UNDEFINED, props->width,
+                                       props->height, flags);
+
+  if (props->sdl_window == NULL) {
+    app_log("Could not create TW_Window: %s\n", SDL_GetError());
+    return 0;
+  }
+
+  return 1;
+}
+
+int _engine_opengl_init(TW_Window *props) {
+
+  SDL_GLContext gl_context = SDL_GL_CreateContext(props->sdl_window);
   printf("OPENGL %s / GLSL %s\n", glGetString(GL_VERSION),
          glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-  props.passed = 0;
-  props.frame = 0;
-
   glDepthFunc(GL_LESS);
-
   glFrontFace(GL_CW);
   glEnable(GL_CULL_FACE);
   glEnable(GL_DEPTH_TEST);
 
-  SDL_GL_SetSwapInterval(0);
+  SDL_GL_SetSwapInterval(props->vsync);
 
   app_log("OpenGL init.");
 
@@ -60,25 +123,23 @@ TW_Window engine_init() {
 
   engine_gl_check();
 
-  app_log("TW_Window created: %i %i", props.width, props.height);
+  return 1;
+}
+
+TW_Window *engine_init() {
+
+  TW_Window *props = (TW_Window *)malloc(sizeof(TW_Window));
+
+  if (!_engine_load_config(props) || !_engine_sdl_init(props) ||
+      !_engine_opengl_init(props)) {
+    free(props);
+    return 0;
+  }
+
+  props->passed = 0;
+  props->frame = 0;
+
+  app_log("Window created: %i %i", props->width, props->height);
 
   return props;
-}
-
-int engine_shutdown(TW_Window props) {
-  glDeleteVertexArrays(1, &global_vao);
-  SDL_DestroyWindow(props.TW_Window);
-  SDL_Quit();
-  return 0;
-}
-
-// #include <GL/glu.h>
-
-void _engine_gl_check(const char *file, const char *function, int line) {
-  GLenum err;
-  while ((err = glGetError()) != GL_NO_ERROR) {
-    printf("%s: %u => %s (%s)\n", file, line, function);
-    //, gluErrorString(err));
-    exit(1);
-  }
 }

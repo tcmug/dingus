@@ -6,7 +6,7 @@
 font_atlas *default_font;
 
 void TW_TextRender(const TW_Component *parent, TW_Component *_self) {
-  TW_Window *props = (TW_Window *)_self->TW_Window;
+  TW_Window *props = (TW_Window *)_self->window;
   TW_Text *self = (TW_Text *)_self;
   SDL_Rect rect = {self->rect.x, self->rect.y, self->rect.w, self->rect.h};
   glEnable(GL_BLEND);

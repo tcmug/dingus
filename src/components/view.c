@@ -6,7 +6,7 @@
 
 void TW_ComponentViewRender(const TW_Component *parent, TW_Component *_self) {
 
-  TW_Window *props = (TW_Window *)_self->TW_Window;
+  TW_Window *props = (TW_Window *)_self->window;
   TW_ComponentView *self = (TW_ComponentView *)_self;
 
   if (self->resized) {

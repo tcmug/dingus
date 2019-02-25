@@ -10,6 +10,10 @@
 #include <string.h>
 #include <wchar.h>
 
+#include <lauxlib.h>
+#include <lua.h>
+#include <lualib.h>
+
 #include "config.h"
 
 #include "components/center.h"
@@ -60,10 +64,12 @@ void PolyRender(const TW_Component *root, TW_Component *self) {
 // elem_type
 int main(int argc, char *args[]) {
 
-  TW_Window props = engine_init();
+  TW_Window *props = engine_init();
+  if (!props)
+    return 1;
 
   int running = 1;
-  int fps_limit = 60, fps = 60, real_fps = 0, fps_counter = 1000;
+  int fps = 0, real_fps = 0, fps_counter = 1000;
   int previous = SDL_GetTicks();
 
   wchar_t fps_display_string[0xFF] = {0};
@@ -105,18 +111,18 @@ int main(int argc, char *args[]) {
 
   TW_Vector3BufferUpdate(&va, va.size);
 
-#define WINDOW_DEFAULT (&props)
+#define WINDOW_DEFAULT (props)
 
   wchar_t *msg = L"BOX";
 
   TW_Component *root =
-      VIEW(.color = {0.3, 0, 0, 0}, .rect = {0, 0, props.width, props.height},
+      VIEW(.color = {0.3, 0, 0, 0}, .rect = {0, 0, props->width, props->height},
            CHILDREN(
                VIEW(.rect = {0, 0, 320, 240}, .color = {0, 0, 0, 0},
                     .hasDepth = 1, CHILDREN(COMPONENT(.render = PolyRender))),
                TOP_RIGHT(CHILDREN(
                    fps_display =
-                       TEXT(.rect = {0, props.height, 100, props.height},
+                       TEXT(.rect = {0, props->height, 100, props->height},
                             .text = fps_display_string))),
                RIGHT(CHILDREN(
                    VIEW(.rect = {400, 10, 300, 300}, .color = {1, 0, 1, 0},
@@ -139,15 +145,15 @@ int main(int argc, char *args[]) {
   /*
 
     TW_Component *root =
-        VIEW(.rect = {0, 0, props.height, props.width},
+        VIEW(.rect = {0, 0, props->height, props->width},
              CHILDREN(fps_display =
-                          TEXT(.rect = {0, 0, props.width, props.height},
+                          TEXT(.rect = {0, 0, props->width, props->height},
                                .text = fps_display_string,
                                .background = {255, 255, 255, 32}),
-                      RIGHT(.rect = {0, 0, props.width, props.height},
+                      RIGHT(.rect = {0, 0, props->width, props->height},
                             CHILDREN(TEXT(.text = L"Aligned right",
                                           .background = {255, 255, 255, 32}))),
-                      CENTER(.rect = {0, 0, props.width, props.height},
+                      CENTER(.rect = {0, 0, props->width, props->height},
                              CHILDREN(TEXT(.text = L"Testing this text thing"),
                                       TEXT(.text = L"META")))));
   */
@@ -162,9 +168,9 @@ int main(int argc, char *args[]) {
       case SDL_WINDOWEVENT: {
         switch (ev.window.event) {
         case SDL_WINDOWEVENT_SIZE_CHANGED:
-          props.width = ev.window.data1;
-          props.height = ev.window.data2;
-          TW_ComponentResize(root, props.width, props.height);
+          props->width = ev.window.data1;
+          props->height = ev.window.data2;
+          TW_ComponentResize(root, props->width, props->height);
           TW_ComponentRerender(fps_display);
           break;
         }
@@ -173,7 +179,7 @@ int main(int argc, char *args[]) {
         running = 0;
         break;
       case SDL_MOUSEBUTTONDOWN: {
-        TW_Vector2 coord = {ev.motion.x, props.height - ev.motion.y};
+        TW_Vector2 coord = {ev.motion.x, props->height - ev.motion.y};
         TW_Component *self = TW_ComponentAtPoint(root, coord);
         app_log("TW_Component at TW_Vector2 (%f, %f) is %p", coord.x, coord.y,
                 self);
@@ -190,10 +196,10 @@ int main(int argc, char *args[]) {
           fullscreen = !fullscreen;
           if (fullscreen) {
             app_log("Enter fullscreen mode.");
-            SDL_SetWindowFullscreen(props.TW_Window, SDL_WINDOW_FULLSCREEN);
+            SDL_SetWindowFullscreen(props->sdl_window, SDL_WINDOW_FULLSCREEN);
           } else {
             app_log("Exit fullscreen mode.");
-            SDL_SetWindowFullscreen(props.TW_Window, 0);
+            SDL_SetWindowFullscreen(props->sdl_window, 0);
           }
         }
       }
@@ -203,8 +209,8 @@ int main(int argc, char *args[]) {
 
       const int start = SDL_GetTicks();
       const int frame_time = (start - previous);
-      props.frame_time = frame_time;
-      props.passed += frame_time;
+      props->frame_time = frame_time;
+      props->passed += frame_time;
       previous = start;
 
       fps_counter += frame_time;
@@ -222,27 +228,28 @@ int main(int argc, char *args[]) {
         fps++;
       }
 
-      glViewport(0, 0, props.width, props.height);
+      glViewport(0, 0, props->width, props->height);
       glClearColor(0.2, 0, 0, 0);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
               GL_STENCIL_BUFFER_BIT);
       engine_gl_check();
 
-      GLuint program, loc;
+      GLint program, loc, u;
 
       TW_ShaderUse(uishader);
       TW_Vector3GLUniform("tint", (TW_Vector3){1, 1, 1});
       glGetIntegerv(GL_CURRENT_PROGRAM, &program);
-      glUniform1i(glGetUniformLocation(program, "surface"), 0);
+      u = glGetUniformLocation(program, "surface");
+      glUniform1i(u, 0);
 
       root->render(0, root);
 
-      SDL_GL_SwapWindow(props.TW_Window);
+      SDL_GL_SwapWindow(props->sdl_window);
 
       // FPS limit.
       const int end = SDL_GetTicks();
-      if (fps_limit) {
-        const int to_delay = ((1000 / fps_limit) - (end - start));
+      if (props->frame_limit) {
+        const int to_delay = ((1000 / props->frame_limit) - (end - start));
         if (to_delay > 0) {
           SDL_Delay(to_delay);
         }
