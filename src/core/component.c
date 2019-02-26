@@ -11,10 +11,11 @@
 #include "log.h"
 
 void TW_ComponentRenderChildren(TW_Component *self) {
-  if (self->children)
-    for (int i = 0; self->children[i]; i++)
-      if (self->children[i]->render)
-        self->children[i]->render(self, self->children[i]);
+  TW_Component *kid;
+  DL_FOREACH(self->kids, kid)
+  if (kid->render) {
+    kid->render(self, kid);
+  }
 }
 
 void TW_ComponentRerender(TW_Component *self) {

@@ -36,6 +36,10 @@
 
 #define APP_LOOP_EVENT_BLOCKS_RENDER
 
+TW_Window *props = 0;
+
+#define WINDOW_DEFAULT (props)
+
 TW_Vector3Buffer va;
 TW_Shader flat, uishader;
 
@@ -51,6 +55,7 @@ void PolyRender(const TW_Component *root, TW_Component *self) {
   TW_Matrix model = TW_MatrixRotation(a, a, 0);
 
   TW_ShaderUse(flat);
+
   TW_MatrixGLUniform("projection", projection);
   TW_MatrixGLUniform("view", view);
   TW_MatrixGLUniform("model", model);
@@ -61,10 +66,53 @@ void PolyRender(const TW_Component *root, TW_Component *self) {
   TW_ComponentRerender(self);
 }
 
+#include "utlist.h"
+
+static int l_component(lua_State *L) {
+  const char *type = lua_get_table_string(L, "type", "null");
+  int x = lua_get_table_int(L, "x", 0);
+  int y = lua_get_table_int(L, "y", 0);
+  int w = lua_get_table_int(L, "w", props->width);
+  int h = lua_get_table_int(L, "h", props->height);
+  TW_Component *comp = 0;
+  if (strcmp(type, "view") == 0) {
+    comp = VIEW(.color = {0, 0, 0, 0}, .rect = {x, y, w, h});
+  } else if (strcmp(type, "text") == 0) {
+    const wchar_t *c = L"Hello World";
+    comp = TEXT(.rect = {x, y, w, h},
+                .color =
+                    {
+                        1,
+                        1,
+                        1,
+                        1,
+                    },
+                .text = c);
+  }
+
+  comp->kids = 0;
+  lua_pushstring(L, "children");
+  lua_gettable(L, -2);
+  if (lua_istable(L, -1)) {
+    lua_pushnil(L);
+    while (lua_next(L, -2) != 0) {
+      if (lua_islightuserdata(L, -1)) {
+        TW_Component *kid = (TW_Component *)lua_touserdata(L, -1);
+        kid->parent = comp;
+        DL_APPEND(comp->kids, kid);
+      }
+      lua_pop(L, 1);
+    }
+  }
+  lua_pop(L, 1);
+  lua_pushlightuserdata(L, comp);
+  return 1;
+}
+
 // elem_type
 int main(int argc, char *args[]) {
 
-  TW_Window *props = engine_init();
+  props = engine_init();
   if (!props)
     return 1;
 
@@ -111,15 +159,25 @@ int main(int argc, char *args[]) {
 
   TW_Vector3BufferUpdate(&va, va.size);
 
-#define WINDOW_DEFAULT (props)
+  lua_pushcfunction(props->lua, l_component);
+  lua_setglobal(props->lua, "component");
+
+  if (luaL_dofile(props->lua, RESOURCE("share/dingus/scripts/start.lua"))) {
+    app_log("Couldn't load file: %s\n", lua_tostring(props->lua, -1));
+    return 0;
+  }
 
   wchar_t *msg = L"BOX";
-
-  TW_Component *root =
-      VIEW(.color = {0.3, 0, 0, 0}, .rect = {0, 0, props->width, props->height},
-           CHILDREN(
-               VIEW(.rect = {0, 0, 320, 240}, .color = {0, 0, 0, 0},
-                    .hasDepth = 1, CHILDREN(COMPONENT(.render = PolyRender))),
+  lua_getglobal(props->lua, "screen");
+  TW_Component *root = (TW_Component *)lua_touserdata(props->lua, -1);
+  if (!root) {
+    app_log("No root element for screen.");
+    return 1;
+  }
+  /*
+      VIEW(.color = {0.3, 0, 0, 0}, .rect = {0, 0, props->width,
+     props->height}, CHILDREN( VIEW(.rect = {0, 0, 320, 240}, .color = {0,
+     0, 0, 0}, .hasDepth = 1, CHILDREN(COMPONENT(.render = PolyRender))),
                TOP_RIGHT(CHILDREN(
                    fps_display =
                        TEXT(.rect = {0, props->height, 100, props->height},
@@ -137,11 +195,12 @@ int main(int argc, char *args[]) {
                                      VIEW(.rect = {75, 75, 75, 75},
                                           .color = {1, 0, 0, 0},
                                           CHILDREN(TEXT(.color = {0, 0, 0},
-                                                        .rect = {0, 75, 75, 75},
-                                                        .text = msg)))
+                                                        .rect = {0, 75, 75,
+     75}, .text = msg)))
 
                                          ))))))));
 
+  */
   /*
 
     TW_Component *root =
@@ -152,10 +211,10 @@ int main(int argc, char *args[]) {
                                .background = {255, 255, 255, 32}),
                       RIGHT(.rect = {0, 0, props->width, props->height},
                             CHILDREN(TEXT(.text = L"Aligned right",
-                                          .background = {255, 255, 255, 32}))),
-                      CENTER(.rect = {0, 0, props->width, props->height},
-                             CHILDREN(TEXT(.text = L"Testing this text thing"),
-                                      TEXT(.text = L"META")))));
+                                          .background = {255, 255, 255,
+    32}))), CENTER(.rect = {0, 0, props->width, props->height},
+                             CHILDREN(TEXT(.text = L"Testing this text
+    thing"), TEXT(.text = L"META")))));
   */
   while (running) {
     SDL_Event ev;

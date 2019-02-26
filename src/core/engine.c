@@ -28,6 +28,21 @@ int lua_get_table_int(lua_State *L, const char *key, int def) {
   return value;
 }
 
+const char *lua_get_table_string(lua_State *L, const char *key,
+                                 const char *def) {
+  const char *value = 0;
+  lua_pushstring(L, key);
+  lua_gettable(L, -2);
+  if (lua_isstring(L, -1)) {
+    value = lua_tostring(L, -1);
+  } else {
+    value = def;
+  }
+  lua_pop(L, 1);
+
+  return value;
+}
+
 int engine_shutdown(TW_Window *props) {
   glDeleteVertexArrays(1, &global_vao);
   SDL_DestroyWindow(props->sdl_window);
@@ -48,7 +63,9 @@ void _engine_gl_check(const char *file, const char *function, int line) {
 
 int _engine_load_config(TW_Window *props) {
   props->lua = luaL_newstate();
-  if (luaL_dofile(props->lua, RESOURCE("share/dingus/scripts/start.lua"))) {
+
+  if (luaL_dofile(props->lua,
+                  RESOURCE("share/dingus/scripts/preferences.lua"))) {
     app_log("Couldn't load file: %s\n", lua_tostring(props->lua, -1));
     return 0;
   }
@@ -65,6 +82,7 @@ int _engine_load_config(TW_Window *props) {
   props->vsync = lua_get_table_int(props->lua, "vsync", 1);
   props->resizable = lua_get_table_int(props->lua, "resizable", 0);
   props->high_dpi = lua_get_table_int(props->lua, "high_dpi", 0);
+  props->fullscreen = lua_get_table_int(props->lua, "fullscreen", 0);
 
   lua_pop(props->lua, -1);
 

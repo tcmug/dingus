@@ -9,6 +9,8 @@
 
 #include "../math/math.h"
 
+#include "utlist.h"
+
 struct component_t;
 
 typedef void (*render_callback)(const struct component_t *parent,
@@ -36,6 +38,7 @@ typedef struct window_t {
   int vsync;
   int high_dpi;
   int frame_limit;
+  int fullscreen;
 
   int passed;
   int frame_time;
@@ -66,15 +69,24 @@ void TW_ComponentResize(TW_Component *self, int w, int h);
     elem_type *e = (elem_type *)malloc(sizeof(elem_type));                     \
     elem_type initial = {COMPONENT_DEFAULTS, __VA_ARGS__};                     \
     memcpy(e, &initial, sizeof(initial));                                      \
-    if (e->children) {                                                         \
-      TW_Component *c;                                                         \
-      int i = 0;                                                               \
-      while (c = e->children[i++]) {                                           \
-        c->parent = (TW_Component *)e;                                         \
-      }                                                                        \
-    }                                                                          \
     e;                                                                         \
   })
+/*
+#define TW_Component(elem_type, ...)                                           \
+({                                                                           \
+  elem_type *e = (elem_type *)malloc(sizeof(elem_type));                     \
+  elem_type initial = {COMPONENT_DEFAULTS, __VA_ARGS__};                     \
+  memcpy(e, &initial, sizeof(initial));                                      \
+  if (e->children) {                                                         \
+    TW_Component *c;                                                         \
+    int i = 0;                                                               \
+    while (c = e->children[i++]) {                                           \
+      c->parent = (TW_Component *)e;                                         \
+    }                                                                        \
+  }                                                                          \
+  e;                                                                         \
+})
+*/
 
 #define LIST(...)                                                              \
   TW_ComponentListCreate(_NUMARGS(TW_Component *, __VA_ARGS__), __VA_ARGS__)
