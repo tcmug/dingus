@@ -2,9 +2,8 @@
 // TW_Component header properties
 /////
 
-struct window_t *window;       // TW_Window specs.
-struct component_t **children; // TW_Component children.
-struct component_t *parent;    // TW_Component parent component.
+struct window_t *window;    // TW_Window specs.
+struct component_t *parent; // TW_Component parent component.
 
 struct component_t *kids;
 struct component_t *prev;

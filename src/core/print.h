@@ -1,38 +1,32 @@
 #ifndef PRINT_H
 #define PRINT_H
 
-// Comment below line to use default SDL implementation
-#define USE_GL
+#include "buffer.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
-#ifdef USE_GL
-#include "buffer.h"
-#endif
-
-typedef struct font_t_atlas {
+typedef struct TW_FontAtlas_t {
   TTF_Font *font;
-  struct font_t_atlas_glyph_set *glyphset[256];
-  struct font_t_atlas_glyph_set *active_glyphset;
-#ifdef USE_GL
+  struct TW_Glyph_t *glyphs;
+  struct TW_Glyph_t *active_glyph;
+
   int to_render;
   TW_Vector3Buffer points;
   TW_Vector2Buffer uvs;
-#endif
-} font_atlas;
+} TW_FontAtlas;
 
 void print_set_sdl_renderer(SDL_Renderer *renderer);
 
-font_atlas *font_atlas_create(const char *fontName, int size);
+TW_FontAtlas *TW_FontLoad(const char *fontName, int size);
 
 // Print text on renderer using font inside rect.
-void print_rect(font_atlas *font, SDL_Rect rect, const wchar_t *text);
+void print_rect(TW_FontAtlas *font, TW_Rectangle rect, const char *text);
 
 // Print text on renderer using font.
-void print_point(font_atlas *font, SDL_Point TW_Vector2, const wchar_t *text);
+void print_point(TW_FontAtlas *font, SDL_Point TW_Vector2, const char *text);
 
 // Get printed text size on renderer using font.
-void print_size(font_atlas *font, const wchar_t *text, TW_Rectangle *target);
+void print_size(TW_FontAtlas *font, const char *text, TW_Rectangle *target);
 
 #endif

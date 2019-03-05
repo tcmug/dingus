@@ -6,7 +6,11 @@
 #include "triangle.h"
 #include "utlist.h"
 
+#include "../../core/buffer.h"
+
 typedef struct s_bodysphere {
+  TW_Vector3Buffer *render_triangles;
+  TW_Vector2Buffer *render_uvs;
   bodytri *triangles;
   bodytri *priority;
   bodytri *merge;
@@ -17,5 +21,5 @@ typedef struct s_bodysphere {
 
 void bodysphere_create(bodysphere *sphere, real radius);
 void bodysphere_update(bodysphere *sphere, TW_Vector3 viewer);
-
+void bodysphere_render(bodysphere *sphere);
 #endif

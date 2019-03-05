@@ -14,7 +14,7 @@ TW_Vector3Buffer *TW_Vector3BufferCreate(int size, GLenum u) {
   return v;
 }
 
-void TW_Vector3BufferDestroy(TW_Vector3Buffer *self) {
+void TW_Vector3BufferFree(TW_Vector3Buffer *self) {
   glDeleteBuffers(1, &self->id);
   free(self->data);
   engine_gl_check();
@@ -58,7 +58,7 @@ TW_Vector2Buffer *TW_Vector2BufferCreate(int size, GLenum u) {
   return v;
 }
 
-void TW_Vector2BufferDestroy(TW_Vector2Buffer *self) {
+void TW_Vector2BufferFree(TW_Vector2Buffer *self) {
   glDeleteBuffers(1, &self->id);
   free(self->data);
   engine_gl_check();

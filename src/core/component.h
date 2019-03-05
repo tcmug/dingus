@@ -50,17 +50,20 @@ TW_Component *TW_ComponentCreate(TW_Component props);
 TW_Component **TW_ComponentListCreate(int count, ...);
 void TW_ComponentRerender(TW_Component *);
 
-void TW_ComponentDestroy(TW_Component *self);
+void TW_ComponentFree(TW_Component *self);
 void TW_ComponentRenderChildren(TW_Component *self);
 void TW_ComponentUpdatePass(TW_Component *self);
 TW_Component *TW_ComponentAtPoint(TW_Component *self, TW_Vector2 coords);
 
 void TW_ComponentMove(TW_Component *self, int x, int y);
 void TW_ComponentResize(TW_Component *self, int w, int h);
+void TW_ComponentAppendChild(TW_Component *self, TW_Component *child);
+void TW_ComponentPrependChild(TW_Component *self, TW_Component *child);
+void TW_ComponentRemoveChild(TW_Component *self, TW_Component *child);
 
 #define COMPONENT_DEFAULTS                                                     \
-  .window = WINDOW_DEFAULT, .children = 0, .cache = 0, .resized = 1,           \
-  .rect = {0, 0, 0, 0}, .parent = 0
+  .window = WINDOW_DEFAULT, .cache = 0, .resized = 1, .rect = {0, 0, 0, 0},    \
+  .parent = 0
 
 #define _NUMARGS(type, ...) (sizeof((type[]){__VA_ARGS__}) / sizeof(type))
 
@@ -71,22 +74,6 @@ void TW_ComponentResize(TW_Component *self, int w, int h);
     memcpy(e, &initial, sizeof(initial));                                      \
     e;                                                                         \
   })
-/*
-#define TW_Component(elem_type, ...)                                           \
-({                                                                           \
-  elem_type *e = (elem_type *)malloc(sizeof(elem_type));                     \
-  elem_type initial = {COMPONENT_DEFAULTS, __VA_ARGS__};                     \
-  memcpy(e, &initial, sizeof(initial));                                      \
-  if (e->children) {                                                         \
-    TW_Component *c;                                                         \
-    int i = 0;                                                               \
-    while (c = e->children[i++]) {                                           \
-      c->parent = (TW_Component *)e;                                         \
-    }                                                                        \
-  }                                                                          \
-  e;                                                                         \
-})
-*/
 
 #define LIST(...)                                                              \
   TW_ComponentListCreate(_NUMARGS(TW_Component *, __VA_ARGS__), __VA_ARGS__)

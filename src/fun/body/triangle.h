@@ -1,7 +1,7 @@
 #ifndef BODYTRIANGLE_H
 #define BODYTRIANGLE_H
 
-#include "../../math/math.h";
+#include "../../math/math.h"
 #include "utlist.h"
 
 typedef struct s_bodytri {

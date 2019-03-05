@@ -35,6 +35,7 @@ target_sources(dingus
 		src/core/engine.c
 		src/core/buffer.c
 		src/core/print.c
+		src/core/print_utf8.c
 		src/core/shader.c		
 		src/core/component.c
 		src/core/texture.c
@@ -44,8 +45,8 @@ target_sources(dingus
 		src/math/triangle.c
 		src/math/rectangle.c
 		src/math/nettle.c
-# 		src/fun/body/sphere.c
-#		src/fun/body/triangle.c
+ 		src/fun/body/sphere.c
+		src/fun/body/triangle.c
 )
 
 target_link_libraries(dingus

@@ -4,7 +4,7 @@
 #include "../core/component.h"
 #include "../core/print.h"
 
-extern font_atlas *default_font;
+extern TW_FontAtlas *default_font;
 
 typedef struct TW_ComponentView_t {
 #include "../core/component_props.inc"

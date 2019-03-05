@@ -26,29 +26,34 @@ void TW_ComponentRerender(TW_Component *self) {
   }
 }
 
-// void TW_ComponentUpdatePass(TW_Component *self) {
-//   if (self->update)
-//     self->update(self);
-//   if (self->children)
-//     for (int i = 0; self->children[i]; i++)
-//       TW_ComponentUpdatePass(self->children[i]);
-// }
-
 TW_Component *TW_ComponentAtPoint(TW_Component *self, TW_Vector2 coord) {
-  app_log("%p", self);
   TW_Component *match = 0;
   if (TW_RectangleIncludesPoint(self->rect, coord)) {
     match = self;
-    if (self->children) {
-      TW_Vector2 temp = {coord.x - self->rect.x, coord.y - self->rect.y};
-      for (int i = 0; self->children[i]; i++) {
-        TW_Component *test = TW_ComponentAtPoint(self->children[i], temp);
-        if (test)
-          match = test;
-      }
+    TW_Vector2 temp = {coord.x - self->rect.x, coord.y - self->rect.y};
+    TW_Component *kid;
+    DL_FOREACH(self->kids, kid) {
+      TW_Component *test = TW_ComponentAtPoint(kid, temp);
+      if (test)
+        match = test;
     }
   }
   return match;
+}
+
+void TW_ComponentAppendChild(TW_Component *self, TW_Component *child) {
+  DL_APPEND(self->kids, child);
+  child->parent = self;
+}
+
+void TW_ComponentPrependChild(TW_Component *self, TW_Component *child) {
+  DL_PREPEND(self->kids, child);
+  child->parent = self;
+}
+
+void TW_ComponentRemoveChild(TW_Component *self, TW_Component *child) {
+  DL_DELETE(self->kids, child);
+  child->parent = 0;
 }
 
 void TW_ComponentMove(TW_Component *self, int x, int y) {
@@ -65,27 +70,8 @@ void TW_ComponentResize(TW_Component *self, int w, int h) {
   }
 }
 
-TW_Component **TW_ComponentListCreate(int count, ...) {
-  int i = 0;
-  va_list args;
-  va_start(args, count);
-  TW_Component **children =
-      (TW_Component **)malloc((count + 1) * sizeof(TW_Component *));
-  while (i < count) {
-    children[i++] = va_arg(args, TW_Component *);
-  }
-  children[i] = 0;
-  va_end(args);
-  return children;
-}
-
-void TW_ComponentDestroy(TW_Component *self) {
-  if (self->children) {
-    int i = 0;
-    while (self->children[i]) {
-      TW_ComponentDestroy(self->children[i++]);
-    }
-  }
-  free(self->children);
+void TW_ComponentFree(TW_Component *self) {
+  TW_Component *kid, *tmp;
+  DL_FOREACH_SAFE(self->kids, kid, tmp) { TW_ComponentFree(kid); }
   free(self);
 }

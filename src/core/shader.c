@@ -3,41 +3,43 @@
 
 GLuint _shader_load(const char *filename, int type);
 
-TW_Shader TW_ShaderLoad(const char *vertex_name, const char *geometry_name,
-                        const char *fragment_name) {
+TW_Shader *TW_ShaderLoad(const char *vertex_name, const char *geometry_name,
+                         const char *fragment_name) {
 
-  TW_Shader s = {0};
-  s.program = glCreateProgram();
+  TW_Shader *s = (TW_Shader *)malloc(sizeof(TW_Shader));
+  memset(s, 0, sizeof(TW_Shader));
+
+  s->program = glCreateProgram();
   engine_gl_check();
 
   if (vertex_name) {
-    s.vertex = _shader_load(vertex_name, GL_VERTEX_SHADER);
-    if (s.vertex) {
-      glAttachShader(s.program, s.vertex);
+    s->vertex = _shader_load(vertex_name, GL_VERTEX_SHADER);
+    if (s->vertex) {
+      glAttachShader(s->program, s->vertex);
       engine_gl_check();
     }
   }
 
   if (geometry_name) {
-    s.geometry = _shader_load(geometry_name, GL_GEOMETRY_SHADER);
-    if (s.geometry) {
-      glAttachShader(s.program, s.geometry);
+    s->geometry = _shader_load(geometry_name, GL_GEOMETRY_SHADER);
+    if (s->geometry) {
+      glAttachShader(s->program, s->geometry);
       engine_gl_check();
     }
   }
 
   if (fragment_name) {
-    s.fragment = _shader_load(fragment_name, GL_FRAGMENT_SHADER);
-    if (s.fragment) {
-      glAttachShader(s.program, s.fragment);
+    s->fragment = _shader_load(fragment_name, GL_FRAGMENT_SHADER);
+    if (s->fragment) {
+      glAttachShader(s->program, s->fragment);
       engine_gl_check();
     }
   }
 
-  glLinkProgram(s.program);
+  glLinkProgram(s->program);
 
   GLint success = 0;
-  glGetProgramiv(s.program, GL_LINK_STATUS, &success);
+  glGetProgramiv(s->program, GL_LINK_STATUS, &success);
 
   if (success == GL_FALSE) {
     // We failed to compile.
@@ -50,7 +52,7 @@ TW_Shader TW_ShaderLoad(const char *vertex_name, const char *geometry_name,
     int len = 400000;
     char msg[len];
 
-    glGetProgramInfoLog(s.program, len, 0, msg);
+    glGetProgramInfoLog(s->program, len, 0, msg);
     app_warning(msg);
   }
 
@@ -58,6 +60,19 @@ TW_Shader TW_ShaderLoad(const char *vertex_name, const char *geometry_name,
   app_log("Program successfully linked.");
 
   return s;
+}
+
+void TW_ShaderFree(TW_Shader *s) {
+  if (s->fragment)
+    glDeleteShader(s->fragment);
+  if (s->geometry)
+    glDeleteShader(s->geometry);
+  if (s->vertex)
+    glDeleteShader(s->vertex);
+  if (s->program)
+    glDeleteProgram(s->program);
+  free(s);
+  app_log("Shader freed");
 }
 
 GLuint _shader_load(const char *filename, int type) {
@@ -124,7 +139,11 @@ GLuint _shader_load(const char *filename, int type) {
   return s;
 }
 
-void TW_ShaderUse(TW_Shader s) {
-  glUseProgram(s.program);
+void TW_ShaderUse(TW_Shader *s) {
+  glUseProgram(s->program);
   engine_gl_check();
+}
+
+GLint TW_ShaderGLUniformLoc(TW_Shader *s, const char *name) {
+  return glGetUniformLocation(s->program, name);
 }

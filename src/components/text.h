@@ -4,13 +4,15 @@
 #include "../core/component.h"
 #include "../core/print.h"
 
-extern font_atlas *default_font;
+typedef char TW_Char;
+
+extern TW_FontAtlas *default_font;
 
 typedef struct text_t {
 #include "../core/component_props.inc"
   SDL_Color background;
   TW_Vector3 color;
-  const wchar_t *text;
+  const TW_Char *text;
 } TW_Text;
 
 void TW_TextRender(const TW_Component *parent, TW_Component *);

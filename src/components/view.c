@@ -11,7 +11,7 @@ void TW_ComponentViewRender(const TW_Component *parent, TW_Component *_self) {
 
   if (self->resized) {
     if (self->cache) {
-      TW_TextureDestroy(self->cache);
+      TW_TextureFree(self->cache);
     }
     self->rerender = 1;
     self->resized = 0;

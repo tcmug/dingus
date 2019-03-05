@@ -18,10 +18,12 @@ real TW_Vector3Length(TW_Vector3 a);
 TW_Vector3 TW_Vector3Normalize(TW_Vector3 a);
 real TW_Vector3sDistance(TW_Vector3 a, TW_Vector3 b);
 real TW_Vector3sSquaredDistance(TW_Vector3 a, TW_Vector3 b);
+TW_Vector3 TW_Vector3Midpoint(TW_Vector3 a, TW_Vector3 b);
 real TW_Vector3Dot(TW_Vector3 a, TW_Vector3 b);
 TW_Vector3 TW_Vector3Cross(TW_Vector3 a, TW_Vector3 b);
 TW_Vector3 TW_Vector3Reflect(TW_Vector3 v, TW_Vector3 normal);
 void TW_Vector3GLUniform(const char *name, TW_Vector3 c);
+void TW_Vector3GLUniformLoc(int loc, TW_Vector3 c);
 
 int TW_RectangleIncludesPoint(TW_Rectangle r, TW_Vector2 p);
 

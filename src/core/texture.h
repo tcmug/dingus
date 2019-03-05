@@ -15,7 +15,7 @@ typedef struct texture_t {
 
 TW_Texture *TW_TextureRenderTarget(int w, int h, int hasdepth);
 TW_Texture *TW_TextureLoad(const char *filename);
-void TW_TextureDestroy(TW_Texture *);
+void TW_TextureFree(TW_Texture *);
 void TW_TextureStartRender(TW_Texture *t);
 void TW_TextureEndRender(TW_Texture *t);
 void TW_TextureDraw(TW_Texture *t, TW_Rectangle r);

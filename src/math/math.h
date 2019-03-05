@@ -18,6 +18,11 @@
 #define EPSILON (0.0001f)
 #define MAX_DISTANCE (1000000)
 
+#define UNFOLD(v)                                                              \
+  { (v).x, (v).y, (v).z }
+
+#define POINTS(a, b, c) ((TW_Vector3[]){UNFOLD(a), UNFOLD(b), UNFOLD(c)})
+
 #include "types.h"
 
 #include "functions.h"

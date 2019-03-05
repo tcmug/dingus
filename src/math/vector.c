@@ -55,6 +55,10 @@ real TW_Vector3sSquaredDistance(TW_Vector3 a, TW_Vector3 b) {
   return TW_Vector3LengthSquared(TW_Vector3SubVector(b, a));
 }
 
+TW_Vector3 TW_Vector3Midpoint(TW_Vector3 a, TW_Vector3 b) {
+  return TW_Vector3MulReal(TW_Vector3AddVector(a, b), 0.5);
+}
+
 real TW_Vector3Dot(TW_Vector3 a, TW_Vector3 b) {
   return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
 }
@@ -72,9 +76,10 @@ TW_Vector3 TW_Vector3Reflect(TW_Vector3 v, TW_Vector3 normal) {
 void TW_Vector3GLUniform(const char *name, TW_Vector3 c) {
   GLint program;
   glGetIntegerv(GL_CURRENT_PROGRAM, &program);
-  // engine_gl_check();
   GLint loc = glGetUniformLocation(program, name);
-  // engine_gl_check();
   glUniform3fv(loc, 1, c.value);
-  // engine_gl_check();
+}
+
+void TW_Vector3GLUniformLoc(int loc, TW_Vector3 c) {
+  glUniform3fv(loc, 1, c.value);
 }

@@ -39,13 +39,20 @@ TW_Texture *TW_TextureLoad(const char *filename) {
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // When MINifying the image, use a LINEAR blend of two mipmaps, each
+    // filtered LINEARLY too
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                    GL_LINEAR_MIPMAP_LINEAR);
+    // Generate mipmaps, by the way.
 
     // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_FLOAT,
     // pixels);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface->w, surface->h, 0, Mode,
                  GL_UNSIGNED_BYTE, surface->pixels);
+
     glGenerateMipmap(GL_TEXTURE_2D);
 
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -54,6 +61,8 @@ TW_Texture *TW_TextureLoad(const char *filename) {
 
     SDL_FreeSurface(surface);
   }
+
+  printf("Load: %s\n", filename);
   return t;
 }
 
@@ -118,7 +127,7 @@ TW_Texture *TW_TextureRenderTarget(int w, int h, int hasdepth) {
   return f;
 }
 
-void TW_TextureDestroy(TW_Texture *t) {
+void TW_TextureFree(TW_Texture *t) {
   if (t->texture)
     glDeleteTextures(1, &t->texture);
   if (t->depth)
@@ -126,6 +135,7 @@ void TW_TextureDestroy(TW_Texture *t) {
   if (t->buffer)
     glDeleteFramebuffers(1, &t->buffer);
   free(t);
+  app_log("Texture freed");
 }
 
 void TW_TextureStartRender(TW_Texture *t) {

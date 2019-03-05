@@ -53,7 +53,9 @@ int engine_shutdown(TW_Window *props) {
 }
 
 void _engine_gl_check(const char *file, const char *function, int line) {
+
   GLenum err;
+
   while ((err = glGetError()) != GL_NO_ERROR) {
     printf("%s: %u => %s (%s)\n", file, line, function);
     //, gluErrorString(err));
@@ -62,7 +64,10 @@ void _engine_gl_check(const char *file, const char *function, int line) {
 }
 
 int _engine_load_config(TW_Window *props) {
+
   props->lua = luaL_newstate();
+
+  luaL_openlibs(props->lua);
 
   if (luaL_dofile(props->lua,
                   RESOURCE("share/dingus/scripts/preferences.lua"))) {
@@ -106,6 +111,9 @@ int _engine_sdl_init(TW_Window *props) {
   }
   if (props->high_dpi) {
     flags |= SDL_WINDOW_ALLOW_HIGHDPI;
+  }
+  if (props->fullscreen) {
+    flags |= SDL_WINDOW_FULLSCREEN;
   }
 
   props->sdl_window = SDL_CreateWindow("Dingus", SDL_WINDOWPOS_UNDEFINED,

@@ -14,8 +14,10 @@ typedef struct shader_t {
   GLuint fragment;
 } TW_Shader;
 
-TW_Shader TW_ShaderLoad(const char *vertex_name, const char *geometry_name,
-                        const char *fragment_name);
-void TW_ShaderUse(TW_Shader s);
+TW_Shader *TW_ShaderLoad(const char *vertex_name, const char *geometry_name,
+                         const char *fragment_name);
+void TW_ShaderFree(TW_Shader *s);
+void TW_ShaderUse(TW_Shader *s);
+GLint TW_ShaderGLUniformLoc(TW_Shader *s, const char *name);
 
 #endif
