@@ -17,6 +17,7 @@ int rerender;
 // mount_callback mount;
 render_callback render; // Render callback.
 click_callback click;   // Click callback.
+int lua_click;
 
 // click
 // doubleclick

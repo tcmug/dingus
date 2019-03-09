@@ -53,15 +53,11 @@ void PolyRender(const TW_Component *parent, TW_Component *self) {
   TW_Matrix view = TW_MatrixFromVector(
       (TW_Vector3){0, 0, 1.4}, (TW_Vector3){0, 0, 0}, (TW_Vector3){0, 1, 0});
 
-  static float a = 0;
-  a += 0.0001;
-  TW_Matrix model = TW_MatrixRotation(a, a, 0);
-
   TW_ShaderUse(flat);
 
   TW_MatrixGLUniform("projection", projection);
   TW_MatrixGLUniform("view", view);
-  TW_MatrixGLUniform("model", model);
+  TW_MatrixGLUniform("model", TW_MatrixIdentity());
 
   TW_Vector3BufferBind(&va, 0);
   // glDrawArrays(GL_TRIANGLES, 0, va.size);
@@ -71,6 +67,11 @@ void PolyRender(const TW_Component *parent, TW_Component *self) {
 
   bodysphere_update(&sphere, (TW_Vector3){0, 0, 2});
   sphere.position.x = -1;
+  sphere.position.z = 0;
+  bodysphere_render(&sphere);
+
+  sphere.position.x = 1;
+  sphere.position.z = -1;
   bodysphere_render(&sphere);
 
   TW_ShaderUse(uishader);
@@ -109,6 +110,8 @@ static int l_view(lua_State *L) {
   return 1;
 }
 
+int callback_index = -1;
+
 static int l_text(lua_State *L) {
   const char *type = lua_get_table_string(L, "type", "null");
 
@@ -116,6 +119,23 @@ static int l_text(lua_State *L) {
   int y = lua_get_table_int(L, "y", 0);
   int w = lua_get_table_int(L, "w", props->width);
   int h = lua_get_table_int(L, "h", props->height);
+
+  app_log("new: (%i,%i %i,%i)", x, y, h, w);
+
+  int lua_click = 0;
+  lua_pushstring(L, "click");
+  lua_gettable(L, -2);
+  if (lua_isfunction(L, -1)) {
+    if (callback_index = -1) {
+      lua_newtable(L); // create table for functions
+      callback_index = luaL_ref(L, LUA_REGISTRYINDEX);
+    }
+    lua_rawgeti(L, LUA_REGISTRYINDEX, callback_index);
+    lua_pushvalue(L, -2);
+    lua_click = luaL_ref(L, -2);
+    lua_pop(L, 1);
+  }
+  lua_pop(L, 1);
 
   const char *cstr = lua_get_table_string(L, "text", "null");
 
@@ -126,7 +146,7 @@ static int l_text(lua_State *L) {
                                     1,
                                     1,
                                 },
-                            .text = cstr);
+                            .text = cstr, .lua_click = lua_click);
 
   l_prep_kids(L, comp);
   lua_pushlightuserdata(L, comp);
@@ -208,7 +228,7 @@ int main(int argc, char *args[]) {
   TW_ComponentAppendChild(screen, threed);
   TW_ComponentPrependChild(root, screen);
 
-  spheret = TW_TextureLoad("dirt.jpg");
+  spheret = TW_TextureLoad(RESOURCE("share/dingus/dirt.jpg"));
   bodysphere_create(&sphere, 1);
 
   while (running) {
@@ -234,10 +254,20 @@ int main(int argc, char *args[]) {
       case SDL_MOUSEBUTTONDOWN: {
         TW_Vector2 coord = {ev.motion.x, props->height - ev.motion.y};
         TW_Component *self = TW_ComponentAtPoint(root, coord);
-        app_log("TW_Component at TW_Vector2 (%f, %f) is %p", coord.x, coord.y,
-                self);
-        if (self && self->click) {
-          self->click(self, coord);
+        /*app_log("TW_Component at (%f, %f) is %p (%f,%f %f,%f)", coord.x,
+                coord.y, self, self->rect.x, self->rect.y, self->rect.w,
+                self->rect.h);*/
+        if (self) {
+          if (self->click) {
+            self->click(self, coord);
+          }
+          if (self->lua_click) {
+            lua_rawgeti(props->lua, LUA_REGISTRYINDEX, callback_index);
+            lua_rawgeti(props->lua, -1, self->lua_click);
+            lua_call(props->lua, 0, 0);
+            lua_pop(props->lua, 1);
+            // app_log("%i", lua_gettop(props->lua));
+          }
         }
       } break;
       case SDL_KEYUP:

@@ -56,7 +56,7 @@ TW_Matrix TW_MatrixTranslation(TW_Matrix m, TW_Vector3 v) {
     0 0 1 z
     0 0 0 1
   */
-  return (TW_Matrix){1, 0, 0, v.x, 0, 1, 0, v.y, 0, 0, 1, v.z, 0, 0, 0, 1};
+  return (TW_Matrix){1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, v.x, v.y, v.z, 1};
 }
 
 TW_Matrix TW_MatrixScaling(TW_Matrix m, TW_Vector3 v) {
@@ -124,6 +124,10 @@ void TW_MatrixGLUniform(const char *name, TW_Matrix m) {
   // engine_gl_check();
   glUniformMatrix4fv(loc, 1, 0, m.value);
   // engine_gl_check();
+}
+
+void TW_MatrixGLUniformLoc(GLint loc, TW_Matrix m) {
+  glUniformMatrix4fv(loc, 1, 0, m.value);
 }
 
 TW_Matrix TW_MatrixFromVector(TW_Vector3 eye, TW_Vector3 to, TW_Vector3 up) {

@@ -88,51 +88,46 @@ void _print_flush(TW_FontAtlas *font) {
 
 void _print_push_glyph(TW_FontAtlas *font, TW_Rectangle target) {
 
-  float glx = 0;
-  float gry = 0;
-  float grx = 1;
-  float gly = 1;
-
   font->points.data[font->to_render].x = target.x;
-  font->points.data[font->to_render].y = target.y - target.h;
+  font->points.data[font->to_render].y = target.y + target.h;
   font->points.data[font->to_render].z = 0;
-  font->uvs.data[font->to_render].x = glx;
-  font->uvs.data[font->to_render].y = gly;
-  font->to_render++;
-
-  font->points.data[font->to_render].x = target.x;
-  font->points.data[font->to_render].y = target.y;
-  font->points.data[font->to_render].z = 0;
-  font->uvs.data[font->to_render].x = glx;
-  font->uvs.data[font->to_render].y = gry;
+  font->uvs.data[font->to_render].x = 0;
+  font->uvs.data[font->to_render].y = 0;
   font->to_render++;
 
   font->points.data[font->to_render].x = target.x + target.w;
-  font->points.data[font->to_render].y = target.y - target.h;
+  font->points.data[font->to_render].y = target.y + target.h;
   font->points.data[font->to_render].z = 0;
-  font->uvs.data[font->to_render].x = grx;
-  font->uvs.data[font->to_render].y = gly;
-  font->to_render++;
-
-  font->points.data[font->to_render].x = target.x + target.w;
-  font->points.data[font->to_render].y = target.y - target.h;
-  font->points.data[font->to_render].z = 0;
-  font->uvs.data[font->to_render].x = grx;
-  font->uvs.data[font->to_render].y = gly;
-  font->to_render++;
-
-  font->points.data[font->to_render].x = target.x;
-  font->points.data[font->to_render].y = target.y;
-  font->points.data[font->to_render].z = 0;
-  font->uvs.data[font->to_render].x = glx;
-  font->uvs.data[font->to_render].y = gry;
+  font->uvs.data[font->to_render].x = 1;
+  font->uvs.data[font->to_render].y = 0;
   font->to_render++;
 
   font->points.data[font->to_render].x = target.x + target.w;
   font->points.data[font->to_render].y = target.y;
   font->points.data[font->to_render].z = 0;
-  font->uvs.data[font->to_render].x = grx;
-  font->uvs.data[font->to_render].y = gry;
+  font->uvs.data[font->to_render].x = 1;
+  font->uvs.data[font->to_render].y = 1;
+  font->to_render++;
+
+  font->points.data[font->to_render].x = target.x + target.w;
+  font->points.data[font->to_render].y = target.y;
+  font->points.data[font->to_render].z = 0;
+  font->uvs.data[font->to_render].x = 1;
+  font->uvs.data[font->to_render].y = 1;
+  font->to_render++;
+
+  font->points.data[font->to_render].x = target.x;
+  font->points.data[font->to_render].y = target.y;
+  font->points.data[font->to_render].z = 0;
+  font->uvs.data[font->to_render].x = 0;
+  font->uvs.data[font->to_render].y = 1;
+  font->to_render++;
+
+  font->points.data[font->to_render].x = target.x;
+  font->points.data[font->to_render].y = target.y + target.h;
+  font->points.data[font->to_render].z = 0;
+  font->uvs.data[font->to_render].x = 0;
+  font->uvs.data[font->to_render].y = 0;
   font->to_render++;
 
   if (font->to_render >= font->points.size) {

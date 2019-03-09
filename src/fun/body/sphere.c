@@ -1,6 +1,7 @@
 
 #include "sphere.h"
 #include "../../core/log.h"
+#include "../../core/shader.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -200,6 +201,11 @@ void bodytri_render(bodysphere *sphere, bodytri *tri) {
 void bodysphere_render(bodysphere *sphere) {
   at = 0;
   bodytri *tri;
+
+  sphere->matrix = TW_MatrixTranslation(sphere->matrix, sphere->position);
+
+  TW_MatrixGLUniform("model", sphere->matrix);
+
   DL_FOREACH(sphere->priority, tri) bodytri_render(sphere, tri);
 
   if (at > 0) {
