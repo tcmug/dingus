@@ -1,14 +1,14 @@
 {
-  "app-id": "org.meemus.dingus",
+  "app-id": "org.meemus.tw",
   "runtime": "org.freedesktop.Platform",
   "runtime-version": "18.08",
   "sdk": "org.freedesktop.Sdk",
-  "command": "/app/bin/dingus",
+  "command": "/app/bin/tw",
   "finish-args": ["--socket=x11"],
   "modules": [
     "lib/shared-modules/lua5.3/lua-5.3.2.json",
     {
-      "name": "dingus",
+      "name": "tw",
       "buildsystem": "cmake",
       "sources": [
         {
