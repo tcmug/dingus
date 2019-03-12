@@ -21,12 +21,11 @@
 #include "components/text.h"
 #include "components/top.h"
 #include "components/view.h"
-#include "core/component.h"
+
 #include "core/engine.h"
 #include "core/log.h"
-#include "core/print.h"
-
-#include "math/math.h"
+#include "core/math.h"
+#include "core/ui.h"
 
 #include "core/buffer.h"
 #include "core/shader.h"
@@ -110,6 +109,28 @@ static int l_view(lua_State *L) {
   return 1;
 }
 
+static int l_parent(lua_State *L) {
+  TW_Component *comp = (TW_Component *)lua_touserdata(L, -1);
+  lua_pushlightuserdata(L, comp->parent);
+  return 1;
+}
+
+static int l_insert(lua_State *L) {
+  if (lua_isuserdata(L, -2)) {
+    TW_Component *comp = lua_touserdata(L, -2);
+    TW_ComponentAppendChild(comp, (TW_Component *)lua_touserdata(L, -1));
+    lua_pushlightuserdata(L, comp->parent);
+  } else {
+    app_log("not user data");
+  }
+  return 0;
+}
+
+static int l_quit(lua_State *L) {
+  props->running = 0;
+  return 0;
+}
+
 int callback_index = -1;
 
 static int l_text(lua_State *L) {
@@ -126,7 +147,7 @@ static int l_text(lua_State *L) {
   lua_pushstring(L, "click");
   lua_gettable(L, -2);
   if (lua_isfunction(L, -1)) {
-    if (callback_index = -1) {
+    if (callback_index == -1) {
       lua_newtable(L); // create table for functions
       callback_index = luaL_ref(L, LUA_REGISTRYINDEX);
     }
@@ -160,7 +181,6 @@ int main(int argc, char *args[]) {
   if (!props)
     return 1;
 
-  int running = 1;
   int fps = 0, real_fps = 0, fps_counter = 1000;
   int previous = SDL_GetTicks();
 
@@ -209,6 +229,15 @@ int main(int argc, char *args[]) {
   lua_pushcfunction(props->lua, l_text);
   lua_setglobal(props->lua, "TEXT");
 
+  lua_pushcfunction(props->lua, l_insert);
+  lua_setglobal(props->lua, "insert");
+
+  lua_pushcfunction(props->lua, l_parent);
+  lua_setglobal(props->lua, "parent");
+
+  lua_pushcfunction(props->lua, l_quit);
+  lua_setglobal(props->lua, "quit");
+
   if (luaL_dofile(props->lua, RESOURCE("share/dingus/scripts/start.lua"))) {
     app_log("Couldn't load file: %s\n", lua_tostring(props->lua, -1));
     return 0;
@@ -228,10 +257,12 @@ int main(int argc, char *args[]) {
   TW_ComponentAppendChild(screen, threed);
   TW_ComponentPrependChild(root, screen);
 
+  TW_ComponentAppendChild((TW_Component *)props, root);
+
   spheret = TW_TextureLoad(RESOURCE("share/dingus/dirt.jpg"));
   bodysphere_create(&sphere, 1);
 
-  while (running) {
+  while (props->running) {
     SDL_Event ev;
 #ifdef APP_LOOP_EVENT_BLOCKS_RENDER
     if (SDL_PollEvent(&ev)) {
@@ -249,7 +280,7 @@ int main(int argc, char *args[]) {
         }
       } break;
       case SDL_QUIT:
-        running = 0;
+        props->running = 0;
         break;
       case SDL_MOUSEBUTTONDOWN: {
         TW_Vector2 coord = {ev.motion.x, props->height - ev.motion.y};
@@ -264,16 +295,17 @@ int main(int argc, char *args[]) {
           if (self->lua_click) {
             lua_rawgeti(props->lua, LUA_REGISTRYINDEX, callback_index);
             lua_rawgeti(props->lua, -1, self->lua_click);
-            lua_call(props->lua, 0, 0);
+            lua_pushlightuserdata(props->lua, self);
+            lua_call(props->lua, 1, 0);
             lua_pop(props->lua, 1);
-            // app_log("%i", lua_gettop(props->lua));
+            app_log("%i", lua_gettop(props->lua));
           }
         }
       } break;
       case SDL_KEYUP:
         switch (ev.key.keysym.sym) {
         case SDLK_ESCAPE:
-          running = 0;
+          props->running = 0;
           break;
         case SDLK_f:
           fullscreen = !fullscreen;
@@ -308,10 +340,6 @@ int main(int argc, char *args[]) {
         fps++;
       }
 
-      // glViewport(0, 0, props->width, props->height);
-      // glClearColor(0.2, 0, 0, 0);
-      // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
-      //         GL_STENCIL_BUFFER_BIT);
       // engine_gl_check();
 
       // GLint program, loc, u;
@@ -326,7 +354,7 @@ int main(int argc, char *args[]) {
       // glUniform1i(u, 0);
 
       TW_ShaderUse(uishader);
-      root->render(0, root);
+      TW_WindowRender(props);
       SDL_GL_SwapWindow(props->sdl_window);
 
       // FPS limit.

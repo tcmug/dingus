@@ -7,8 +7,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../log.h"
 #include "component.h"
-#include "log.h"
 
 void TW_ComponentRenderChildren(TW_Component *self) {
   TW_Component *kid;

@@ -1,7 +1,7 @@
 #ifndef TOP_H
 #define TOP_H
 
-#include "../core/component.h"
+#include "../core/ui.h"
 
 void TW_ComponentTopRender(const TW_Component *parent, TW_Component *_self);
 void TW_ComponentTopRightRender(const TW_Component *parent,

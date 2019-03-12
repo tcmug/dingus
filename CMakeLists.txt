@@ -25,6 +25,8 @@ install(DIRECTORY resources/share/ DESTINATION share)
 
 target_include_directories(dingus PRIVATE lib/uthash/include)
 
+add_subdirectory(src/core)
+
 target_sources(dingus
 	PRIVATE
 		src/components/text.c
@@ -32,19 +34,6 @@ target_sources(dingus
 		src/components/top.c
 		src/components/center.c
 		src/components/view.c		
-		src/core/engine.c
-		src/core/buffer.c
-		src/core/print.c
-		src/core/print_utf8.c
-		src/core/shader.c		
-		src/core/component.c
-		src/core/texture.c
-		src/math/vector.c
-		src/math/matrix.c
-		src/math/sphere.c
-		src/math/triangle.c
-		src/math/rectangle.c
-		src/math/nettle.c
  		src/fun/body/sphere.c
 		src/fun/body/triangle.c
 )

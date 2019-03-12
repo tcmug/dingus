@@ -1,13 +1,12 @@
 #ifndef VIEW_H
 #define VIEW_H
 
-#include "../core/component.h"
-#include "../core/print.h"
+#include "../core/ui.h"
 
 extern TW_FontAtlas *default_font;
 
 typedef struct TW_ComponentView_t {
-#include "../core/component_props.inc"
+#include "../core/ui/component_props.inc"
   real color[4];
   int hasDepth;
 } TW_ComponentView;

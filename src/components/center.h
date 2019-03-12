@@ -1,10 +1,10 @@
 #ifndef CENTER_H
 #define CENTER_H
 
-#include "../core/component.h"
+#include "../core/ui.h"
 
 typedef struct center_t {
-#include "../core/component_props.inc"
+#include "../core/ui/component_props.inc"
 } center;
 
 int center_update(TW_Component *);

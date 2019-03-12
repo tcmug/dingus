@@ -1,10 +1,10 @@
 #ifndef RIGHT_H
 #define RIGHT_H
 
-#include "../core/component.h"
+#include "../core/ui.h"
 
 typedef struct right_t {
-#include "../core/component_props.inc"
+#include "../core/ui/component_props.inc"
 } right;
 
 void TW_ComponentRightRender(const TW_Component *, TW_Component *);

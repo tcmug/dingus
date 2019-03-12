@@ -1,7 +1,7 @@
 
 #include "math.h"
 
-#include "../core/engine.h"
+#include "../engine.h"
 
 TW_Matrix TW_MatrixIdentity() {
   /*

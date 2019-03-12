@@ -1,15 +1,14 @@
-#ifndef TEXT_H
-#define TEXT_H
+#ifndef TW_TEXT_H
+#define TW_TEXT_H
 
-#include "../core/component.h"
-#include "../core/print.h"
+#include "../core/ui.h"
 
 typedef char TW_Char;
 
 extern TW_FontAtlas *default_font;
 
 typedef struct text_t {
-#include "../core/component_props.inc"
+#include "../core/ui/component_props.inc"
   SDL_Color background;
   TW_Vector3 color;
   const TW_Char *text;

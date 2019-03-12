@@ -1,8 +1,9 @@
-#ifndef POINT_BUFFER_H
-#define POINT_BUFFER_H
+#ifndef TW_CORE_BUFFER_H
+#define TW_CORE_BUFFER_H
 
-#include "../core/engine.h"
-#include "../math/math.h"
+#include "sdl.h"
+
+#include "math.h"
 
 typedef struct TW_Vector2Buffer_t {
 

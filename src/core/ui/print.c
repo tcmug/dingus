@@ -1,7 +1,9 @@
 
-#include <SDL2/SDL_opengl.h>
+#include "../log.h"
+#include "../sdl.h"
 
-#include "log.h"
+#include "utlist.h"
+
 #include "print.h"
 #include "print_utf8.h"
 

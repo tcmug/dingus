@@ -1,6 +1,7 @@
 
 
-#include "../core/log.h"
+#include "../log.h"
+
 #include "math.h"
 
 int TW_RectangleIncludesPoint(TW_Rectangle r, TW_Vector2 p) {

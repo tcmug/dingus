@@ -52,17 +52,6 @@ int engine_shutdown(TW_Window *props) {
   return 0;
 }
 
-void _engine_gl_check(const char *file, const char *function, int line) {
-
-  GLenum err;
-
-  while ((err = glGetError()) != GL_NO_ERROR) {
-    printf("%s: %u => %s (%s)\n", file, line, function);
-    //, gluErrorString(err));
-    exit(1);
-  }
-}
-
 int _engine_load_config(TW_Window *props) {
 
   props->lua = luaL_newstate();
@@ -164,6 +153,8 @@ TW_Window *engine_init() {
 
   props->passed = 0;
   props->frame = 0;
+  props->running = 1;
+  props->kids = 0;
 
   app_log("Window created: %i %i", props->width, props->height);
 

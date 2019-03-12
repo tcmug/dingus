@@ -1,13 +1,8 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_mixer.h>
-#include <SDL2/SDL_opengl.h>
-#include <SDL2/SDL_ttf.h>
-
-#include "../math/math.h"
+#include "../math.h"
+#include "../sdl.h"
 
 #include "utlist.h"
 
@@ -23,28 +18,11 @@ typedef struct component_t_state {
 
 struct texture_t;
 
+#include "window.h"
+
 typedef struct component_t {
 #include "component_props.inc"
 } TW_Component;
-
-typedef struct window_t {
-
-  SDL_Window *sdl_window;
-  struct lua_State *lua;
-
-  int height;
-  int width;
-  int resizable;
-  int vsync;
-  int high_dpi;
-  int frame_limit;
-  int fullscreen;
-
-  int passed;
-  int frame_time;
-  int frame;
-
-} TW_Window;
 
 TW_Component *TW_ComponentCreate(TW_Component props);
 TW_Component **TW_ComponentListCreate(int count, ...);

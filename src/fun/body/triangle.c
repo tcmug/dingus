@@ -1,6 +1,5 @@
 
-#include "triangle.h"
-#include "sphere.h"
+#include "types.h"
 
 #include <stdio.h>
 #include <stdlib.h>

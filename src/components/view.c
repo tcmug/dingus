@@ -39,10 +39,10 @@ void TW_ComponentViewRender(const TW_Component *parent, TW_Component *_self) {
                        TW_MatrixOrthogonalProjection(0, parent->rect.w, 0,
                                                      parent->rect.h, 0, 1));
   } else {
+    app_log("failing...");
     TW_MatrixGLUniform(
         "projection",
         TW_MatrixOrthogonalProjection(0, self->rect.w, 0, self->rect.h, 0, 1));
   }
-
   TW_TextureDraw(self->cache, self->rect);
 }

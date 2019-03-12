@@ -1,7 +1,7 @@
 
 #include "math.h"
 
-#include "../core/engine.h"
+#include "../engine.h"
 
 TW_Vector3 TW_Vector3AddVector(TW_Vector3 a, TW_Vector3 b) {
   return (TW_Vector3){a.x + b.x, a.y + b.y, a.z + b.z};

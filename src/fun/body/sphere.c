@@ -1,5 +1,6 @@
 
-#include "sphere.h"
+#include "types.h"
+
 #include "../../core/log.h"
 #include "../../core/shader.h"
 
@@ -8,7 +9,6 @@
 #include <string.h>
 
 // #define PER_TRIANGLE (1)
-#include "triangle.h"
 
 #define TOP (0)
 #define FRONTLEFT (1)

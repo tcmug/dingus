@@ -1,7 +1,7 @@
 #ifndef PRINT_H
 #define PRINT_H
 
-#include "buffer.h"
+#include "../buffer.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
