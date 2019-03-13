@@ -59,8 +59,12 @@ TW_Vector3 TW_ClosestPointOnTriangle(TW_Vector3 a, TW_Vector3 b, TW_Vector3 c,
                                      TW_Vector3 p);
 real TW_SphereSweepTriangle(TW_Sphere s, TW_Vector3 v, TW_Triangle t,
                             TW_Vector3 *touch_point);
+
 int TW_TestTriangles(TW_Collision *TW_Collision, int num_triangles,
                      TW_Triangle *triangles);
 int TW_Vector2InTriangle(TW_Vector3 TW_Vector2, TW_Triangle t);
+
+TW_Vector2 TW_Vector2SubVector(TW_Vector2 a, TW_Vector2 b);
+TW_Vector2 TW_Vector2AddVector(TW_Vector2 a, TW_Vector2 b);
 
 #endif

@@ -3,6 +3,8 @@
 
 #include "component.h"
 
+typedef enum { CURSOR_POINTER, CURSOR_VECTOR } TW_CursorMode;
+
 typedef struct window_t {
 #include "component_props.inc"
 
@@ -17,6 +19,10 @@ typedef struct window_t {
   int high_dpi;
   int frame_limit;
   int fullscreen;
+
+  TW_CursorMode cursor_mode;
+  TW_Vector2 cursor_vector;
+  TW_Vector2 cursor_position;
 
   int passed;
   int frame_time;

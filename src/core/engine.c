@@ -151,6 +151,7 @@ TW_Window *engine_init() {
     return 0;
   }
 
+  props->cursor_mode = CURSOR_POINTER;
   props->passed = 0;
   props->frame = 0;
   props->running = 1;
@@ -159,4 +160,49 @@ TW_Window *engine_init() {
   app_log("Window created: %i %i", props->width, props->height);
 
   return props;
+}
+
+void engine_set_cursor_mode(TW_Window *props, TW_CursorMode mode) {
+
+  if (props->cursor_mode == mode) {
+    return;
+  }
+
+  props->cursor_mode = mode;
+
+  switch (props->cursor_mode) {
+  case CURSOR_POINTER:
+    // Move to where we were, show cursor.
+    SDL_SetRelativeMouseMode(SDL_FALSE);
+    SDL_WarpMouseInWindow(props->sdl_window, props->cursor_position.x,
+                          props->height - props->cursor_position.y);
+    SDL_ShowCursor(SDL_TRUE);
+    app_log("Cursor mode change: pointer");
+    break;
+  case CURSOR_VECTOR: {
+    // Hide cursor, zero the vector, move the cursor to the middle of the
+    // screen.
+    SDL_ShowCursor(SDL_FALSE);
+    app_log("Cursor mode change: vector");
+    SDL_SetRelativeMouseMode(SDL_TRUE);
+    props->cursor_vector = (TW_Vector2){0, 0};
+    break;
+  }
+  }
+}
+
+void engine_report_cursor_position(TW_Window *props, const SDL_Event *ev) {
+
+  switch (props->cursor_mode) {
+  case CURSOR_POINTER:
+    // Store position.
+    props->cursor_position =
+        (TW_Vector2){ev->motion.x, props->height - 1 - ev->motion.y};
+    ;
+    break;
+  case CURSOR_VECTOR: {
+    props->cursor_vector = TW_Vector2AddVector(
+        props->cursor_vector, (TW_Vector2){ev->motion.xrel, ev->motion.yrel});
+  } break;
+  }
 }

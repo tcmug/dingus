@@ -45,12 +45,27 @@ TW_Shader *flat, *uishader;
 bodysphere sphere;
 TW_Texture *spheret;
 
+int init = 0;
+TW_Matrix view;
+
 void PolyRender(const TW_Component *parent, TW_Component *self) {
 
   real ratio = parent->rect.w / parent->rect.h;
   TW_Matrix projection = TW_MatrixPerspectiveProjection(0.01, 1000, 70, ratio);
-  TW_Matrix view = TW_MatrixFromVector(
-      (TW_Vector3){0, 0, 1.4}, (TW_Vector3){0, 0, 0}, (TW_Vector3){0, 1, 0});
+
+  if (!init) {
+    view = TW_MatrixFromVector((TW_Vector3){0, 0, 1.4}, (TW_Vector3){0, 0, 0},
+                               (TW_Vector3){0, 1, 0});
+    init = 1;
+  }
+
+  if (props->cursor_mode == CURSOR_VECTOR) {
+    TW_Matrix rot = TW_MatrixRotation(0, props->cursor_vector.x * 0.01, 0);
+    view = TW_MatrixMulMatrix(view, rot);
+    rot = TW_MatrixRotation(props->cursor_vector.y * 0.01, 0, 0);
+    view = TW_MatrixMulMatrix(view, rot);
+    props->cursor_vector = (TW_Vector2){0, 0};
+  }
 
   TW_ShaderUse(flat);
 
@@ -119,6 +134,7 @@ static int l_insert(lua_State *L) {
   if (lua_isuserdata(L, -2)) {
     TW_Component *comp = lua_touserdata(L, -2);
     TW_ComponentAppendChild(comp, (TW_Component *)lua_touserdata(L, -1));
+    TW_ComponentRerender(comp);
     lua_pushlightuserdata(L, comp->parent);
   } else {
     app_log("not user data");
@@ -265,11 +281,12 @@ int main(int argc, char *args[]) {
   while (props->running) {
     SDL_Event ev;
 #ifdef APP_LOOP_EVENT_BLOCKS_RENDER
-    if (SDL_PollEvent(&ev)) {
+    while (SDL_PollEvent(&ev)) {
 #else
     if (SDL_WaitEvent(&ev)) {
 #endif
       switch (ev.type) {
+
       case SDL_WINDOWEVENT: {
         switch (ev.window.event) {
         case SDL_WINDOWEVENT_SIZE_CHANGED:
@@ -279,11 +296,17 @@ int main(int argc, char *args[]) {
           break;
         }
       } break;
+
+      case SDL_MOUSEMOTION: {
+        engine_report_cursor_position(props, &ev);
+      } break;
+
       case SDL_QUIT:
         props->running = 0;
         break;
+
       case SDL_MOUSEBUTTONDOWN: {
-        TW_Vector2 coord = {ev.motion.x, props->height - ev.motion.y};
+        TW_Vector2 coord = {ev.motion.x, props->height - ev.motion.y + 1};
         TW_Component *self = TW_ComponentAtPoint(root, coord);
         /*app_log("TW_Component at (%f, %f) is %p (%f,%f %f,%f)", coord.x,
                 coord.y, self, self->rect.x, self->rect.y, self->rect.w,
@@ -304,6 +327,12 @@ int main(int argc, char *args[]) {
       } break;
       case SDL_KEYUP:
         switch (ev.key.keysym.sym) {
+        case SDLK_SPACE:
+          if (props->cursor_mode == CURSOR_POINTER)
+            engine_set_cursor_mode(props, CURSOR_VECTOR);
+          else
+            engine_set_cursor_mode(props, CURSOR_POINTER);
+          break;
         case SDLK_ESCAPE:
           props->running = 0;
           break;

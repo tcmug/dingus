@@ -83,3 +83,11 @@ void TW_Vector3GLUniform(const char *name, TW_Vector3 c) {
 void TW_Vector3GLUniformLoc(int loc, TW_Vector3 c) {
   glUniform3fv(loc, 1, c.value);
 }
+
+TW_Vector2 TW_Vector2SubVector(TW_Vector2 a, TW_Vector2 b) {
+  return (TW_Vector2){a.x - b.x, a.y - b.y};
+}
+
+TW_Vector2 TW_Vector2AddVector(TW_Vector2 a, TW_Vector2 b) {
+  return (TW_Vector2){a.x + b.x, a.y + b.y};
+}
