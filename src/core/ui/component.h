@@ -8,15 +8,14 @@
 
 struct component_t;
 
-typedef void (*render_callback)(const struct component_t *parent,
-                                struct component_t *self);
+typedef void (*render_callback)(struct component_t *self);
 typedef void (*click_callback)(struct component_t *self, TW_Vector2 coords);
 typedef int (*update_callback)(struct component_t *self);
 
 typedef struct component_t_state {
 } component_state;
 
-struct texture_t;
+struct TW_Texture_t;
 
 #include "window.h"
 
@@ -27,6 +26,7 @@ typedef struct component_t {
 TW_Component *TW_ComponentCreate(TW_Component props);
 TW_Component **TW_ComponentListCreate(int count, ...);
 void TW_ComponentRerender(TW_Component *);
+TW_Component *TW_GetRoot(TW_Component *comp);
 
 void TW_ComponentFree(TW_Component *self);
 void TW_ComponentRenderChildren(TW_Component *self);
@@ -40,8 +40,8 @@ void TW_ComponentPrependChild(TW_Component *self, TW_Component *child);
 void TW_ComponentRemoveChild(TW_Component *self, TW_Component *child);
 
 #define COMPONENT_DEFAULTS                                                     \
-  .window = WINDOW_DEFAULT, .cache = 0, .resized = 1, .rect = {0, 0, 0, 0},    \
-  .parent = 0
+  .cache = 0, .resized = 1, .rect = {0, 0, 0, 0}, .parent = 0,                 \
+  .render = TW_ComponentRenderChildren, .shader = 0
 
 #define _NUMARGS(type, ...) (sizeof((type[]){__VA_ARGS__}) / sizeof(type))
 

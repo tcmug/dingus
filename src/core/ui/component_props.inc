@@ -2,7 +2,6 @@
 // TW_Component header properties
 /////
 
-struct window_t *window;    // TW_Window specs.
 struct component_t *parent; // TW_Component parent component.
 
 struct component_t *kids;
@@ -10,8 +9,9 @@ struct component_t *prev;
 struct component_t *next;
 
 int resized;
-TW_Rectangle rect;       // Target TW_Rectangle.
-struct texture_t *cache; // SDL Texture
+TW_Rectangle rect;          // Target TW_Rectangle.
+struct TW_Texture_t *cache; // Cache texture
+struct TW_Shader_t *shader;
 int rerender;
 
 // mount_callback mount;

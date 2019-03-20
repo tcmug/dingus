@@ -1,12 +1,12 @@
 
 #include "../core/log.h"
+#include "../core/shader.h"
 #include "../core/texture.h"
 
 #include "view.h"
 
-void TW_ComponentViewRender(const TW_Component *parent, TW_Component *_self) {
+void TW_ComponentViewRender(TW_Component *_self) {
 
-  TW_Window *props = (TW_Window *)_self->window;
   TW_ComponentView *self = (TW_ComponentView *)_self;
 
   if (self->resized) {
@@ -24,7 +24,10 @@ void TW_ComponentViewRender(const TW_Component *parent, TW_Component *_self) {
     TW_TextureStartRender(self->cache);
     glClearColor(self->color[0], self->color[1], self->color[2],
                  self->color[3]);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if (self->hasDepth)
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    else
+      glClear(GL_COLOR_BUFFER_BIT);
     TW_MatrixGLUniform(
         "projection",
         TW_MatrixOrthogonalProjection(0, self->rect.w, 0, self->rect.h, 0, 1));
@@ -32,17 +35,14 @@ void TW_ComponentViewRender(const TW_Component *parent, TW_Component *_self) {
     TW_TextureEndRender(self->cache);
   }
 
-  // FIXME: Silly way of determining rendering area projection, instead there
-  // should always be a parent, a root
-  if (parent) {
-    TW_MatrixGLUniform("projection",
-                       TW_MatrixOrthogonalProjection(0, parent->rect.w, 0,
-                                                     parent->rect.h, 0, 1));
-  } else {
-    app_log("failing...");
-    TW_MatrixGLUniform(
-        "projection",
-        TW_MatrixOrthogonalProjection(0, self->rect.w, 0, self->rect.h, 0, 1));
-  }
+  TW_Window *window = (TW_Window *)TW_GetRoot(_self);
+  TW_ShaderUse(window->shader);
+  TW_Vector3GLUniform("tint", (TW_Vector3){1, 1, 1});
+  TW_MatrixGLUniform(
+      "projection", TW_MatrixOrthogonalProjection(0, _self->parent->rect.w, 0,
+                                                  _self->parent->rect.h, 0, 1));
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
   TW_TextureDraw(self->cache, self->rect);
+  glDisable(GL_BLEND);
 }

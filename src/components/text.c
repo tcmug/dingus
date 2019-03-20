@@ -5,8 +5,7 @@
 
 TW_FontAtlas *default_font;
 
-void TW_TextRender(const TW_Component *parent, TW_Component *_self) {
-  TW_Window *props = (TW_Window *)_self->window;
+void TW_TextRender(TW_Component *_self) {
   TW_Text *self = (TW_Text *)_self;
   TW_Rectangle rect = {self->rect.x, self->rect.y, self->rect.w, self->rect.h};
   glEnable(GL_BLEND);

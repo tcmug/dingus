@@ -3,12 +3,12 @@
 #include "../core/log.h"
 #include "utlist.h"
 
-void TW_ComponentRightRender(const TW_Component *parent, TW_Component *_self) {
+void TW_ComponentRightRender(TW_Component *_self) {
 
-  if (!_self->kids || !parent)
+  if (!_self->kids || !_self->parent)
     return;
 
-  _self->rect = parent->rect;
+  _self->rect = _self->parent->rect;
 
   TW_Component *kid;
   DL_FOREACH(_self->kids, kid) { kid->rect.x = _self->rect.w - kid->rect.w; }

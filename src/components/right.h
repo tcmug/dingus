@@ -7,7 +7,7 @@ typedef struct right_t {
 #include "../core/ui/component_props.inc"
 } right;
 
-void TW_ComponentRightRender(const TW_Component *, TW_Component *);
+void TW_ComponentRightRender(TW_Component *);
 
 #define RIGHT_DEFAULTS .render = TW_ComponentRightRender
 

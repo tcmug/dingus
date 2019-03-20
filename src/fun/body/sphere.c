@@ -22,8 +22,8 @@
 void bodysphere_create(bodysphere *sphere, real radius) {
   sphere->triangles = malloc(sizeof(bodytri) * 8);
 
-  sphere->render_triangles = TW_Vector3BufferCreate(3 * 1000, GL_STREAM_DRAW);
-  sphere->render_uvs = TW_Vector2BufferCreate(3 * 1000, GL_STREAM_DRAW);
+  sphere->render_triangles = TW_Vector3BufferCreate(3 * 10000, GL_STREAM_DRAW);
+  sphere->render_uvs = TW_Vector2BufferCreate(3 * 10000, GL_STREAM_DRAW);
 
   TW_Vector3 points[8] = {{0, 1, 0},          {-NORM1, 0, NORM1},
                           {NORM1, 0, NORM1},  {-NORM1, 0, -NORM1},
@@ -66,9 +66,9 @@ void bodysphere_create(bodysphere *sphere, real radius) {
   sphere->position.z = 0;
   sphere->matrix = TW_MatrixIdentity();
 
-  bodytri *temp, *tri;
-  bodytri *split[1000];
-  for (int i = 0; i < 3; i++) {
+  bodytri *tri;
+  bodytri *split[100000];
+  for (int i = 0; i < 0; i++) {
     int n = 0;
     DL_FOREACH(sphere->priority, tri) { split[n++] = tri; }
     for (int j = 0; j < n; j++) {
@@ -175,7 +175,9 @@ void bodytri_render(bodysphere *sphere, bodytri *tri) {
 
   if (at >= sphere->render_triangles->size) {
     TW_Vector3BufferUpdate(sphere->render_triangles, at);
+    TW_Vector2BufferUpdate(sphere->render_uvs, at);
     TW_Vector3BufferBind(sphere->render_triangles, 0);
+    TW_Vector2BufferBind(sphere->render_uvs, 1);
     glDrawArrays(GL_TRIANGLES, 0, at);
     at = 0;
   }
@@ -190,9 +192,6 @@ void bodytri_render(bodysphere *sphere, bodytri *tri) {
   // sphere->render_triangles->data[at + 1] = tri->points[1];
   // sphere->render_triangles->data[at + 2] = tri->points[2];
 
-  TW_Vector3BufferUpdate(sphere->render_triangles, at);
-  TW_Vector2BufferUpdate(sphere->render_uvs, at);
-
   at += 3;
 }
 
@@ -203,15 +202,15 @@ void bodysphere_render(bodysphere *sphere) {
   bodytri *tri;
 
   sphere->matrix = TW_MatrixTranslation(sphere->matrix, sphere->position);
-
   TW_MatrixGLUniform("model", sphere->matrix);
 
   DL_FOREACH(sphere->priority, tri) bodytri_render(sphere, tri);
 
   if (at > 0) {
+    TW_Vector3BufferUpdate(sphere->render_triangles, at);
+    TW_Vector2BufferUpdate(sphere->render_uvs, at);
     TW_Vector3BufferBind(sphere->render_triangles, 0);
     TW_Vector2BufferBind(sphere->render_uvs, 1);
-
     glDrawArrays(GL_TRIANGLES, 0, at);
     at = 0;
   }

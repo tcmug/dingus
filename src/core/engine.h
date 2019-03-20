@@ -16,5 +16,8 @@ void engine_report_cursor_position(TW_Window *props, const SDL_Event *ev);
 int lua_get_table_int(lua_State *L, const char *key, int def);
 const char *lua_get_table_string(lua_State *L, const char *key,
                                  const char *def);
+void *lua_get_table_userdata(lua_State *L, const char *key, void *def);
+
+void l_prep_kids(lua_State *L, TW_Component *comp);
 
 #endif

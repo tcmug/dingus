@@ -1,12 +1,12 @@
 
 #include "top.h"
 
-void TW_ComponentTopRender(const TW_Component *parent, TW_Component *_self) {
+void TW_ComponentTopRender(TW_Component *_self) {
 
-  if (!_self->kids || !parent)
+  if (!_self->kids || !_self->parent)
     return;
 
-  _self->rect = parent->rect;
+  _self->rect = _self->parent->rect;
 
   TW_Component *kid;
   DL_FOREACH(_self->kids, kid)
@@ -17,13 +17,12 @@ void TW_ComponentTopRender(const TW_Component *parent, TW_Component *_self) {
   TW_ComponentRenderChildren(_self);
 }
 
-void TW_ComponentTopRightRender(const TW_Component *parent,
-                                TW_Component *_self) {
+void TW_ComponentTopRightRender(TW_Component *_self) {
 
-  if (!_self->kids || !parent)
+  if (!_self->kids || !_self->parent)
     return;
 
-  _self->rect = parent->rect;
+  _self->rect = _self->parent->rect;
 
   TW_Component *kid;
   DL_FOREACH(_self->kids, kid)

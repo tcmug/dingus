@@ -43,6 +43,19 @@ const char *lua_get_table_string(lua_State *L, const char *key,
   return value;
 }
 
+void *lua_get_table_userdata(lua_State *L, const char *key, void *def) {
+  void *value = 0;
+  lua_pushstring(L, key);
+  lua_gettable(L, -2);
+  if (lua_islightuserdata(L, -1)) {
+    value = lua_touserdata(L, -1);
+  } else {
+    value = def;
+  }
+  lua_pop(L, 1);
+  return value;
+}
+
 int engine_shutdown(TW_Window *props) {
   glDeleteVertexArrays(1, &global_vao);
   SDL_DestroyWindow(props->sdl_window);
@@ -119,7 +132,8 @@ int _engine_sdl_init(TW_Window *props) {
 
 int _engine_opengl_init(TW_Window *props) {
 
-  SDL_GLContext gl_context = SDL_GL_CreateContext(props->sdl_window);
+  // SDL_GLContext gl_context =
+  SDL_GL_CreateContext(props->sdl_window);
   printf("OPENGL %s / GLSL %s\n", glGetString(GL_VERSION),
          glGetString(GL_SHADING_LANGUAGE_VERSION));
 
@@ -127,6 +141,7 @@ int _engine_opengl_init(TW_Window *props) {
   glFrontFace(GL_CW);
   glEnable(GL_CULL_FACE);
   glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LEQUAL);
 
   SDL_GL_SetSwapInterval(props->vsync);
 

@@ -1,11 +1,19 @@
 #include "buffer.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+
 void TW_Vector3BufferInit(TW_Vector3Buffer *self, int size, GLenum u) {
   glGenBuffers(1, &self->id);
   engine_gl_check();
   self->size = size;
   self->usage = u;
   self->data = (TW_Vector3 *)malloc(sizeof(TW_Vector3) * size);
+}
+
+void TW_Vector3BufferRealloc(TW_Vector3Buffer *self, int size) {
+  self->size = size;
+  self->data = (TW_Vector3 *)realloc(self->data, sizeof(TW_Vector3) * size);
 }
 
 TW_Vector3Buffer *TW_Vector3BufferCreate(int size, GLenum u) {
@@ -85,5 +93,27 @@ void TW_Vector2BufferUpdate(TW_Vector2Buffer *self, int size) {
                sizeof(TW_Vector2) * (size == -1 ? self->size : size),
                &self->data[0], self->usage);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
+  engine_gl_check();
+}
+
+void TW_IndicesBufferInit(TW_IndicesBuffer *self, int size, GLenum u) {
+  glGenBuffers(1, &self->id);
+  engine_gl_check();
+  self->size = size;
+  self->usage = u;
+  self->data = (GLuint *)malloc(sizeof(GLuint) * size);
+}
+
+void TW_IndicesBufferBind(TW_IndicesBuffer *self) {
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self->id);
+  engine_gl_check();
+}
+
+void TW_IndicesBufferUpdate(TW_IndicesBuffer *self, int size) {
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self->id);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+               sizeof(GLuint) * (size == -1 ? self->size : size),
+               &self->data[0], self->usage);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   engine_gl_check();
 }

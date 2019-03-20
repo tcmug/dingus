@@ -11,7 +11,7 @@ typedef struct TW_ComponentView_t {
   int hasDepth;
 } TW_ComponentView;
 
-void TW_ComponentViewRender(const TW_Component *parent, TW_Component *);
+void TW_ComponentViewRender(TW_Component *);
 
 #define VIEW_DEFAULTS                                                          \
   .render = &TW_ComponentViewRender, .rerender = 1, .color = {1, 1, 1, 0},     \

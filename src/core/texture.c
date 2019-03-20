@@ -34,9 +34,6 @@ TW_Texture *TW_TextureLoad(const char *filename) {
     t->width = surface->w;
     t->height = surface->h;
 
-    float pixels[] = {1.0f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f,
-                      1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.5f};
-
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -75,8 +72,8 @@ TW_Texture *TW_TextureRenderTarget(int w, int h, int hasdepth) {
   f->height = h;
 
   GLuint previous_framebuffer, previous_texture;
-  glGetIntegerv(GL_TEXTURE_BINDING_2D, &previous_texture);
-  glGetIntegerv(GL_FRAMEBUFFER_BINDING, &previous_framebuffer);
+  glGetIntegerv(GL_TEXTURE_BINDING_2D, (GLint *)&previous_texture);
+  glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint *)&previous_framebuffer);
 
   glGenFramebuffers(1, &f->buffer);
   glBindFramebuffer(GL_FRAMEBUFFER, f->buffer);
@@ -91,7 +88,7 @@ TW_Texture *TW_TextureRenderTarget(int w, int h, int hasdepth) {
   //   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   //   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   //   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, f->width, f->height, 0, GL_RGB,
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, f->width, f->height, 0, GL_RGB,
                GL_FLOAT, 0);
 
   // Attach 2D TW_Texture to this FBO
@@ -152,7 +149,6 @@ void TW_TextureEndRender(TW_Texture *t) {
 }
 
 void TW_TextureDraw(TW_Texture *t, TW_Rectangle r) {
-
   // GL_STATIC_DRAW
   static TW_Vector3Buffer *va = 0;
   static TW_Vector2Buffer *pv = 0;
@@ -177,6 +173,7 @@ void TW_TextureDraw(TW_Texture *t, TW_Rectangle r) {
   TW_Vector3BufferBind(va, 0);
   TW_Vector2BufferBind(pv, 1);
 
+  glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, t->texture);
 
   glDrawArrays(GL_TRIANGLE_FAN, 0, 4);

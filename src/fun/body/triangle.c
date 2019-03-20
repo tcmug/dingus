@@ -51,7 +51,7 @@ void bodytri_create(bodytri *tri, TW_Vector3 points[]) {
   ms[1] = TW_Vector3SubVector(points[1], points[0]);
   ms[2] = TW_Vector3SubVector(points[2], points[0]);
 
-  TW_Vector3 to_split[3 * 4];
+  // TW_Vector3 to_split[3 * 4];
 
   for (int j = 0; j < 3; j++) {
     tri->mesh[j].x = ms[j].x;

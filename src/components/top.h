@@ -3,9 +3,8 @@
 
 #include "../core/ui.h"
 
-void TW_ComponentTopRender(const TW_Component *parent, TW_Component *_self);
-void TW_ComponentTopRightRender(const TW_Component *parent,
-                                TW_Component *_self);
+void TW_ComponentTopRender(TW_Component *_self);
+void TW_ComponentTopRightRender(TW_Component *_self);
 
 #define TOP_DEFAULTS .render = TW_ComponentTopRender
 #define TOP_RIGHT_DEFAULTS .render = TW_ComponentTopRightRender

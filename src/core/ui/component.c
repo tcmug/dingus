@@ -12,17 +12,14 @@
 
 void TW_ComponentRenderChildren(TW_Component *self) {
   TW_Component *kid;
-  DL_FOREACH(self->kids, kid)
-  if (kid->render) {
-    kid->render(self, kid);
-  }
+  DL_FOREACH(self->kids, kid) kid->render(kid);
 }
 
 void TW_ComponentRerender(TW_Component *self) {
-  TW_Component *c = self;
-  while (c) {
-    c->rerender = 1;
-    c = c->parent;
+  TW_Component *comp = self;
+  while (comp) {
+    comp->rerender = 1;
+    comp = comp->parent;
   }
 }
 
@@ -74,4 +71,11 @@ void TW_ComponentFree(TW_Component *self) {
   TW_Component *kid, *tmp;
   DL_FOREACH_SAFE(self->kids, kid, tmp) { TW_ComponentFree(kid); }
   free(self);
+}
+
+TW_Component *TW_GetRoot(TW_Component *comp) {
+  while (comp->parent) {
+    comp = comp->parent;
+  }
+  return comp;
 }

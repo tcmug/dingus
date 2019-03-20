@@ -3,7 +3,7 @@
 
 #include "engine.h"
 
-typedef struct texture_t {
+typedef struct TW_Texture_t {
   GLuint buffer;
   GLuint texture;
   GLuint depth;

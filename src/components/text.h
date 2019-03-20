@@ -14,7 +14,7 @@ typedef struct text_t {
   const TW_Char *text;
 } TW_Text;
 
-void TW_TextRender(const TW_Component *parent, TW_Component *);
+void TW_TextRender(TW_Component *);
 
 #define TEXT_DEFAULTS                                                          \
   .render = &TW_TextRender, .color = {1, 1, 1}, .background = {0, 0, 0, 255}
