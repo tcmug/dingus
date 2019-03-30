@@ -1,12 +1,14 @@
 /////
-// TW_Component header properties
+// TW_Entity header properties
 /////
 
-struct component_t *parent; // TW_Component parent component.
+int id;
+// struct TW_Component_t *components;
 
-struct component_t *kids;
-struct component_t *prev;
-struct component_t *next;
+struct TW_Entity_t *parent; // TW_Entity parent component.
+struct TW_Entity_t *kids;
+struct TW_Entity_t *prev;
+struct TW_Entity_t *next;
 
 int resized;
 TW_Rectangle rect;          // Target TW_Rectangle.

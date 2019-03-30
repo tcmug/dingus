@@ -1,10 +1,7 @@
 
 #include "engine.h"
 #include "log.h"
-
-#include <lauxlib.h>
-#include <lua.h>
-#include <lualib.h>
+#include "lua.h"
 
 GLuint global_vao = 0;
 
@@ -14,47 +11,6 @@ GLuint global_vao = 0;
     printf(" - %s\n", name);                                                   \
     return props;                                                              \
   }
-
-int lua_get_table_int(lua_State *L, const char *key, int def) {
-  int value;
-  lua_pushstring(L, key);
-  lua_gettable(L, -2);
-  if (lua_isnumber(L, -1)) {
-    value = lua_tointeger(L, -1);
-  } else {
-    value = def;
-  }
-  lua_pop(L, 1);
-  return value;
-}
-
-const char *lua_get_table_string(lua_State *L, const char *key,
-                                 const char *def) {
-  const char *value = 0;
-  lua_pushstring(L, key);
-  lua_gettable(L, -2);
-  if (lua_isstring(L, -1)) {
-    value = lua_tostring(L, -1);
-  } else {
-    value = def;
-  }
-  lua_pop(L, 1);
-
-  return value;
-}
-
-void *lua_get_table_userdata(lua_State *L, const char *key, void *def) {
-  void *value = 0;
-  lua_pushstring(L, key);
-  lua_gettable(L, -2);
-  if (lua_islightuserdata(L, -1)) {
-    value = lua_touserdata(L, -1);
-  } else {
-    value = def;
-  }
-  lua_pop(L, 1);
-  return value;
-}
 
 int engine_shutdown(TW_Window *props) {
   glDeleteVertexArrays(1, &global_vao);
@@ -165,6 +121,8 @@ TW_Window *engine_init() {
     free(props);
     return 0;
   }
+
+  TW_RegisterLua(props->lua);
 
   props->cursor_mode = CURSOR_POINTER;
   props->passed = 0;

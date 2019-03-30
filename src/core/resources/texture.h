@@ -1,7 +1,7 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include "engine.h"
+#include "../engine.h"
 
 typedef struct TW_Texture_t {
   GLuint buffer;

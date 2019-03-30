@@ -11,7 +11,7 @@
 #include <lua.h>
 
 typedef struct TW_Model_t {
-#include "../core/resource_props.h"
+#include "../core/resources/resource_props.h"
   TW_Vector3Buffer vertices;
   TW_Vector3Buffer normals;
   TW_Vector2Buffer uvs;
@@ -19,6 +19,7 @@ typedef struct TW_Model_t {
 } TW_Model;
 
 typedef struct TW_Object_t {
+
   TW_Vector3 position;
   TW_Matrix orientation;
   TW_Model *model;

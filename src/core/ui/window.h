@@ -1,12 +1,12 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include "component.h"
+#include "entity.h"
 
 typedef enum { CURSOR_POINTER, CURSOR_VECTOR } TW_CursorMode;
 
 typedef struct window_t {
-#include "component_props.inc"
+#include "entity_props.inc"
 
   SDL_Window *sdl_window;
   struct lua_State *lua;

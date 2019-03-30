@@ -2,7 +2,7 @@
 #include "types.h"
 
 #include "../../core/log.h"
-#include "../../core/shader.h"
+#include "../../core/resources.h"
 
 #include <stdio.h>
 #include <stdlib.h>

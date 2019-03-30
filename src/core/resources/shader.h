@@ -1,11 +1,7 @@
 #ifndef TW_SHADER_H
 #define TW_SHADER_H
 
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "engine.h"
-#include "log.h"
+#include "../engine.h"
 
 typedef struct TW_Shader_t {
 #include "resource_props.h"

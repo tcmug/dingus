@@ -8,12 +8,17 @@ monkey = MODEL({file = "monkey.obj"})
 ship = MODEL({file = "ship.obj"})
 
 bla = function (component)
+    print("clicked")
     insert(parent(component),  TEXT({ x = 5, y = 40, w = 100, h = 20, text = "Hi!" }) )
 end
 
-screen = COMPONENT({
+screen = ENTITY({
+    w = 800,
+    h = 600,
     children = {
         VIEW({
+            w = 800,
+            h = 600,
             depth=1,
             children={
                 SCENE({
@@ -39,8 +44,8 @@ screen = COMPONENT({
             }
         }),     
         VIEW({
-            h = 300,
-            w = 300,
+            w = 800,
+            h = 600,
             children = {
                 TEXT({ x = 5, y = 5, w = 100, h = 20, text = "Quit", click = function () quit() end }),
                 TEXT({ x = 5, y = 105, w = 100, h = 20, text = "Test", click = bla }),

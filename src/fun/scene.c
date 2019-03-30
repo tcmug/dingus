@@ -1,7 +1,7 @@
 
 #include "scene.h"
 
-void TW_SceneViewRender(TW_Component *_self) {
+void TW_SceneViewRender(TW_Entity *_self) {
 
   TW_SceneView *self = (TW_SceneView *)_self;
   TW_Window *window = (TW_Window *)TW_GetRoot(_self);
@@ -52,7 +52,7 @@ void TW_SceneViewRender(TW_Component *_self) {
     TW_ShaderUse(uishader);
     */
 
-  TW_ComponentRerender(_self);
+  TW_EntityRerender(_self);
 
   TW_ShaderUse(window->shader);
 }
@@ -75,7 +75,7 @@ int l_SCENE(lua_State *L) {
     }
   }
 
-  l_prep_kids(L, (TW_Component *)comp);
+  l_ENTITY_PROCESS_CHILDREN(L, (TW_Entity *)comp);
 
   comp->projection = TW_MatrixIdentity();
   comp->view = TW_MatrixIdentity();

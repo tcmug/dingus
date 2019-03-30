@@ -1,13 +1,13 @@
 
-#include "../core/log.h"
-#include "../core/shader.h"
-#include "../core/texture.h"
+#include "../../log.h"
+#include "../../resources/shader.h"
+#include "../../resources/texture.h"
 
 #include "view.h"
 
-void TW_ComponentViewRender(TW_Component *_self) {
+void TW_EntityViewRender(TW_Entity *_self) {
 
-  TW_ComponentView *self = (TW_ComponentView *)_self;
+  TW_EntityView *self = (TW_EntityView *)_self;
 
   if (self->resized) {
     if (self->cache) {
@@ -31,7 +31,7 @@ void TW_ComponentViewRender(TW_Component *_self) {
     TW_MatrixGLUniform(
         "projection",
         TW_MatrixOrthogonalProjection(0, self->rect.w, 0, self->rect.h, 0, 1));
-    TW_ComponentRenderChildren(_self);
+    TW_EntityRenderChildren(_self);
     TW_TextureEndRender(self->cache);
   }
 
@@ -39,8 +39,8 @@ void TW_ComponentViewRender(TW_Component *_self) {
   TW_ShaderUse(window->shader);
   TW_Vector3GLUniform("tint", (TW_Vector3){1, 1, 1});
   TW_MatrixGLUniform(
-      "projection", TW_MatrixOrthogonalProjection(0, _self->parent->rect.w, 0,
-                                                  _self->parent->rect.h, 0, 1));
+      "projection",
+      TW_MatrixOrthogonalProjection(0, _self->rect.w, 0, _self->rect.h, 0, 1));
   glEnable(GL_BLEND);
   glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
   TW_TextureDraw(self->cache, self->rect);

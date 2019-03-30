@@ -1,15 +1,15 @@
 #include "center.h"
-#include "../core/log.h"
+#include "../../log.h"
 #include "utlist.h"
 
-int center_update(TW_Component *_self) {
+int center_update(TW_Entity *_self) {
 
   if (!_self->kids)
     return 0;
 
   int children_height = 0;
 
-  TW_Component *kid;
+  TW_Entity *kid;
   DL_FOREACH(_self->kids, kid) {
     if (kid->render)
       children_height += kid->rect.h;

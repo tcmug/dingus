@@ -1,4 +1,3 @@
-add_subdirectory(entities)
 
 file(GLOB sources
     "${CMAKE_CURRENT_SOURCE_DIR}/*.c"
@@ -7,5 +6,3 @@ file(GLOB sources
 target_sources(tw PRIVATE
 	${sources}		
 )
-
-

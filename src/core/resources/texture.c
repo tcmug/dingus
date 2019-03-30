@@ -1,7 +1,7 @@
 
 #include "texture.h"
-#include "buffer.h"
-#include "log.h"
+#include "../buffer.h"
+#include "../log.h"
 
 TW_Texture *TW_TextureLoad(const char *filename) {
   TW_Texture *t = (TW_Texture *)malloc(sizeof(TW_Texture));

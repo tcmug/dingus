@@ -1,7 +1,6 @@
 
 #include "resources.h"
-
-#include "../core/log.h"
+#include "../log.h"
 
 unsigned long hash(const char *str) {
   unsigned long hash = 5381;
